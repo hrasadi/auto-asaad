@@ -14,7 +14,7 @@ var LineupManager = function(radioConfig, runningDir) {
 }
 
 // implemented in subclasses
-LineupManager.prototype.schedulePlayback = function(adhanTime) {
+LineupManager.prototype.schedulePlayback = function(programTime, lineup, lineupName) {
     console.log("Not implemented!");
 }
 
@@ -30,9 +30,10 @@ LineupManager.prototype.createLineup = function(programTime, selectorIdx, lineup
     this.decideProgramLineup(lineup, selectorIdx);
 
     // persist the lineup
-    this.fs.writeFileSync(this.runningDir + "/lineups/" + lineupName + ".json", JSON.stringify(lineup, null, 2), 'utf-8');
+    var lineupFilePath = this.runningDir + "/lineups/" + lineupName + ".json";
+    this.fs.writeFileSync(lineupFilePath, JSON.stringify(lineup, null, 2), 'utf-8');
 
-    this.schedulePlayback(programTime, lineup);
+    this.schedulePlayback(programTime, lineup, lineupFilePath);
 
     return lineup;
 }
