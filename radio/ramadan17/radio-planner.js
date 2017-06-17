@@ -2,8 +2,8 @@ var fs = require('fs');
 var moment = require('moment');
 
 var config = null;
-if (process.argv.length < 3) {
-	console.log("FATAL ERROR: Config file not specified");
+if (process.argv.length < 4) {
+	console.log("usage: radio-planner {config-file} {deployment-mode}");
 	process.exit(1);
 }
 
@@ -20,7 +20,16 @@ events = new events(config.Events);
 var messaging = require('../../messaging');
 messaging = new messaging(config.Messaging);
 
-var LineupManager = require('../standalone/standalone-lineup-manager');
+var LineupManager = {};
+switch (process.argv[3]) {
+	case require('../lineup-manager').prototype.DeploymentMode.STANDALONE:
+		LineupManager = require('../standalone/standalone-lineup-manager');
+		break;
+	case require('../lineup-manager').prototype.DeploymentMode.LIQUIDSOAP:
+		LineupManager = require('../standalone/liquidsoap-lineup-manager');
+		break;
+}
+
 var lineupManager = new LineupManager(config.RamadanRadio, process.argv[2]);
 
 events.readTodayEvent(events.EventType.MAGHRIB, function(maghribTime) {

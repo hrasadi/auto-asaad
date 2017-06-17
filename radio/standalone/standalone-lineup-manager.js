@@ -7,11 +7,10 @@ var LineupManager = require('../lineup-manager');
 
 var StandaloneLineupManager = function(radioConfig, configFile) {
     this.configFilePath = path.resolve(configFile);
-    this.runningDir = path.resolve(path.dirname(configFile));
-    console.log(this.runningDir)
+    var runningDir = path.resolve(path.dirname(configFile));
     this.config = radioConfig;
 
-    LineupManager.call(this, radioConfig, this.runningDir);
+    LineupManager.call(this, radioConfig, runningDir);
 }
 
 Utils.inheritsFrom(StandaloneLineupManager, LineupManager);
@@ -36,7 +35,7 @@ StandaloneLineupManager.prototype.schedulePlayback = function(programTime, lineu
         encoding: 'utf-8'
     })
 
-} // implemented in subclasses
+}
 
 
 StandaloneLineupManager.prototype.getMediaDuration = function(media) {

@@ -6,12 +6,13 @@ var LineupManager = function(radioConfig, runningDir) {
 
     this.config = radioConfig;
     this.runningDir = runningDir;
-
-    this.DeploymentType = {
-        STANDALONE: "standalone",
-        LIQUIDSOAP: "liquidsoap"
-    }
 }
+
+LineupManager.prototype.DeploymentMode = {
+    STANDALONE: "standalone",
+    LIQUIDSOAP: "liquidsoap"
+}
+
 
 // implemented in subclasses
 LineupManager.prototype.schedulePlayback = function(programTime, lineup, lineupName) {
