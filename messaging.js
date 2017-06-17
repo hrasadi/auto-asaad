@@ -68,7 +68,6 @@ module.exports = function(messagingConfig) {
                     console.log(e)
                 });
 
-
                 var str = '{"summary": "' + summary + '", "description": "{\\\"type\\\": \\\"message\\\", \\\"data\\\": {\\\"chat_id\\\": \\\"' + this.provideTelegramChatIds()[i] + '\\\", \\\"parse_mode\\\": \\\"html\\\", \\\"text\\\": \\\"' + jsesc(message) + '\\\"}}", ' + 
                     '"start": {"dateTime": "' + eventTime + '", ' + 
                     '"timeZone": "America/New_York"}, "end": {"dateTime": "' + eventTime + '", "timeZone": "America/New_York"}}';
