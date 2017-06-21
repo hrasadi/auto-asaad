@@ -1,9 +1,11 @@
 var fs = require('fs');
 var moment = require('moment');
 var path = require('path');
+var execSync = require('child_process').execSync;
 
 var DEPLOYMENT_MODE = 'liquidsoap';
 var SCRIPT_DIR = path.resolve('../');
+console.log(SCRIPT_DIR);
 var RUNNING_DIR = path.resolve('./');
 var MEDIA_DIR = '/home/ubuntu/media';
 var FILLER_MEDIA = 'Tagh-Toogh-Long.mp3'; // relative to media dir
@@ -61,10 +63,9 @@ try {
 }
 
 generateProgramDates().forEach(function(d) {
-    var scriptDir = path.resolve(__dirname + '..');
-    execSync("echo 'cd " + scriptDir + "; node radio-planner.js " + __dirname + "/ramadan17.conf " + DEPLOYMENT_MODE + "' | at -t " + moment(d).format("YYYYMMDDHHmm.ss").toString(), {
+    /*execSync("echo 'cd " + SCRIPT_DIR + "; node radio-planner.js " + RUNNING_DIR + "/ramadan17.conf " + DEPLOYMENT_MODE + "' | at -t " + moment(d).format("YYYYMMDDHHmm.ss").toString(), {
     	encoding: 'utf-8'
-    })
+    })*/
 })
 
 switch (DEPLOYMENT_MODE) {
