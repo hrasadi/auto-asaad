@@ -1,3 +1,10 @@
+var execSync = require('child_process').execSync;
+var moment = require('moment');
+var path = require('path');
+
+var Utils = require('../../utils');
+var LineupManager = require('../lineup-manager');
+
 var LiquidsoapLineupManager = function(radioConfig, configFile) {
     this.configFilePath = path.resolve(configFile);
     this.runningDir = path.resolve(path.dirname(configFile));
