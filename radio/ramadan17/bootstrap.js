@@ -4,8 +4,7 @@ var path = require('path');
 var execSync = require('child_process').execSync;
 
 var DEPLOYMENT_MODE = 'liquidsoap';
-var SCRIPT_DIR = path.resolve('../');
-console.log(SCRIPT_DIR);
+var LS_SCRIPT_DIR = path.resolve('../liquidsoap');
 var RUNNING_DIR = path.resolve('./');
 var MEDIA_DIR = '/home/ubuntu/media';
 var FILLER_MEDIA = 'Tagh-Toogh-Long.mp3'; // relative to media dir
@@ -39,7 +38,7 @@ var postInstallLiquidsoapRadio = function(dates) {
 	// Copy the .liq file to /etc (The script should be executed with sudo)
 	fs.copySync('../liquidsoap/radio.liq', '/etc/liquidsoap'); 
 
-	execSync('service liquidsoap restart ' + SCRIPT_DIR + " " + RUNNING_DIR + " " + MEDIA_DIR + " " + FILLER_MEDIA);
+	execSync('service liquidsoap restart ' + LS_SCRIPT_DIR + " " + RUNNING_DIR + " " + MEDIA_DIR + " " + FILLER_MEDIA);
 }
 
 // create necassary directories
@@ -63,7 +62,7 @@ try {
 }
 
 generateProgramDates().forEach(function(d) {
-    execSync("echo 'cd " + SCRIPT_DIR + "; node radio-planner.js " + RUNNING_DIR + "/ramadan17.conf " + DEPLOYMENT_MODE + "' | at -t " + moment(d).format("YYYYMMDDHHmm.ss").toString(), {
+    execSync("echo 'cd " + RUNNING_DIR + "; node radio-planner.js ./ramadan17.conf " + DEPLOYMENT_MODE + "' | at -t " + moment(d).format("YYYYMMDDHHmm.ss").toString(), {
     	encoding: 'utf-8'
     })
 })
