@@ -34,10 +34,10 @@ var lineupManager = new LineupManager(config.RamadanRadio, process.argv[2]);
 
 events.readTodayEvent(events.EventType.MAGHRIB, function(maghribTime) {
 
-        var indexDayOfRamadan = moment(maghribTime).diff(moment(config.RamadanRadio.RamadanStartDate), 'days');
+        var indexDayOfRamadan = moment(maghribTime).diff(moment(config.RamadanStartDate), 'days');
         var lineupName = 'ramadan17-lineup-' + moment(maghribTime).format("YYYY-MM-DD");
 
-		var lineup = lineupManager.createLineup(maghribTime, indexDayOfRamadan, lineupName, null);
+		var lineup = lineupManager.createLineup(maghribTime, indexDayOfRamadan, lineupName);
 
         var preAdhanProgramTime = moment(maghribTime).subtract(lineup.totalPreProgramLineupDuration, 'seconds').set('second', 0);
 

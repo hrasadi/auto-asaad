@@ -19,7 +19,7 @@ LineupManager.prototype.schedulePlayback = function(programTime, lineup, lineupN
     console.log("Not implemented!");
 }
 
-LineupManager.prototype.createLineup = function(programTime, selectorIdx, lineupName, workingDir) {
+LineupManager.prototype.createLineup = function(programTime, selectorIdx, lineupName) {
     this.logger = new this.Logger(this.runningDir + "/logs/lineup-planner-" + lineupName + ".log");
 
     if (this.config.Test) {

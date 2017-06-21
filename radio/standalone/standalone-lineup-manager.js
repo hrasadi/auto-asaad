@@ -37,7 +37,6 @@ StandaloneLineupManager.prototype.schedulePlayback = function(programTime, lineu
 
 }
 
-
 StandaloneLineupManager.prototype.getMediaDuration = function(media) {
     var cmd = 'afinfo ' + media.path + ' | awk \'/estimated duration/ { print $3 }\'';
     var mediaDuration = parseFloat(execSync(cmd, {
