@@ -26,7 +26,7 @@ switch (process.argv[3]) {
 		LineupManager = require('../standalone/standalone-lineup-manager');
 		break;
 	case require('../lineup-manager').prototype.DeploymentMode.LIQUIDSOAP:
-		LineupManager = require('../standalone/liquidsoap-lineup-manager');
+		LineupManager = require('../liquidsoap/liquidsoap-lineup-manager');
 		break;
 }
 
