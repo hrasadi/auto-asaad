@@ -18,7 +18,7 @@ Utils.inheritsFrom(LiquidsoapLineupManager, LineupManager);
 LiquidsoapLineupManager.prototype.schedulePlayback = function(programTime, lineup, lineupFilePath) {
 
     // Let Liquidsoap know that the lineup has been changed
-    logger.info("Changing the current lineup file to " + lineupFilePath);
+    this.logger.info("Changing the current lineup file to " + lineupFilePath);
     execSync("cd " + __dirname + "; ./update-lineup-file.sh " + lineupFilePath, {
         encoding: 'utf-8'
     });
@@ -30,13 +30,13 @@ LiquidsoapLineupManager.prototype.schedulePlayback = function(programTime, lineu
 
     /** We should now register cron events **/
     // Register event using 'at'
-    logger.info("PreProgram playback scheduled for " + moment(preProgramTime).format("YYYY-MM-DDTHH:mm:ss").toString());
+    this.logger.info("PreProgram playback scheduled for " + moment(preProgramTime).format("YYYY-MM-DDTHH:mm:ss").toString());
     execSync("echo 'cd " + __dirname + "; ./playback-pre-program.sh' | at -t " + moment(preProgramTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString(), {
         encoding: 'utf-8'
     });
 
     // Register auto-asaad program announcement! (One minute earlier and the rest is handled in the shell file)
-    logger.info("Program playback scheduled for " + moment(programTime).format("YYYY-MM-DDTHH:mm:ss").toString());
+    this.logger.info("Program playback scheduled for " + moment(programTime).format("YYYY-MM-DDTHH:mm:ss").toString());
     execSync("echo 'cd" + __dirname + "; ./playback-program.sh' " + lineupFilePath + "| at -t " + moment(programTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString(), {
         encoding: 'utf-8'
     });
