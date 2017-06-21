@@ -37,7 +37,7 @@ var postInstallStandaloneRadio = function(dates) {
 
 var postInstallLiquidsoapRadio = function(dates) {
 	// Copy the .liq file to /etc (The script should be executed with sudo)
-	path.copySync('../liquidsoap/radio.liq', '/etc/liquidsoap'); 
+	fs.copySync('../liquidsoap/radio.liq', '/etc/liquidsoap'); 
 
 	execSync('service liquidsoap restart ' + SCRIPT_DIR + " " + RUNNING_DIR + " " + MEDIA_DIR + " " + FILLER_MEDIA);
 }
@@ -63,9 +63,9 @@ try {
 }
 
 generateProgramDates().forEach(function(d) {
-    /*execSync("echo 'cd " + SCRIPT_DIR + "; node radio-planner.js " + RUNNING_DIR + "/ramadan17.conf " + DEPLOYMENT_MODE + "' | at -t " + moment(d).format("YYYYMMDDHHmm.ss").toString(), {
+    execSync("echo 'cd " + SCRIPT_DIR + "; node radio-planner.js " + RUNNING_DIR + "/ramadan17.conf " + DEPLOYMENT_MODE + "' | at -t " + moment(d).format("YYYYMMDDHHmm.ss").toString(), {
     	encoding: 'utf-8'
-    })*/
+    })
 })
 
 switch (DEPLOYMENT_MODE) {
