@@ -43,7 +43,7 @@ LiquidsoapLineupManager.prototype.schedulePlayback = function(programTime, lineu
 
     // Register auto-asaad program announcement! (One minute earlier and the rest is handled in the shell file)
     this.logger.info("Program playback scheduled for " + moment(programTime).format("YYYY-MM-DDTHH:mm:ss").toString());
-    execSync("echo 'cd" + __dirname + "; ./playback-program.sh' " + lineupFilePath + "| at -t " + moment(programTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString(), {
+    execSync("echo 'cd " + __dirname + "; ./playback-program.sh' " + lineupFilePath + "| at -t " + moment(programTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString(), {
         encoding: 'utf-8'
     });
 }

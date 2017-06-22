@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # The the lineup file should be introduced as paramter
 

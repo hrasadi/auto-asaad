@@ -1,0 +1,35 @@
+{
+  "name": "auto-asaad",
+  "version": "1.0.0",
+  "description": "Auto-asaad is a set of scripts for social media automation",
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "fs-extra": "^3.0.1",
+    "moment": "^2.18.1",
+    "winston": "^2.3.1"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hrasadi/auto-asaad.git"
+  },
+  "keywords": [
+    "telegram",
+    "messenger",
+    "event",
+    "notification",
+    "adhan",
+    "and",
+    "islamic",
+    "events",
+    "automatic",
+    "radio",
+    "liquidsoap"
+  ],
+  "author": "Hamidreza Asaadi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hrasadi/auto-asaad/issues"
+  },
+  "homepage": "https://github.com/hrasadi/auto-asaad#readme"
+}

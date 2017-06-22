@@ -1,4 +1,5 @@
 var fs = require('fs');
+var fsExtra = require('fs-extra');
 var moment = require('moment');
 var path = require('path');
 var execSync = require('child_process').execSync;
@@ -16,8 +17,6 @@ var generateProgramDates = function() {
 	var ramadanEndDate = moment(ramadanStartDate).add(30, 'day');
 
 	// Do not schedule past events (but do schedule for today)
-	console.log(moment(new Date()));
-	console.log(ramadanStartDate);
 	var firstDayOfProgram = moment.max(ramadanStartDate, moment(new Date()).set('hour', 0).set('minute', 0).set('second', 0));
 
 	var dates = [];
@@ -30,22 +29,26 @@ var generateProgramDates = function() {
 
 }
 
-var postInstallStandaloneRadio = function(dates) {
+var installStandaloneRadio = function(dates) {
 	// nothing!
 }
 
-var postInstallLiquidsoapRadio = function(dates) {
+var installLiquidsoapRadio = function(dates) {
 	// Copy the .liq file to /etc (The script should be executed with sudo)
-	fs.copySync('../liquidsoap/radio.liq', '/etc/liquidsoap'); 
+	fsExtra.copySync('../liquidsoap/radio.liq', '/etc/liquidsoap/radio.liq'); 
 
-	execSync('service liquidsoap restart ' + LS_SCRIPT_DIR + " " + RUNNING_DIR + " " + MEDIA_DIR + " " + FILLER_MEDIA);
+	execSync("echo radio_LS_SCRIPT_DIR=" + LS_SCRIPT_DIR + " >> /etc/default/liquidsoap");
+	execSync("echo radio_RUNNING_DIR=" + RUNNING_DIR  + " >> /etc/default/liquidsoap");
+	execSync("echo radio_MEDIA_DIR=" + MEDIA_DIR  + " >> /etc/default/liquidsoap");
+	execSync("echo radio_FILLER_MEDIA=" + FILLER_MEDIA  + " >> /etc/default/liquidsoap");
+	execSync("service liquidsoap restart"); 
 }
 
 // create necassary directories
 try {
 	fs.mkdirSync('./logs');
 } catch(e) {
-	console.log(e);
+	console.log(e)
 }
 
 try {
@@ -61,17 +64,17 @@ try {
 	console.log(e);
 }
 
+switch (DEPLOYMENT_MODE) {
+	case 'standalone':
+		installStandaloneRadio();
+		break;
+	case 'liquidsoap':
+		installLiquidsoapRadio();
+		break;	
+}
+
 generateProgramDates().forEach(function(d) {
     execSync("echo 'cd " + RUNNING_DIR + "; node radio-planner.js ./ramadan17.conf " + DEPLOYMENT_MODE + "' | at -t " + moment(d).format("YYYYMMDDHHmm.ss").toString(), {
     	encoding: 'utf-8'
-    })
-})
-
-switch (DEPLOYMENT_MODE) {
-	case 'standalone':
-		postInstallStandaloneRadio();
-		break;
-	case 'liquidsoap':
-		postInstallLiquidsoapRadio();
-		break;	
-}
+    	});
+});
