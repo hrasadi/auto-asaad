@@ -20,20 +20,20 @@ start_pre_program = interactive.bool("start_pre_program", false)
 
 def read_pre_program_lineup() =
 	# Get the URI
-	file = list.hd(get_process_lines("cd "^script_dir^"; node ./get-next-pre-program-item.js "^running_dir^"/"^current_lineup_file))
+	file = list.hd(get_process_lines("cd "^script_dir^"; node ./get-next-pre-program-item.js "^current_lineup_file()))
 	
 	request.create(file)
 end
 
 def read_program_lineup() =
 	# Get the URI
-	file = list.hd(get_process_lines("cd "^script_dir^"; node ./get-next-program-item.js "^running_dir^"/"^current_lineup_file))
+	file = list.hd(get_process_lines("cd "^script_dir^"; node ./get-next-program-item.js "^current_lineup_file()))
 	
 	request.create(file)
 end
 
 pre_program_playlist = switch(track_sensitive=false, [
-		(start_pre_adhan, fallback(track_sensitive=false, [
+		(start_pre_program, fallback(track_sensitive=false, [
 			request.dynamic(id = "pre_program_req", read_pre_program_lineup),
 			single(media_dir^"/"^pre_program_filler)]))])
 
