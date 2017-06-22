@@ -5,7 +5,7 @@ var execSync = require('child_process').execSync;
 // path to the lineup file
 var lineupFilePath = process.argv[2];
 
-lineup = JSON.parse(fs.readFileSync(lineupFilePath + ".json", 'utf8'));
+lineup = JSON.parse(fs.readFileSync(lineupFilePath, 'utf8'));
 
 // Check the iterator value
 var iter = 0;
