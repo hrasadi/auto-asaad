@@ -19,10 +19,14 @@ LiquidsoapLineupManager.prototype.schedulePlayback = function(programTime, lineu
 
     // Let Liquidsoap know that the lineup has been changed
     this.logger.info("Changing the current lineup file to " + lineupFilePath);
-    execSync("cd " + __dirname + "; ./update-lineup-file.sh " + lineupFilePath, {
-        encoding: 'utf-8'
-    });
 
+    try {
+        execSync("cd " + __dirname + "; ./update-lineup-file.sh " + lineupFilePath, {
+            encoding: 'utf-8'
+        });        
+    } catch (e) {
+            // telnet return non-zero exit codes, simply ignore them!
+    }
 
     // Estimate the shift in time required
     // We start from second 0 of the minute to prevent possible errors
@@ -34,7 +38,7 @@ LiquidsoapLineupManager.prototype.schedulePlayback = function(programTime, lineu
         this.logger.info("PreProgram playback scheduled for " + moment(preProgramTime).format("YYYY-MM-DDTHH:mm:ss").toString());
         execSync("echo 'cd " + __dirname + "; ./playback-pre-program.sh' | at -t " + moment(preProgramTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString(), {
             encoding: 'utf-8'
-        });        
+        });                    
     }
 
     // Register auto-asaad program announcement! (One minute earlier and the rest is handled in the shell file)
