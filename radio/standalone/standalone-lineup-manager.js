@@ -23,11 +23,13 @@ StandaloneLineupManager.prototype.schedulePlayback = function(programTime, lineu
 
     /** We should now register cron events **/
     // Register event using 'at'
-    this.logger.info("PreProgram playback scheduled for " + moment(preProgramTime).format("YYYY-MM-DDTHH:mm:ss").toString());
-    var fillerPath = this.config.Media.BaseDir + this.config.Media.Filler[0].path
-    execSync("echo 'cd " + __dirname + "; node playback-pre-program.js " + lineupFilePath + " " + fillerPath + " ' | at -t " + moment(preProgramTime).format("YYYYMMDDHHmm.ss").toString(), {
-        encoding: 'utf-8'
-    })
+    if (this.hasPreProgram) {
+        this.logger.info("PreProgram playback scheduled for " + moment(preProgramTime).format("YYYY-MM-DDTHH:mm:ss").toString());
+        var fillerPath = this.config.Media.BaseDir + this.config.Media.Filler[0].path
+        execSync("echo 'cd " + __dirname + "; node playback-pre-program.js " + lineupFilePath + " " + fillerPath + " ' | at -t " + moment(preProgramTime).format("YYYYMMDDHHmm.ss").toString(), {
+            encoding: 'utf-8'
+        })        
+    }
 
     // Register auto-asaad program announcement!
     this.logger.info("Program playback scheduled for " + moment(programTime).format("YYYY-MM-DDTHH:mm:ss").toString())

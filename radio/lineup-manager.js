@@ -6,6 +6,8 @@ var LineupManager = function(radioConfig, runningDir) {
 
     this.config = radioConfig;
     this.runningDir = runningDir;
+
+    this.hasPreProgram = (radioConfig.PreProgram != undefined) ? true : false;
 }
 
 LineupManager.prototype.DeploymentMode = {
@@ -27,7 +29,9 @@ LineupManager.prototype.createLineup = function(programTime, selectorIdx, lineup
     }
 
     var lineup = {};
-    this.decidePreProgramLineup(lineup, selectorIdx);
+    if (this.hasPreProgram) {
+        this.decidePreProgramLineup(lineup, selectorIdx);        
+    }
     this.decideProgramLineup(lineup, selectorIdx);
 
     // persist the lineup
