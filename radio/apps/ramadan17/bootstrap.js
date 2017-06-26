@@ -5,7 +5,7 @@ var path = require('path');
 var execSync = require('child_process').execSync;
 
 var DEPLOYMENT_MODE = 'liquidsoap';
-var LS_SCRIPT_DIR = path.resolve('../liquidsoap');
+var LS_SCRIPT_DIR = path.resolve('../../liquidsoap');
 var RUNNING_DIR = path.resolve('./');
 var MEDIA_DIR = '/home/ubuntu/media';
 var FILLER_MEDIA = 'Tagh-Toogh-Long.mp3'; // relative to media dir
