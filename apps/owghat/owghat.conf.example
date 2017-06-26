@@ -1,0 +1,20 @@
+  {
+   "Messaging": {
+    "Google": {
+      "ClientId": "YOUR_CLIENT_ID",
+      "ClientSecret": "YOUR_SECRET_ID",
+      "RefreshToken": "YOUR_REFERESH_TOKEN",
+      "CalendarName": "YOUR_CALENDAR_NAME"
+    },
+    "Telegram": {
+      "ChatIdProvider": "static",
+      "ChatIds": ["CHAT_ID_TO_RECEIVE_NOTIFICATIONS"]
+    }
+  },
+  "Events": {
+    "Latitude": YOUR_LAT,
+    "Longitude": YOUR_LONG,
+    "Timezone": "TIMEZONE",
+    "CalculationMethod": FROM_1_TO_7
+  }
+}

@@ -1,6 +1,9 @@
 var fs = require('fs');
 var moment = require('moment');
 
+var Events = require('../../../events');
+var Messaging = require('../../../messaging');
+
 var config = null;
 if (process.argv.length < 4) {
 	console.log("usage: radio-planner {config-file} {deployment-mode}");
@@ -14,11 +17,8 @@ if (config == null) {
 	process.exit(1);
 }
 
-var events = require('../../../events');
-events = new events(config.Events);
-
-var messaging = require('../../../messaging');
-messaging = new messaging(config.Messaging);
+var events = new Events(config.Events);
+var messaging = new Messaging(config.Messaging);
 
 var LineupManager = {};
 switch (process.argv[3]) {
