@@ -1,6 +1,9 @@
 var moment = require('moment');
 var fs = require('fs');
 
+var Events = require('../../events');
+var Messaging = require('../../messaging');
+
 adhans = ['https://www.youtube.com/watch?v=cWJ0A2MGADc', 
 			'https://www.youtube.com/watch?v=IUuGAeK5Hi0', 
 			'https://www.youtube.com/watch?v=ZQztDKU4J7g', 
@@ -23,12 +26,8 @@ config = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 var startDate = moment(process.argv[3]);
 var endDate = moment(process.argv[4]);
 
-var events = require('../../events');
-events = new events(config.Events);
-
-var messaging = require('../../messaging');
-
-messaging = new messaging(config.Messaging);
+var events = new Events(config.Events);
+var messaging = new Messaging(config.Messaging);
 
 var current_adhan = 0;
 
@@ -46,4 +45,3 @@ for (var i = 0; i < periodLengthInDays; i++) {
 
 	startDate.add(1, 'day');
 }
-
