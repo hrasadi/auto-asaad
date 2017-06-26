@@ -2,7 +2,7 @@ var execSync = require('child_process').execSync;
 var moment = require('moment');
 var path = require('path');
 
-var Utils = require('../../utils');
+var utils = require('../../utils');
 var LineupManager = require('../lineup-manager');
 
 var StandaloneLineupManager = function(radioConfig, configFile) {
@@ -13,7 +13,7 @@ var StandaloneLineupManager = function(radioConfig, configFile) {
     LineupManager.call(this, radioConfig, runningDir);
 }
 
-Utils.inheritsFrom(StandaloneLineupManager, LineupManager);
+utils.inheritsFrom(StandaloneLineupManager, LineupManager);
 
 StandaloneLineupManager.prototype.schedulePlayback = function(programTime, lineup, lineupFilePath) {
     

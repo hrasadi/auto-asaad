@@ -2,7 +2,7 @@ var execSync = require('child_process').execSync;
 var moment = require('moment');
 var path = require('path');
 
-var Utils = require('../../utils');
+var utils = require('../../utils');
 var LineupManager = require('../lineup-manager');
 
 var LiquidsoapLineupManager = function(radioConfig, configFile) {
@@ -13,7 +13,7 @@ var LiquidsoapLineupManager = function(radioConfig, configFile) {
     LineupManager.call(this, radioConfig, this.runningDir);
 }
 
-Utils.inheritsFrom(LiquidsoapLineupManager, LineupManager);
+utils.inheritsFrom(LiquidsoapLineupManager, LineupManager);
 
 LiquidsoapLineupManager.prototype.schedulePlayback = function(programTime, lineup, lineupFilePath) {
 
