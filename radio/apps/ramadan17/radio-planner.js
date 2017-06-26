@@ -14,19 +14,19 @@ if (config == null) {
 	process.exit(1);
 }
 
-var events = require('../../events');
+var events = require('../../../events');
 events = new events(config.Events);
 
-var messaging = require('../../messaging');
+var messaging = require('../../../messaging');
 messaging = new messaging(config.Messaging);
 
 var LineupManager = {};
 switch (process.argv[3]) {
-	case require('../lineup-manager').prototype.DeploymentMode.STANDALONE:
-		LineupManager = require('../standalone/standalone-lineup-manager');
+	case require('../../lineup-manager').prototype.DeploymentMode.STANDALONE:
+		LineupManager = require('../../standalone/standalone-lineup-manager');
 		break;
-	case require('../lineup-manager').prototype.DeploymentMode.LIQUIDSOAP:
-		LineupManager = require('../liquidsoap/liquidsoap-lineup-manager');
+	case require('../../lineup-manager').prototype.DeploymentMode.LIQUIDSOAP:
+		LineupManager = require('../../liquidsoap/liquidsoap-lineup-manager');
 		break;
 }
 
