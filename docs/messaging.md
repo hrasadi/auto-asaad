@@ -41,3 +41,25 @@ Currently, the only implemented ChatIdProvider method is the _static_ method,
 i.e. you should provide a list of chat ID's you want to receive the notification
 directly in the configuration file. If you have a Telegram bot and want to 
 obtain chat IDs, you can refer to this [article](https://core.telegram.org/bots/api#getupdates)
+
+## API
+
+Messaging class can be instatiating by passing the configuration object to the constructor:
+
+```javascript
+var Messaging = require('../../messaging') // Assume the CWD be apps/myapp
+var messaging = new Messaging(config)
+```
+
+After initialization, the public API calls available to you are as follows:
+* `createCalEvent(eventTime, summary, message)`: registers an event in Google 
+calendar where:
+
+** `eventTime`: String. This is the scheduled time for the message. It should be in the 
+ISO format (`YYYY-MM-DDTHH:mm:ss`).
+
+** `summary`: String. The summary of the event. If using Telegram scheduling, 
+the convention requires you to set it to `#scheduler` literal.
+
+** `message`: String. The body of the notification. Note that you should escape special
+characters in the string. For instance a new line character should be written as `\\n` in the string
