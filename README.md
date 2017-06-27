@@ -13,10 +13,10 @@ commit these applications as they are being developed. Of couse each use-case
 will reveal new challenges that will reflect on the framework itself.
 
 ## Documentation Entries
-1. Introduction and Architecture
-2. Messaging Tools
-3. Events Extraction Tools
-4. Applications
-4. Radio Module
-    1. Radio Module Design
-    2. Applications
+1. [Introduction and Architecture](./docs/intro.md)
+2. [Messaging Tools](./docs/messaging.md)
+3. [Events Extraction Tools](./docs/events.md)
+4. [Applications](./docs/apps.md)
+4. [Radio Module](./radio/README.md)
+    1. [Radio Module Design](./radio/docs/design.md)
+    2. [Applications](./radio/docs/apps.md)
