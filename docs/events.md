@@ -36,7 +36,7 @@ The public API calls are as follows:
 	The `callback_fn` function callback accepts a date string and all the event times 
 	for that day in this order:
 
-	```
+	```javascript
 	callback = function(date, fajrString, sunriseString, dhuhrString, asrString, sunsetString,
 		maghribString, ishaString, midnightString) { // CALLBACK BODY }
 	```
