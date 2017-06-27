@@ -15,3 +15,7 @@ auto-asaad is a set of scripts built on top of Liquidsoap, in addition to
 a standalone implementation tuned for macOS systems, with the goal of defining 
 dynamic and scheduled program playbacks.
 
+You can find more info about the design of this module and how to use it refer
+to [design](./docs/design.md) page. There is also a brief description of 
+applications developed using radio auto-asaad please refer to 
+[applications](./docs/apps.md) page.
