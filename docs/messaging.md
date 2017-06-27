@@ -55,11 +55,8 @@ After initialization, the public API calls available to you are as follows:
 * `createCalEvent(eventTime, summary, message)`: registers an event in Google 
 calendar where:
 
-** `eventTime`: String. This is the scheduled time for the message. It should be in the 
-ISO format (`YYYY-MM-DDTHH:mm:ss`).
+	* `eventTime`: String. This is the scheduled time for the message. It should be in the ISO format (`YYYY-MM-DDTHH:mm:ss`).
 
-** `summary`: String. The summary of the event. If using Telegram scheduling, 
-the convention requires you to set it to `#scheduler` literal.
+	* `summary`: String. The summary of the event. If using Telegram scheduling, the convention requires you to set it to `#scheduler` literal.
 
-** `message`: String. The body of the notification. Note that you should escape special
-characters in the string. For instance a new line character should be written as `\\n` in the string
+	* `message`: String. The body of the notification. Note that you should escape special characters in the string. For instance a new line character should be written as `\\n` in the string
