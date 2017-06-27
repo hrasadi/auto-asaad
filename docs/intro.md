@@ -6,6 +6,12 @@ larger variaty of platforms.
 
 The main use-case for auto-asaad can be stated as follows:
 
-_We want to automatically notify our service subscribers on a specific point(s)
-of time by sending them a message with customized text. The time for sending 
+_We want to automatically notify our service subscribers on specific point(s)
+in time by sending them messages with customized text. The time for sending 
 the messages may also change every day and is not necessarily fixed._
+
+A very basic example would be to send a message every week to fill your audience 
+with the news headlines.
+
+The notification features have been implemented in two main classes, namely
+[_messaging_](./messaging.md) and [_events_](./events.md).
