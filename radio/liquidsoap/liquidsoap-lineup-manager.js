@@ -36,16 +36,24 @@ LiquidsoapLineupManager.prototype.schedulePlayback = function(programTime, lineu
     // Register event using 'at'
     if (this.hasPreProgram) {
         this.logger.info("PreProgram playback scheduled for " + moment(preProgramTime).format("YYYY-MM-DDTHH:mm:ss").toString());
-        execSync("echo 'cd " + __dirname + "; ./playback-pre-program.sh' | at -t " + moment(preProgramTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString(), {
+        execSync("echo 'cd " + __dirname + "; ./playback-pre-program.sh' | at -t " + moment(preProgramTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() " 2>&1", {
             encoding: 'utf-8'
         });                    
+
+        currentProgram.PreShow.Scheduler = {};
+        currentProgram.PreShow.Scheduler.ScheduledAt = currentProgram.PreShow.Meta.TentativeStartTime;
+        currentProgram.PreShow.Scheduler.SchedulerId = ret.split(" ")[1]; // The second token (e.g. "job xxx at Thu Jun 29 20:24:58 2017")
     }
 
     // Register auto-asaad program announcement! (One minute earlier and the rest is handled in the shell file)
     this.logger.info("Program playback scheduled for " + moment(programTime).format("YYYY-MM-DDTHH:mm:ss").toString());
-    execSync("echo 'cd " + __dirname + "; ./playback-program.sh' " + lineupFilePath + "| at -t " + moment(programTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString(), {
+    execSync("echo 'cd " + __dirname + "; ./playback-program.sh' " + lineupFilePath + "| at -t " + moment(programTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() " 2>&1", {
         encoding: 'utf-8'
     });
+
+    currentProgram.Show.Scheduler = {};
+    currentProgram.Show.Scheduler.ScheduledAt = currentProgram.Show.Meta.TentativeStartTime;
+    currentProgram.Show.Scheduler.SchedulerId = ret.split(" ")[1]; // The second token (e.g. "job xxx at Thu Jun 29 20:24:58 2017")
 }
 
 LiquidsoapLineupManager.prototype.getMediaDuration = function(media) {
