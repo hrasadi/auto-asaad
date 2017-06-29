@@ -55,11 +55,6 @@ Raa1.prototype.reset = function(currentDate, callback_fn) {
 	});	
 }
 
-Raa1.prototype.getSelectorIdx = function() {
-	return moment(this.config.RadioStartDate).diff(moment, 'days');
-}
-
-
 Raa1.prototype.calculateProgramStartTime = function(program) {
 	if (program.Id == 'IftarProgram') {
 		return this.dataProvider.maghribTime;		

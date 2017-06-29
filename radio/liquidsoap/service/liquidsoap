@@ -60,9 +60,8 @@ case "$1" in
 	LS_SCRIPT_DIR="${liq_name}_LS_SCRIPT_DIR"
 	RUNNING_DIR="${liq_name}_RUNNING_DIR"
 	MEDIA_DIR="${liq_name}_MEDIA_DIR"
-	FILLER_MEDIA="${liq_name}_FILLER_MEDIA" 
 	start-stop-daemon --start --quiet --pidfile $rundir/${liq%.liq}.pid \
-          --chuid $user:$group --exec $liquidsoap -- -d $confdir/$liq -- ${!LS_SCRIPT_DIR} ${!RUNNING_DIR} ${!MEDIA_DIR} ${!FILLER_MEDIA} 
+          --chuid $user:$group --exec $liquidsoap -- -d $confdir/$liq -- ${!LS_SCRIPT_DIR} ${!RUNNING_DIR} ${!MEDIA_DIR} 
       fi
     done
     if test -n "$has_channels"; then

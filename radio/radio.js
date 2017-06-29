@@ -8,8 +8,4 @@ Radio.prototype.reset = function(currentDate, callback_fn) {
 	console.log("Not implemented");
 }
 
-Radio.prototype.getSelectorIdx = function(currentDate) {
-	console.log("Not implemented");
-}
-
 module.exports = Radio;

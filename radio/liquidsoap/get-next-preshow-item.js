@@ -9,17 +9,24 @@ lineup = JSON.parse(fs.readFileSync(lineupFilePath, 'utf8'));
 
 var currentProgramIdx = parseInt(fs.readFileSync(lineupFilePath + ".program.iter", 'utf8'));
 
+// If the current program does not have a preshow, then quit
+if (!lineup.Programs[currentProgramIdx].PreShow) {
+    process.exit(0);
+}
+
 // Check the iterator value
 var preShowIter = 0;
 if (fs.existsSync(lineupFilePath + ".preshow.iter")) {
-	iter = parseInt(fs.readFileSync(lineupFilePath + ".preshow.iter", 'utf8')); 
+	preShowIter = parseInt(fs.readFileSync(lineupFilePath + ".preshow.iter", 'utf8')); 
 }
 
-if (iter < lineup.Programs[currentProgramIdx].PreShow.Clips.length) {
-	console.log(lineup.Programs[currentProgramIdx].PreShow.Clips[iter].Path);
+if (preShowIter < lineup.Programs[currentProgramIdx].PreShow.Clips.length) {
+	console.log(lineup.Programs[currentProgramIdx].PreShow.Clips[preShowIter].Path);
 
 	// write the new iterator value to file
-	fs.writeFileSync(lineupFilePath + ".preshow.iter", iter + 1);
+	fs.writeFileSync(lineupFilePath + ".preshow.iter", preShowIter + 1);
+} else if (iter == lineup.Programs[currentProgramIdx].PreShow.Clips.length) { // cleanup time!
+	fs.unlinkSync(lineupFilePath + ".preshow.item");
 }
 // else print nothing 
 

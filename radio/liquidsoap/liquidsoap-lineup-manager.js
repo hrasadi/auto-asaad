@@ -11,7 +11,7 @@ var LiquidsoapLineupManager = function(radioConfig, cwd, radioObj) {
 
 utils.inheritsFrom(LiquidsoapLineupManager, LineupManager);
 
-LiquidsoapLineupManager.prototype.prepareScheduling = function() {
+LiquidsoapLineupManager.prototype.onSchedulingComplete = function() {
     // Let Liquidsoap know that the lineup has been changed
     this.logger.info("Changing the current lineup file to " + this.today.lineupFilePath);
     try {
@@ -38,7 +38,7 @@ LiquidsoapLineupManager.prototype.schedulePlayback = function(currentProgram, cu
 
         currentProgram.PreShow.Scheduler = {};
         currentProgram.PreShow.Scheduler.ScheduledAt = currentProgram.PreShow.Meta.TentativeStartTime;
-        currentProgram.PreShow.Scheduler.SchedulerId = ret.split(" ")[1]; // The second token (e.g. "job xxx at Thu Jun 29 20:24:58 2017")
+        currentProgram.PreShow.Scheduler.SchedulerId = ret.split("\n")[1].split(" ")[1]; // The second token (e.g. "warning .... \n job xxx at Thu Jun 29 20:24:58 2017")
     }
 
     // Register auto-asaad program announcement! (One minute earlier and the rest is handled in the shell file)
@@ -49,7 +49,7 @@ LiquidsoapLineupManager.prototype.schedulePlayback = function(currentProgram, cu
 
     currentProgram.Show.Scheduler = {};
     currentProgram.Show.Scheduler.ScheduledAt = currentProgram.Show.StartTime;
-    currentProgram.Show.Scheduler.SchedulerId = ret.split(" ")[1]; // The second token (e.g. "job xxx at Thu Jun 29 20:24:58 2017")
+    currentProgram.Show.Scheduler.SchedulerId = ret.split("\n")[1].split(" ")[1]; // The second token (e.g. "job xxx at Thu Jun 29 20:24:58 2017")
 }
 
 LiquidsoapLineupManager.prototype.getMediaDuration = function(media) {

@@ -41,6 +41,8 @@ if (iter < lineup.Programs[currentProgramIdx].Show.Clips.length) {
 			fs.writeFileSync(lineupFilePath + ".program.iter", nextProgramIdx);
 
 			// Playback of the new program automatically begins in the next iteration when this script is executed by liquidsoap server
+			// We should lock it already
+			fs.writeFileSync(lineupFilePath + ".show.lock", "");
 		}
 	}
 	// No output, nothing to play in this iteration
