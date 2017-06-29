@@ -316,9 +316,11 @@ LineupManager.prototype.compileLineup = function() {
     }
 
     // Validate that there is no overlap
+    this.logger.info("Compiling Lineup - Pass 2 (Validation)");
     this.validateLineup();
 
     // Schedule the playback
+    this.logger.info("Compiling Lineup - Pass 3 (Scheduling)");
     this.scheduleLineupPlayback();
 
     // Persist the compiled lineup
