@@ -15,7 +15,7 @@ if (!lineup.Programs[currentProgramIdx].PreShow) {
 }
 
 if (lineup.Programs[currentProgramIdx].PreShow.FillerClip) {
-	console.log(lineup.Programs[currentProgramIdx].PreShow.FillerClip.Path);
+    console.log(lineup.Programs[currentProgramIdx].PreShow.FillerClip.Path);
 }
 // else print nothing 
 

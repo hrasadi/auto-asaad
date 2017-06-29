@@ -5,8 +5,8 @@ var kill = require('tree-kill');
 
 var config = null;
 if (process.argv.length < 3) {
-	console.log("usage: playback-program.js {lineup-file-path}");
-	process.exit(1);
+    console.log("usage: playback-program.js {lineup-file-path}");
+    process.exit(1);
 }
 
 var lineupFilePath = process.argv[2];
@@ -17,11 +17,11 @@ kill(preProgramPid, 'SIGTERM', doPlayback);
 fs.unlinkSync('radio.lock');
 
 function doPlayback() {
-	var today = moment().format('YYYY-MM-DD');
-	lineup = JSON.parse(fs.readFileSync(lineupFilePath, 'utf8'));
+    var today = moment().format('YYYY-MM-DD');
+    lineup = JSON.parse(fs.readFileSync(lineupFilePath, 'utf8'));
 
-	// Do playback
-	lineup.programPlaylist.forEach (function(item) {	
-		execSync('afplay ' + item.path);
-	})	
+    // Do playback
+    lineup.programPlaylist.forEach (function(item) {    
+        execSync('afplay ' + item.path);
+    })  
 }

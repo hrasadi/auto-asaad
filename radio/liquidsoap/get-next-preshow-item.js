@@ -17,16 +17,16 @@ if (!lineup.Programs[currentProgramIdx].PreShow) {
 // Check the iterator value
 var preShowIter = 0;
 if (fs.existsSync(lineupFilePath + ".preshow.iter")) {
-	preShowIter = parseInt(fs.readFileSync(lineupFilePath + ".preshow.iter", 'utf8')); 
+    preShowIter = parseInt(fs.readFileSync(lineupFilePath + ".preshow.iter", 'utf8')); 
 }
 
 if (preShowIter < lineup.Programs[currentProgramIdx].PreShow.Clips.length) {
-	console.log(lineup.Programs[currentProgramIdx].PreShow.Clips[preShowIter].Path);
+    console.log(lineup.Programs[currentProgramIdx].PreShow.Clips[preShowIter].Path);
 
-	// write the new iterator value to file
-	fs.writeFileSync(lineupFilePath + ".preshow.iter", preShowIter + 1);
+    // write the new iterator value to file
+    fs.writeFileSync(lineupFilePath + ".preshow.iter", preShowIter + 1);
 } else if (iter == lineup.Programs[currentProgramIdx].PreShow.Clips.length) { // cleanup time!
-	fs.unlinkSync(lineupFilePath + ".preshow.item");
+    fs.unlinkSync(lineupFilePath + ".preshow.item");
 }
 // else print nothing 
 
