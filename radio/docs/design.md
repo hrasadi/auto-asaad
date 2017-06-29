@@ -5,7 +5,7 @@ articles (as well as the code if you want to dig more).
 
 ## Terminology
 
-* *Clip*: The smallest controllable peice of media, e.g. one MP3 file, live 
+* **Clip**: The smallest controllable peice of media, e.g. one MP3 file, live 
 stream URL, etc.
 * **Program**: A list of clips that will be played back-to-back. Programs may
 be scheduled for a specific point in time.
