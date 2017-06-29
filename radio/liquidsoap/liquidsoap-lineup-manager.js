@@ -11,7 +11,7 @@ var LiquidsoapLineupManager = function(radioConfig, cwd, radioObj) {
 
 utils.inheritsFrom(LiquidsoapLineupManager, LineupManager);
 
-LiquidsoapLineupManager.prototype.schedulePlayback = function(programTime, lineup, lineupFilePath) {
+LiquidsoapLineupManager.prototype.schedulePlayback = function(currentProgram) {
 
     // Let Liquidsoap know that the lineup has been changed
     this.logger.info("Changing the current lineup file to " + lineupFilePath);
@@ -24,15 +24,11 @@ LiquidsoapLineupManager.prototype.schedulePlayback = function(programTime, lineu
             // telnet return non-zero exit codes, simply ignore them!
     }
 
-    // Estimate the shift in time required
-    // We start from second 0 of the minute to prevent possible errors
-    var preProgramTime = moment(programTime).subtract(lineup.totalPreProgramLineupDuration, 'seconds').set('second', 0);
-
     /** We should now register cron events **/
     // Register event using 'at'
-    if (this.hasPreProgram) {
-        this.logger.info("PreProgram playback scheduled for " + moment(preProgramTime).format("YYYY-MM-DDTHH:mm:ss").toString());
-        execSync("echo 'cd " + __dirname + "; ./playback-pre-program.sh' | at -t " + moment(preProgramTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1", {
+    if (this.hasPreProgram(currentProgram)) {
+        this.logger.info("PreShow playback scheduled for " + moment(currentProgram.PreShow.Meta.TentativeStartTime).format("YYYY-MM-DDTHH:mm:ss").toString());
+        execSync("echo 'cd " + __dirname + "; ./playback-pre-program.sh' | at -t " + moment(currentProgram.PreShow.Meta.TentativeStartTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1", {
             encoding: 'utf-8'
         });                    
 
@@ -42,8 +38,8 @@ LiquidsoapLineupManager.prototype.schedulePlayback = function(programTime, lineu
     }
 
     // Register auto-asaad program announcement! (One minute earlier and the rest is handled in the shell file)
-    this.logger.info("Program playback scheduled for " + moment(programTime).format("YYYY-MM-DDTHH:mm:ss").toString());
-    execSync("echo 'cd " + __dirname + "; ./playback-program.sh' " + lineupFilePath + "| at -t " + moment(programTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1", {
+    this.logger.info("Show playback scheduled for " + moment(currentProgram.Show.Meta.TentativeStartTime).format("YYYY-MM-DDTHH:mm:ss").toString());
+    execSync("echo 'cd " + __dirname + "; ./playback-program.sh' " + lineupFilePath + "| at -t " + moment(currentProgram.Show.Meta.TentativeStartTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1", {
         encoding: 'utf-8'
     });
 
