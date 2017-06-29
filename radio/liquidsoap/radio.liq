@@ -24,6 +24,13 @@ def read_pre_show_lineup() =
 	request.create(file)
 end
 
+def read_pre_show_filler() =
+	# Get the URI
+	file = list.hd(get_process_lines("cd "^script_dir^"; node ./get-preshow-filler-item.js "^current_lineup_file()))
+	
+	request.create(file)
+end
+
 def read_show_lineup() =
 	# Get the URI
 	file = list.hd(get_process_lines("cd "^script_dir^"; node ./get-next-show-item.js "^current_lineup_file()))
@@ -34,7 +41,7 @@ end
 pre_show_playlist = switch(track_sensitive=false, [
 		(start_pre_show, fallback(track_sensitive=false, [
 			request.dynamic(id = "pre_show_req", read_pre_show_lineup),
-			single(media_dir^"/"^pre_show_filler)]))])
+			request.dynamic(id = "pre_show_filler", read_pre_show_filler)]))])
 
 
 show_playlist = request.dynamic(id = "show_req", read_show_lineup)
