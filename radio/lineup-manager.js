@@ -204,7 +204,6 @@ LineupManager.prototype.generateLineup = function() {
 
         // The show might have start time. If the program has a pre-program show,
         // it is mandatory to specify start time for it!
-        //console.log(program.Show.StartTime)
         this.today.lineup.Programs.push(program);            
     }
 
@@ -242,7 +241,7 @@ LineupManager.prototype.createProgramFromTemplate = function(programTemplate) {
 }
 
 LineupManager.prototype.decideProgramPreShowClipsFromTemplate = function(programTemplate, program) {
-    this.logger.info("-- BEGIN OF PRE-SHOW LINEUP ARRANGEMENT FOR " + programTemplate.Id);
+    this.logger.debug("-- BEGIN OF PRE-SHOW LINEUP ARRANGEMENT FOR " + programTemplate.Id);
 
     program.PreShow = {}
     program.PreShow.Clips = [];
@@ -256,9 +255,9 @@ LineupManager.prototype.decideProgramPreShowClipsFromTemplate = function(program
         var media = {};
         Object.assign(media, this.config.Media[programTemplate.PreShow.Clips[i]][mediaIdx]);
 
-        media.path = this.config.Media.BaseDir + media.path;
+        media.Path = this.config.Media.BaseDir + media.Path;
         
-        this.logger.info("* I have decided to play " + programTemplate.PreShow.Clips[i] + " with index: " + mediaIdx);
+        this.logger.debug("* I have decided to play " + programTemplate.PreShow.Clips[i] + " with index: " + mediaIdx);
 
         program.PreShow.Clips.push(media);
     }
@@ -266,13 +265,13 @@ LineupManager.prototype.decideProgramPreShowClipsFromTemplate = function(program
     var fillerMedia = this.config.Media[programTemplate.PreShow.FillerClip][0];
     program.PreShow.FillerClip = fillerMedia;
 
-    this.logger.info("* Filler clip is " + fillerMedia.path);
+    this.logger.debug("* Filler clip is " + fillerMedia.Path);
 
-    this.logger.info("-- END OF PRE-SHOW LINEUP FOR " + programTemplate.Id);
+    this.logger.debug("-- END OF PRE-SHOW LINEUP FOR " + programTemplate.Id);
 }
 
 LineupManager.prototype.decideProgramShowClipsFromTemplate = function(programTemplate, program) {
-    this.logger.info("-- BEGIN OF PROGRAM LINEUP ARRANGEMENT FOR " + programTemplate.Id);
+    this.logger.debug("-- BEGIN OF PROGRAM LINEUP ARRANGEMENT FOR " + programTemplate.Id);
 
     program.Show = {}
     program.Show.Clips = [];
@@ -285,14 +284,14 @@ LineupManager.prototype.decideProgramShowClipsFromTemplate = function(programTem
         // resolve the media file path before writing down to lineup
         var media = {};
         Object.assign(media, this.config.Media[programTemplate.Show.Clips[i]][mediaIdx]);
-        media.path = this.config.Media.BaseDir + media.path;
+        media.Path = this.config.Media.BaseDir + media.Path;
 
-        this.logger.info("* I have decided to play " + programTemplate.Show.Clips[i] + " with index: " + mediaIdx);
+        this.logger.debug("* I have decided to play " + programTemplate.Show.Clips[i] + " with index: " + mediaIdx);
 
         program.Show.Clips.push(media);
     }
 
-    this.logger.info("-- END OF PROGRAM LINEUP FOR " + programTemplate.Id);
+    this.logger.debug("-- END OF PROGRAM LINEUP FOR " + programTemplate.Id);
 }
 
 LineupManager.prototype.myMod = function(m, n) {
@@ -300,32 +299,48 @@ LineupManager.prototype.myMod = function(m, n) {
 }
 
 LineupManager.prototype.compileLineup = function() {
+    this.today.compiledLineup.PlaylistStartIdx = 0;
     this.today.compiledLineup.Programs = [];
     
     // Calculate the start and end times for all programs
+    this.logger.debug("Compiling Lineup - Pass 1 (Timing Calculation)");
     for (var i = 0; i < this.today.lineup.Programs.length; i++) {
         
         // Prepare compiled program object
         compiledProgram = {};
         Object.assign(compiledProgram, this.today.lineup.Programs[i]);
 
-        this.logger.info("Compiling Lineup - Pass 1 (Timing Calculation)");
-        this.calculateProgramTimes(this.today.lineup.Programs[i], compiledProgram);
+        if (i == 0) {
+            this.adjustFirstProgram(compiledProgram);
+        }
 
+        this.calculateProgramTimes(this.today.lineup.Programs[i], compiledProgram);
         this.today.compiledLineup.Programs.push(compiledProgram);
     }
 
     // Validate that there is no overlap
-    this.logger.info("Compiling Lineup - Pass 2 (Validation)");
+    this.logger.debug("Compiling Lineup - Pass 2 (Validation)");
     this.validateLineup();
 
     // Schedule the playback
-    this.logger.info("Compiling Lineup - Pass 3 (Scheduling)");
+    this.logger.debug("Compiling Lineup - Pass 3 (Scheduling)");
     this.scheduleLineupPlayback();
 
     // Persist the compiled lineup
     this.fs.writeFileSync(this.today.lineupFilePath + ".compiled", JSON.stringify(this.today.compiledLineup, null, 2), 'utf-8');
 
+}
+
+// When the radio first starts, it should play something (of course!). 
+// Therefore, either the first program in the list should be scheduled or 
+// otherwise we will schedule it for now.
+LineupManager.prototype.adjustFirstProgram = function(compiledProgram) {
+    
+    if (compiledProgram.Show.StartTime == undefined) {
+        this.logger.warn("First program should be scheduled but it was not. I will schedule it for playback in a minute!");
+        // schedule it for a minute from now (to handle possible system delays)
+        compiledProgram.Show.StartTime = moment().add(1, 'minute');
+    }
 }
 
 LineupManager.prototype.calculateProgramTimes = function(program, compiledProgram) {
@@ -395,14 +410,32 @@ LineupManager.prototype.validateLineup = function() {
 }
 
 LineupManager.prototype.scheduleLineupPlayback = function() {
+    
+    // Let managers do any preparation before scheduling programs
+    this.prepareScheduling();
+
     for (var i = 0; i < this.today.compiledLineup.Programs.length; i++) {
         var currentProgram = this.today.compiledLineup.Programs[i];
 
-        // if the program is explicitly marked for scheduling (StartTime is specified for it), do it!
+        // if the program is explicitly marked for scheduling (StartTime is 
+        // specified for it), do it!
         if (currentProgram.Show.StartTime) {
-            this.schedulePlayback(currentProgram)
+            // Note that we only schedule programs with a future start times.
+            // Hence, we are not prune to scheduling problems if admins modify the
+            // lineup midway throughout the day
+            if (currentProgram.Show.StartTime.isAfter(moment())) {
+                this.schedulePlayback(currentProgram)
+            } else {
+                this.today.compiledLineup.PlaylistStartIdx = i + 1;
+                this.logger.warn("Program " + currentProgram.Id + " start time is already passed. Hence I do not schedule it.");
+            }
         }
     }
+}
+
+// implemented in subclasses
+LineupManager.prototype.prepareScheduling = function() {
+    console.log("Not implemented!");
 }
 
 // implemented in subclasses
@@ -410,12 +443,10 @@ LineupManager.prototype.schedulePlayback = function(programTime) {
     console.log("Not implemented!");
 }
 
-
 // implemented in subclasses
 LineupManager.prototype.getMediaDuration = function(media) {
     console.log("Not implemented!");
 } 
-
 
 LineupManager.prototype.DeploymentMode = {
     STANDALONE: "standalone",

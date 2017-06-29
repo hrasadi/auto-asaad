@@ -11,36 +11,34 @@ var LiquidsoapLineupManager = function(radioConfig, cwd, radioObj) {
 
 utils.inheritsFrom(LiquidsoapLineupManager, LineupManager);
 
-LiquidsoapLineupManager.prototype.schedulePlayback = function(currentProgram) {
-
+LiquidsoapLineupManager.prototype.prepareScheduling = function() {
     // Let Liquidsoap know that the lineup has been changed
     this.logger.info("Changing the current lineup file to " + this.today.lineupFilePath);
-
     try {
-        execSync("cd " + __dirname + "; ./update-lineup-file.sh " + this.today.lineupFilePath, {
+        execSync("cd " + __dirname + "; ./update-lineup-file.sh " + this.today.lineupFilePath + " " + this.today.compiledLineup.PlaylistStartIdx, {
             encoding: 'utf-8'
         });        
     } catch (e) {
             // telnet return non-zero exit codes, simply ignore them!
     }
+}
 
+LiquidsoapLineupManager.prototype.schedulePlayback = function(currentProgram, currentProgramIdx) {
     /** We should now register cron events **/
     // Register event using 'at'
     if (this.hasPreProgram(currentProgram)) {
 
-        // if there is a filler, register it with the radio
-        if (currentProgram.PreShow.FillerClip) {
-            try {
-                execSync("cd " + __dirname + "; ./update-preshow-filler.sh " + currentProgram.PreShow.FillerClip.path, {
-                    encoding: 'utf-8'
-                });        
-            } catch (e) {
-                    // telnet return non-zero exit codes, simply ignore them!
-            }            
-        }
 
+        // Register preshow and its filler if any
         this.logger.info("PreShow playback scheduled for " + moment(currentProgram.PreShow.Meta.TentativeStartTime).format("YYYY-MM-DDTHH:mm:ss").toString());
-        var ret = execSync("echo 'cd " + __dirname + "; ./playback-pre-program.sh' | at -t " + moment(currentProgram.PreShow.Meta.TentativeStartTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1", {
+        
+        var preShowCmd = "echo 'cd " + __dirname + "; ./playback-preshow.sh' " + this.today.lineupFilePath + " " + currentProgramIdx;
+        if (currentProgram.PreShow.FillerClip) {
+            preShowCmd += "; ./update-preshow-filler.sh " + currentProgram.PreShow.FillerClip.path;
+        }
+        preShowCmd += " | at -t " + moment(currentProgram.PreShow.Meta.TentativeStartTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1";
+
+        var ret = execSync(preShowCmd, {
             encoding: 'utf-8'
         });                    
 
@@ -50,19 +48,19 @@ LiquidsoapLineupManager.prototype.schedulePlayback = function(currentProgram) {
     }
 
     // Register auto-asaad program announcement! (One minute earlier and the rest is handled in the shell file)
-    this.logger.info("Show playback scheduled for " + moment(currentProgram.Show.Meta.TentativeStartTime).format("YYYY-MM-DDTHH:mm:ss").toString());
-    var ret = execSync("echo 'cd " + __dirname + "; ./playback-program.sh' " + this.today.lineupFilePath + "| at -t " + moment(currentProgram.Show.Meta.TentativeStartTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1", {
+    this.logger.info("Show playback scheduled for " + moment(currentProgram.Show.StartTime).format("YYYY-MM-DDTHH:mm:ss").toString());
+    var ret = execSync("echo 'cd " + __dirname + "; ./playback-show.sh' " + this.today.lineupFilePath + " " + currentProgramIdx + "| at -t " + moment(currentProgram.Show.StartTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1", {
         encoding: 'utf-8'
     });
 
     currentProgram.Show.Scheduler = {};
-    currentProgram.Show.Scheduler.ScheduledAt = currentProgram.Show.Meta.TentativeStartTime;
+    currentProgram.Show.Scheduler.ScheduledAt = currentProgram.Show.StartTime;
     currentProgram.Show.Scheduler.SchedulerId = ret.split(" ")[1]; // The second token (e.g. "job xxx at Thu Jun 29 20:24:58 2017")
 }
 
 LiquidsoapLineupManager.prototype.getMediaDuration = function(media) {
 
-    var cmd = 'mp3info -p "%S" ' + media.path;
+    var cmd = 'mp3info -p "%S" ' + media.Path;
     var mediaDuration = parseFloat(execSync(cmd, {
         encoding: 'utf-8'
     }));

@@ -9,43 +9,42 @@ running_dir = argv(2)
 # the initial lineup file is emptry, later on, the first 'radio-planner' should annouce the lineup file using telnet 
 current_lineup_file = interactive.string("current_lineup_file", "") 
 media_dir = argv(3)
-pre_program_filler = interactive.string("pre_program_filler", "")
+pre_show_filler = interactive.string("pre_show_filler", "")
 
 print("Scripts dir: "^script_dir)
 print("Running dir: "^running_dir)
 print("Media dir: "^media_dir)
-print("Default filler: "^pre_program_filler)
 
-start_pre_program = interactive.bool("start_pre_program", false)
+start_pre_show = interactive.bool("start_pre_show", false)
 
-def read_pre_program_lineup() =
+def read_pre_show_lineup() =
 	# Get the URI
-	file = list.hd(get_process_lines("cd "^script_dir^"; node ./get-next-pre-program-item.js "^current_lineup_file()))
+	file = list.hd(get_process_lines("cd "^script_dir^"; node ./get-next-preshow-item.js "^current_lineup_file()))
 	
 	request.create(file)
 end
 
-def read_program_lineup() =
+def read_show_lineup() =
 	# Get the URI
-	file = list.hd(get_process_lines("cd "^script_dir^"; node ./get-next-program-item.js "^current_lineup_file()))
+	file = list.hd(get_process_lines("cd "^script_dir^"; node ./get-next-show-item.js "^current_lineup_file()))
 	
 	request.create(file)
 end
 
-pre_program_playlist = switch(track_sensitive=false, [
-		(start_pre_program, fallback(track_sensitive=false, [
-			request.dynamic(id = "pre_program_req", read_pre_program_lineup),
-			single(media_dir^"/"^pre_program_filler)]))])
+pre_show_playlist = switch(track_sensitive=false, [
+		(start_pre_show, fallback(track_sensitive=false, [
+			request.dynamic(id = "pre_show_req", read_pre_show_lineup),
+			single(media_dir^"/"^pre_show_filler)]))])
 
 
-program_playlist = request.dynamic(id = "program_req", read_program_lineup)
+show_playlist = request.dynamic(id = "show_req", read_show_lineup)
 
 lineup = fallback(track_sensitive=false, [
-	program_playlist,
-	pre_program_playlist
+	show_playlist,
+	pre_show_playlist
 ])
 
 main = audio_to_stereo(mksafe(lineup))
 
-output.icecast(%mp3, host="localhost", port=8000, password="icecast_password", mount="raa.ogg", main)
+output.icecast(%mp3, host="localhost", port=8000, password="icecast_password", mount="raa1.ogg", main)
 

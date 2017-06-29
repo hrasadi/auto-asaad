@@ -56,7 +56,7 @@ Raa1.prototype.reset = function(currentDate, callback_fn) {
 }
 
 Raa1.prototype.getSelectorIdx = function() {
-	return moment(this.dataProvider.currentDate).date();
+	return moment(this.config.RadioStartDate).diff(moment, 'days');
 }
 
 
