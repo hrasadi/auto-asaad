@@ -40,7 +40,6 @@ Raa1.prototype.initialize = function() {
 	this.messaging = new Messaging(this.config.Messaging);
 
 	var lineupManager = lm.build(process.argv[3], this.config.Radio, this.cwd, this);
-	console.log(lineupManager)
 	lineupManager.startMainLoop();
 }
 
