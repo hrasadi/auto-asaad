@@ -427,7 +427,7 @@ LineupManager.build = function(deploymentMode, radioConfig, configFile, radioObj
             clazz = require('./standalone/standalone-lineup-manager');
             break;
         case LineupManager.prototype.DeploymentMode.LIQUIDSOAP:
-            return require('./liquidsoap/liquidsoap-lineup-manager');
+            clazz = require('./liquidsoap/liquidsoap-lineup-manager');
             break;
     }
     return new clazz(radioConfig, configFile, radioObj);

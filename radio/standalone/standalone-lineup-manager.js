@@ -2,14 +2,14 @@ var execSync = require('child_process').execSync;
 var moment = require('moment');
 var path = require('path');
 
-var utils = require('../../utils');
+var Utils = require('../../utils');
 var LineupManager = require('../lineup-manager');
 
 var StandaloneLineupManager = function(radioConfig, cwd, radioObj) {
     LineupManager.call(this, radioConfig, cwd, radioObj);
 }
 
-utils.inheritsFrom(StandaloneLineupManager, LineupManager);
+Utils.inheritsFrom(StandaloneLineupManager, LineupManager);
 
 StandaloneLineupManager.prototype.schedulePlayback = function(currentProgram) {
     
