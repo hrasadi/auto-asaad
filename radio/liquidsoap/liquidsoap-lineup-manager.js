@@ -27,6 +27,18 @@ LiquidsoapLineupManager.prototype.schedulePlayback = function(currentProgram) {
     /** We should now register cron events **/
     // Register event using 'at'
     if (this.hasPreProgram(currentProgram)) {
+
+        // if there is a filler, register it with the radio
+        if (currentProgram.PreShow.FillerClip) {
+            try {
+                execSync("cd " + __dirname + "; ./update-preshow-filler.sh " + currentProgram.PreShow.FillerClip.path, {
+                    encoding: 'utf-8'
+                });        
+            } catch (e) {
+                    // telnet return non-zero exit codes, simply ignore them!
+            }            
+        }
+
         this.logger.info("PreShow playback scheduled for " + moment(currentProgram.PreShow.Meta.TentativeStartTime).format("YYYY-MM-DDTHH:mm:ss").toString());
         var ret = execSync("echo 'cd " + __dirname + "; ./playback-pre-program.sh' | at -t " + moment(currentProgram.PreShow.Meta.TentativeStartTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1", {
             encoding: 'utf-8'
