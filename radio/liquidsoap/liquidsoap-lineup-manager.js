@@ -14,10 +14,10 @@ utils.inheritsFrom(LiquidsoapLineupManager, LineupManager);
 LiquidsoapLineupManager.prototype.schedulePlayback = function(currentProgram) {
 
     // Let Liquidsoap know that the lineup has been changed
-    this.logger.info("Changing the current lineup file to " + lineupFilePath);
+    this.logger.info("Changing the current lineup file to " + this.today.lineupFilePath);
 
     try {
-        execSync("cd " + __dirname + "; ./update-lineup-file.sh " + lineupFilePath, {
+        execSync("cd " + __dirname + "; ./update-lineup-file.sh " + this.today.lineupFilePath, {
             encoding: 'utf-8'
         });        
     } catch (e) {
