@@ -32,13 +32,7 @@ LiquidsoapLineupManager.prototype.schedulePlayback = function(currentProgram, cu
         // Register preshow and its filler if any
         this.logger.info("PreShow playback scheduled for " + moment(currentProgram.PreShow.Meta.TentativeStartTime).format("YYYY-MM-DDTHH:mm:ss").toString());
         
-        var preShowCmd = "echo 'cd " + __dirname + "; ./playback-preshow.sh' " + this.today.lineupFilePath + " " + currentProgramIdx;
-        if (currentProgram.PreShow.FillerClip) {
-            preShowCmd += "; ./update-preshow-filler.sh " + currentProgram.PreShow.FillerClip.path;
-        }
-        preShowCmd += " | at -t " + moment(currentProgram.PreShow.Meta.TentativeStartTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1";
-
-        var ret = execSync(preShowCmd, {
+        var ret = execSync("echo 'cd " + __dirname + "; ./playback-preshow.sh' " + this.today.lineupFilePath + " " + currentProgramIdx + " | at -t " + moment(currentProgram.PreShow.Meta.TentativeStartTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1", {
             encoding: 'utf-8'
         });                    
 
