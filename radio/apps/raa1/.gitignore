@@ -1,4 +1,4 @@
-raa1.conf
+*.conf
 lineups/**
 logs/**
 

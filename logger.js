@@ -2,7 +2,7 @@ var winston = require('winston')
 
 module.exports = function(logFilePath) {
   // set default log level.
-  var logLevel = 'info'
+  var logLevel = 'debug'
 
   // Set up logger
   var customColors = {

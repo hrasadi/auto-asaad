@@ -135,16 +135,17 @@ LineupManager.prototype.startMainLoop = function() {
     var lineupWatcher = function() {
         // Watch the lineup file for changes
         try {   
-            self.today.lineupFileWatcher = self.fs.watch(lineupFilePath, "", 
+            self.today.lineupFileWatcher = self.fs.watch(self.today.lineupFilePath,
                 function(eventType, fileName) {
                     if (eventType == 'change') {
+                        // Read the new lineup from modified file
+                        self.today.lineup = JSON.parse(self.fs.readFileSync(self.today.lineupFilePath, 'utf8'));
                         // Recompile
                         self.compileLineup();
                     }
                     // else?
                 });   
         } catch (e) {
-            // If the lineup file does not exist, generate it from template        
             self.generateLineup();
             self.compileLineup();
             // try again!
