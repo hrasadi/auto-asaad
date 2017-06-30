@@ -147,6 +147,8 @@ LineupManager.prototype.startMainLoop = function() {
             // If the lineup file does not exist, generate it from template        
             self.generateLineup();
             self.compileLineup();
+            // try again!
+            lineupWatcher();
         }
     }
 
