@@ -137,7 +137,8 @@ LineupManager.prototype.startMainLoop = function() {
         try {   
             self.today.lineupFileWatcher = self.fs.watch(self.today.lineupFilePath,
                 function(eventType, fileName) {
-                    if (eventType == 'change') {
+console.log("event");             
+       if (eventType == 'change') {
                         // Read the new lineup from modified file
                         self.today.lineup = JSON.parse(self.fs.readFileSync(self.today.lineupFilePath, 'utf8'));
                         // Recompile
@@ -156,7 +157,8 @@ LineupManager.prototype.startMainLoop = function() {
     var resetRadio = function() {
         // unwatch the old file
         if (self.today.lineupFileWatcher != null) {
-            self.fs.close(self.today.lineupFileWatcher);
+	console.log("unwatched");    
+        self.fs.close(self.today.lineupFileWatcher);
         }
 
         // start preparing for today
@@ -373,7 +375,8 @@ LineupManager.prototype.calculateProgramTimes = function(program, compiledProgra
         var mostRecentProgram = this.today.compiledLineup.Programs[this.today.compiledLineup.Programs.length - 1];
         compiledProgram.Show.Meta.TentativeStartTime = mostRecentProgram.Show.Meta.TentativeEndTime;
     } else {
-        compiledProgram.Show.Meta.TentativeStartTime = program.Show.StartTime;
+        compiledProgram.Show.StartTime = moment(program.Show.StartTime);
+        compiledProgram.Show.Meta.TentativeStartTime = moment(program.Show.StartTime);
     }
 
     // Calculate the end time
