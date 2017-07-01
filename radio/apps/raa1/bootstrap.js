@@ -18,33 +18,52 @@ var installStandaloneRadio = function(dates) {
 
 var installLiquidsoapRadio = function(dates) {
 	// Copy the .liq file to /etc (The script should be executed with sudo)
-	fsExtra.copySync('../liquidsoap/radio.liq', '/etc/liquidsoap/radio.liq'); 
-	child_process.execSync('systemctl daemon-reload');
+	fsExtra.copySync('../../liquidsoap/radio.liq', '/etc/liquidsoap/radio.liq'); 
+	execSync('systemctl daemon-reload');
 
 	execSync("echo radio_LS_SCRIPT_DIR=" + LS_SCRIPT_DIR + " >> /etc/default/liquidsoap");
 	execSync("echo radio_RUNNING_DIR=" + RUNNING_DIR  + " >> /etc/default/liquidsoap");
 	execSync("echo radio_MEDIA_DIR=" + MEDIA_DIR  + " >> /etc/default/liquidsoap");
-	execSync("echo radio_FILLER_MEDIA=" + FILLER_MEDIA  + " >> /etc/default/liquidsoap");
 	execSync("service liquidsoap restart"); 
 
 	// create necassary directories
 	try {
-
-		fs.mkdirSync('./logs');
-		fs.chmodSync('./logs', '777');
-		
-		fs.mkdirSync('./lineups');
-		// Let the lineups be writable by other processes (esp. when running liquidsoap as deamon)
-		fs.chmodSync('./lineups', '777');
-		
-		fs.mkdirSync('./pm2-home');
-		fs.chownSync('./pm2-home', userid.uid('liquidsoap'), userid.gid('liquidsoap'));
-	}
+	    fs.mkdirSync('./logs');
+	} catch (e) {
+            console.log(e);
+        }
+        try {
+            fs.chmodSync('./logs', '777');
+	} catch (e) {
+            console.log(e);
+        }
+	try {	
+            fs.mkdirSync('./lineups');
+	} catch (e) {
+            console.log(e);
+        }
+	
+	try { // Let the lineups be writable by other processes (esp. when running liquidsoap as deamon)
+    	    fs.chmodSync('./lineups', '777');
+	} catch (e) {
+            console.log(e);
+        }
+	try { 	
+            fs.mkdirSync('./pm2-home');
+	} catch (e) {
+            console.log(e);
+        }
+	try {
+    	    fs.chownSync('./pm2-home', userid.uid('liquidsoap'), userid.gid('liquidsoap'));
+	} catch (e) {
+                console.log(e);
+        }
 
 	// register pm2 deamon
-	execSync("pm2 startup ubuntu -u liquidsoap --hp " + RUNNING_DIR + "/pm2-home");
-	execSync("pm2 start raa1.js -- raa1.conf liquidsoap");
-	execSync("pm save");
+	execSync("alias lpm2='sudo -u liquidsoap PM2_HOME=" + RUNNING_DIR + "/pm2-home/.pm2 pm2'");
+	execSync("lpm2 start raa1.js -- raa1.conf liquidsoap");
+	execSync("sudo pm2 startup ubuntu -u liquidsoap --hp " + RUNNING_DIR + "/pm2-home");
+	execSync("lpm2 save");
 }
 
 switch (DEPLOYMENT_MODE) {

@@ -171,7 +171,8 @@ console.log("event");
             lineupWatcher();
         });
     }
-
+	
+console.log("here!");
     resetRadio();
 
     // Wake up at the end of the day and reset the manager

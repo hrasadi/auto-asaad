@@ -1,4 +1,4 @@
 *.conf
 lineups/**
 logs/**
-
+pm2-home/**
