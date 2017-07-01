@@ -137,8 +137,7 @@ LineupManager.prototype.startMainLoop = function() {
         try {   
             self.today.lineupFileWatcher = self.fs.watch(self.today.lineupFilePath,
                 function(eventType, fileName) {
-console.log("event");             
-       if (eventType == 'change') {
+                    if (eventType == 'change') {
                         // Read the new lineup from modified file
                         self.today.lineup = JSON.parse(self.fs.readFileSync(self.today.lineupFilePath, 'utf8'));
                         // Recompile
@@ -157,7 +156,6 @@ console.log("event");
     var resetRadio = function() {
         // unwatch the old file
         if (self.today.lineupFileWatcher != null) {
-	console.log("unwatched");    
         self.fs.close(self.today.lineupFileWatcher);
         }
 
@@ -172,7 +170,6 @@ console.log("event");
         });
     }
 	
-console.log("here!");
     resetRadio();
 
     // Wake up at the end of the day and reset the manager

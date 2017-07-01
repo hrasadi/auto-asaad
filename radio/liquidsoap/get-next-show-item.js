@@ -8,7 +8,7 @@ var lineupFilePath = process.argv[2];
 if (fs.existsSync(lineupFilePath)) {
     lineup = JSON.parse(fs.readFileSync(lineupFilePath, 'utf8'));
 
-    if (fs.existsSync(ineupFilePath + ".program.iter")) {
+    if (fs.existsSync(lineupFilePath + ".program.iter")) {
 
         var currentProgramIdx = parseInt(fs.readFileSync(lineupFilePath + ".program.iter", 'utf8'));
 
