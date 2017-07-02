@@ -5,8 +5,8 @@ var readline = require('readline');
 
 // Entry Point
 if (process.argv.length < 4) {
-	console.log("usage: node add-program.js {config-file} {radio-ID}");
-	process.exit(1);
+    console.log("usage: node add-program.js {config-file} {radio-ID}");
+    process.exit(1);
 }
 
 const rl = readline.createInterface({
@@ -25,7 +25,7 @@ var program = {};
 
 rl.question('Enter the new program ID: ', (pid) => {
   if (pid.length == 0) {
-  	throw "Invalid program ID!";
+    throw "Invalid program ID!";
   }
 
   program.Id = pid;
@@ -43,60 +43,60 @@ var readClips = function() {
   program.Clips = []  
   
   var readClip = function() {
-  	rl.question('Enter path to next clip for this program (empty line to break): ', (clipPath) => {
-  		if (clipPath.length == 0) {
-  			// done with clips, read the start time now
-  			readStartTime();
+    rl.question('Enter path to next clip for this program (empty line to break): ', (clipPath) => {
+        if (clipPath.length == 0) {
+            // done with clips, read the start time now
+            readStartTime();
 
-  		} else {
-  			program.Clips.push(fs.readFileSync(clipPath, 'utf8'));
-  			readClip();
-  		}
-  	});
+        } else {
+            program.Clips.push(fs.readFileSync(clipPath, 'utf8'));
+            readClip();
+        }
+    });
   }
 
   readClip();
 }
 
 var readStartTime = function() {
-  	rl.question('Enter program start time (empty for automatic scheduling): ', (startTime) => {
-  		if (prevProgramId.length > 0) {
-  			program.StartTime = moment(programTemplate.Show.StartTime.At, ['h:m:s', 'H:m:s']);
-  		}
-  		readPosition();
-  	});
+    rl.question('Enter program start time (empty for automatic scheduling): ', (startTime) => {
+        if (prevProgramId.length > 0) {
+            program.StartTime = moment(programTemplate.Show.StartTime.At, ['h:m:s', 'H:m:s']);
+        }
+        readPosition();
+    });
   }
 }
 
 var readPosition = function() {
-  	rl.question('Enter ID of the program that this program should be added after (empty for schedule as first program): ', (prevProgramId) => {
-  		if (prevProgramId.length == 0) {
-  			lineup.Programs.splice(0, 0, program);
-  		} else {
-  			var inserted = false;
-  			// iterate through the lineup to find the position
-  			for (var i =0; i < lineup.Programs.length; i++) {
-  				curProgram = lineup.Programs[i];
+    rl.question('Enter ID of the program that this program should be added after (empty for schedule as first program): ', (prevProgramId) => {
+        if (prevProgramId.length == 0) {
+            lineup.Programs.splice(0, 0, program);
+        } else {
+            var inserted = false;
+            // iterate through the lineup to find the position
+            for (var i =0; i < lineup.Programs.length; i++) {
+                curProgram = lineup.Programs[i];
 
-  				if (curProgram.Id == prevProgramId) {
-  					lineup.Programs.splice(i + 1, 0, program); // insert after this items
-  					inserted = true;
-  					break;
-  				}
-  				
-  				if (!inserted) {
-  					throw "Could not find program with ID = " + prevProgramId;
-  				}
+                if (curProgram.Id == prevProgramId) {
+                    lineup.Programs.splice(i + 1, 0, program); // insert after this items
+                    inserted = true;
+                    break;
+                }
+                
+                if (!inserted) {
+                    throw "Could not find program with ID = " + prevProgramId;
+                }
 
-  				// Read everything, persist the results
-  				persistNewLineup();
-  			}
+                // Read everything, persist the results
+                persistNewLineup();
+            }
 
-  		}
-  	});
+        }
+    });
   }
 }
 
 var persistNewLineup = function() {
-	console.log(JSON.stringify(lineup, null, 2));
+    console.log(JSON.stringify(lineup, null, 2));
 }

@@ -4,8 +4,8 @@ var path = require('path');
 
 // Entry Point
 if (process.argv.length < 4) {
-	console.log("usage: node get-lineup.js {config-file} {radio-ID}");
-	process.exit(1);
+    console.log("usage: node get-lineup.js {config-file} {radio-ID}");
+    process.exit(1);
 }
 
 var cwd = path.resolve(path.dirname(process.argv[2]));
