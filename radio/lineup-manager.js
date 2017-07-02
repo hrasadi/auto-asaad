@@ -343,7 +343,12 @@ LineupManager.prototype.myMod = function(m, n) {
 
 LineupManager.prototype.compileLineup = function() {
     // Backup the old playback, so that we can unschedule them
-    oldCompiledLineupPrograms = this.today.compiledLineup.Programs;
+    var oldCompiledLineupPrograms = undefined
+    if (this.today.compiledLineup.Programs) {
+        oldCompiledLineupPrograms = this.today.compiledLineup.Programs;        
+    } else { // When lineup-manager first starts, the old compiled lineup should be populated from file
+        oldCompiledLineupPrograms = JSON.parse(self.fs.readFileSync(self.today.compiledLineupFilePath, 'utf8'));
+    }
 
     this.today.compiledLineup.PlaylistStartIdx = 0;
     this.today.compiledLineup.Programs = [];
@@ -470,8 +475,10 @@ LineupManager.prototype.scheduleLineupPlayback = function(oldCompiledLineupProgr
     }
 
     // unschedule the old programs
-    for (var i = 0; i < oldCompiledLineupPrograms.length; i++) {
-        this.unschedulePlayback(oldCompiledLineupPrograms[i]);
+    if (oldCompiledLineupPrograms) {
+        for (var i = 0; i < oldCompiledLineupPrograms.length; i++) {
+            this.unschedulePlayback(oldCompiledLineupPrograms[i]);
+        }
     }
 
     // Let managers do any additional work after scheduling programs is completed (e.g. inform update of lineup to liquidsoap)
