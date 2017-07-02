@@ -145,7 +145,7 @@ LineupManager.prototype.startMainLoop = function() {
                         try {
                             self.compileLineup();
                         } catch(e) {
-                            self.logger.error(e);
+                            self.logger.crit(e);
                             // Nothing will really change until the file is touched again. Both in-mem copies of lineup and compiledLineup would be invalid during this period
                         }
                     }

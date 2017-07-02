@@ -1,5 +1,10 @@
 var fs = require('fs');
 var moment = require('moment');
+// Custom format so that files are easier to read
+moment.prototype.toJSON = function() {
+    return this.format();
+}
+
 var path = require('path');
 var readline = require('readline');
 
@@ -33,14 +38,17 @@ rl.question('Enter the new program ID: ', (pid) => {
   readTitle();
 });
 
-rl.question('Enter the program title: ', (title) => {
-  program.Title = title;
-
-  readClips();
-});
+var readTitle = function() {
+    rl.question('Enter the program title: ', (title) => {
+        program.Title = title;
+        
+        readClips();
+    });
+}
 
 var readClips = function() {
-  program.Clips = []  
+  program.Show = {}
+  program.Show.Clips = []  
   
   var readClip = function() {
     rl.question('Enter path to next clip for this program (empty line to break): ', (clipPath) => {
@@ -49,7 +57,7 @@ var readClips = function() {
             readStartTime();
 
         } else {
-            program.Clips.push(fs.readFileSync(clipPath, 'utf8'));
+            program.Show.Clips.push(JSON.parse(fs.readFileSync(clipPath, 'utf8')));
             readClip();
         }
     });
@@ -59,13 +67,14 @@ var readClips = function() {
 }
 
 var readStartTime = function() {
-    rl.question('Enter program start time (empty for automatic scheduling): ', (startTime) => {
-        if (prevProgramId.length > 0) {
-            program.StartTime = moment(programTemplate.Show.StartTime.At, ['h:m:s', 'H:m:s']);
+    rl.question('Enter program start time (empty for 5 mins from now): ', (startTime) => {
+        if (startTime.length > 0) { 
+            program.Show.StartTime = moment(startTime, ['h:m:s', 'H:m:s']);
+        } else {
+            program.Show.StartTime = moment().add(5, 'minutes').set('second', 0);
         }
         readPosition();
     });
-  }
 }
 
 var readPosition = function() {
@@ -84,19 +93,17 @@ var readPosition = function() {
                     break;
                 }
                 
-                if (!inserted) {
-                    throw "Could not find program with ID = " + prevProgramId;
-                }
-
-                // Read everything, persist the results
-                persistNewLineup();
             }
-
+            if (!inserted) {
+                throw "Could not find program with ID = " + prevProgramId;
+            }		
         }
+        rl.close();
+        // Read everything, persist the results
+        persistNewLineup();
     });
-  }
 }
 
 var persistNewLineup = function() {
-    console.log(JSON.stringify(lineup, null, 2));
+    fs.writeFileSync(lineupPath, JSON.stringify(lineup, null, 2));
 }
