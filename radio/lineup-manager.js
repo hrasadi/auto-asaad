@@ -343,11 +343,13 @@ LineupManager.prototype.myMod = function(m, n) {
 
 LineupManager.prototype.compileLineup = function() {
     // Backup the old playback, so that we can unschedule them
-    var oldCompiledLineupPrograms = undefined
+    var oldCompiledLineupPrograms = undefined;
     if (this.today.compiledLineup.Programs) {
         oldCompiledLineupPrograms = this.today.compiledLineup.Programs;        
     } else { // When lineup-manager first starts, the old compiled lineup should be populated from file
-        oldCompiledLineupPrograms = JSON.parse(self.fs.readFileSync(self.today.compiledLineupFilePath, 'utf8'));
+        if (this.fs.existsSync(this.today.compiledLineupFilePath)) {
+            oldCompiledLineupPrograms = JSON.parse(this.fs.readFileSync(this.today.compiledLineupFilePath, 'utf8'));
+        }
     }
 
     this.today.compiledLineup.PlaylistStartIdx = 0;

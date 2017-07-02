@@ -57,7 +57,7 @@ Raa1.prototype.reset = function(currentDate, callback_fn) {
 }
 
 Raa1.prototype.calculateProgramStartTime = function(program) {
-	if (program.Id == 'IftarProgram') {
+	if (program.Id == 'MaghribProgram') {
 		return this.dataProvider.maghribTime;		
 	}
 }
