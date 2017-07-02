@@ -101,8 +101,11 @@ Radio.prototype.onLineupCompiled = function(compiledLineup) {
 			}
 		}
 		// remove the extra semi-colon
-		
-                data.array.push(entry);
+		if (entry.description) {
+			entry.description.slice(0, -2);
+		}
+
+        data.array.push(entry);
 	}
 
 	var resultText = lineupTemplateFn(data);
