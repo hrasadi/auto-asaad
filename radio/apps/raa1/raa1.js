@@ -3,6 +3,7 @@ var Radio = require('../../radio');
 var fs = require('fs');
 var moment = require('moment');
 var path = require('path');
+var dot = require('dot');
 
 var Events = require('../../../events');
 var Messaging = require('../../../messaging');
@@ -59,6 +60,50 @@ Raa1.prototype.calculateProgramStartTime = function(program) {
 	if (program.Id == 'IftarProgram') {
 		return this.dataProvider.maghribTime;		
 	}
+}
+
+// For raa1, we should generate the lineup HTML
+Radio.prototype.onLineupCompiled = function(compiledLineup) {
+
+	var lineupTemplateText = fs.readFileSync('lineup-view.jst', 'utf8');
+	dot.templateSettings.strip = false;
+
+	var lineupTemplateFn = dot.template(lineupTemplateText);
+
+	var data = {};
+	data.array = [];
+	for (var i = 0; i < compiledLineup.length; i++) {
+		var entry = {};
+		entry.description = "";
+	
+		entry.title = compiledLineup[i].Title;
+
+		if (compiledLineup[i].PreShow) {
+			entry.time = compiledLineup[i].PreShow.Meta.TentativeStartTime;
+
+			for (var j = 0; j < compiledLineup[i].PreShow.Clips.length) {
+				if (compiledLineup[i].PreShow.Clips[j].Description) {
+					entry.description += compiledLineup[i].PreShow.Clips[j].Description;
+					entry.description += "؛ ";
+				}
+			}
+		} else {
+			entry.time = compiledLineup[i].Show.Meta.TentativeStartTime;			
+		}
+		for (var j = 0; j < compiledLineup[i].Show.Clips.length) {
+			if (compiledLineup[i].Show.Clips[j].Description) {
+				entry.description += compiledLineup[i].Show.Clips[j].Description;
+				entry.description += "؛ ";
+			}
+		}
+		// remove the extra semi-colon
+		entry.description -= "؛ ";
+
+		data.push(entry);
+	}
+
+	var resultText = lineupTemplateFn(data);
+	fs.writeFileSync(this.cwd + "/lineups/lineup.html", resultText)
 }
 
 // Entry Point

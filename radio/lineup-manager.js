@@ -365,6 +365,8 @@ LineupManager.prototype.compileLineup = function() {
     // Persist the compiled lineup
     this.fs.writeFileSync(this.today.lineupFilePath + ".compiled", JSON.stringify(this.today.compiledLineup, null, 2), 'utf-8');
 
+    // POST COMPILE EVENT IN THE RADIO
+    this.radio.onLineupCompiled(this.today.compiledLineup);
 }
 
 LineupManager.prototype.calculateProgramTimes = function(program, compiledProgram) {
