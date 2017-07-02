@@ -52,6 +52,17 @@ LiquidsoapLineupManager.prototype.schedulePlayback = function(currentProgram, cu
     currentProgram.Show.Scheduler.SchedulerId = ret.split("\n")[1].split(" ")[1]; // The second token (e.g. "job xxx at Thu Jun 29 20:24:58 2017")
 }
 
+LiquidsoapLineupManager.prototype.unschedulePlayback = function(program) {
+    if (program.PreShow && program.PreShow.Scheduler) {
+        // unschedule preshow
+        execSync('atrm ' + program.PreShow.Scheduler.SchedulerId);
+    }
+    if (program.Show.Scheduler) {
+        // unschedule show
+        execSync('atrm ' + program.Show.Scheduler.SchedulerId);
+    }
+}
+
 LiquidsoapLineupManager.prototype.getMediaDuration = function(media) {
 
     var cmd = 'mp3info -p "%S" ' + media.Path;

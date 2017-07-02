@@ -342,6 +342,9 @@ LineupManager.prototype.myMod = function(m, n) {
 }
 
 LineupManager.prototype.compileLineup = function() {
+    // Backup the old playback, so that we can unschedule them
+    oldCompiledLineupPrograms = this.today.compiledLineup.Programs;
+
     this.today.compiledLineup.PlaylistStartIdx = 0;
     this.today.compiledLineup.Programs = [];
     
@@ -368,12 +371,12 @@ LineupManager.prototype.compileLineup = function() {
 
     // Schedule the playback
     this.logger.debug("Compiling Lineup - Pass 3 (Scheduling)");
-    this.scheduleLineupPlayback();
+    this.scheduleLineupPlayback(oldCompiledLineupPrograms);
 
     // Persist the compiled lineup
     this.fs.writeFileSync(this.today.compiledLineupFilePath, JSON.stringify(this.today.compiledLineup, null, 2), 'utf-8');
 
-    // POST COMPILE EVENT IN THE RADIO
+    // POST COMPILE EVENT IN THE RADIO (e.g. generate lineup web page etc.)
     this.radio.onLineupCompiled(this.today.compiledLineup);
 }
 
@@ -444,7 +447,7 @@ LineupManager.prototype.validateLineup = function() {
     }
 }
 
-LineupManager.prototype.scheduleLineupPlayback = function() {
+LineupManager.prototype.scheduleLineupPlayback = function(oldCompiledLineupPrograms) {
     
     this.today.compiledLineup.PlaylistStartIdx = 0; 
     
@@ -466,7 +469,12 @@ LineupManager.prototype.scheduleLineupPlayback = function() {
         }
     }
 
-    // Let managers do any additional work after scheduling programs is completed
+    // unschedule the old programs
+    for (var i = 0; i < oldCompiledLineupPrograms.length; i++) {
+        this.unschedulePlayback(oldCompiledLineupPrograms[i]);
+    }
+
+    // Let managers do any additional work after scheduling programs is completed (e.g. inform update of lineup to liquidsoap)
     this.onSchedulingComplete();
 }
 
@@ -476,7 +484,12 @@ LineupManager.prototype.onSchedulingComplete = function() {
 }
 
 // implemented in subclasses
-LineupManager.prototype.schedulePlayback = function(programTime) {
+LineupManager.prototype.schedulePlayback = function(currentProgram, currentProgramIdx) {
+    console.log("Not implemented!");
+}
+
+// implemented in subclasses
+LineupManager.prototype.unschedulePlayback = function(program) {
     console.log("Not implemented!");
 }
 
