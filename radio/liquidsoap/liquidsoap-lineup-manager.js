@@ -13,9 +13,9 @@ utils.inheritsFrom(LiquidsoapLineupManager, LineupManager);
 
 LiquidsoapLineupManager.prototype.onSchedulingComplete = function() {
     // Let Liquidsoap know that the lineup has been changed
-    this.logger.info("Changing the current lineup file to " + this.today.lineupFilePath);
+    this.logger.info("Changing the current lineup file to " + this.today.compiledLineupFilePath);
     try {
-        execSync("cd " + __dirname + "; ./update-lineup-file.sh " + this.today.lineupFilePath + " " + this.today.compiledLineup.PlaylistStartIdx, {
+        execSync("cd " + __dirname + "; ./update-lineup-file.sh " + this.today.compiledLineupFilePath + " " + this.today.compiledLineup.PlaylistStartIdx, {
             encoding: 'utf-8'
         });        
     } catch (e) {
@@ -32,7 +32,7 @@ LiquidsoapLineupManager.prototype.schedulePlayback = function(currentProgram, cu
         // Register preshow and its filler if any
         this.logger.info("PreShow playback scheduled for " + moment(currentProgram.PreShow.Meta.TentativeStartTime).format("YYYY-MM-DDTHH:mm:ss").toString());
         
-        var ret = execSync("echo 'cd " + __dirname + "; ./playback-preshow.sh' " + this.today.lineupFilePath + " " + currentProgramIdx + " | at -t " + moment(currentProgram.PreShow.Meta.TentativeStartTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1", {
+        var ret = execSync("echo 'cd " + __dirname + "; ./playback-preshow.sh' " + this.today.compiledLineupFilePath + " " + currentProgramIdx + " | at -t " + moment(currentProgram.PreShow.Meta.TentativeStartTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1", {
             encoding: 'utf-8'
         });                    
 
@@ -43,7 +43,7 @@ LiquidsoapLineupManager.prototype.schedulePlayback = function(currentProgram, cu
 
     // Register auto-asaad program announcement! (One minute earlier and the rest is handled in the shell file)
     this.logger.info("Show playback scheduled for " + moment(currentProgram.Show.StartTime).format("YYYY-MM-DDTHH:mm:ss").toString());
-    var ret = execSync("echo 'cd " + __dirname + "; ./playback-show.sh' " + this.today.lineupFilePath + " " + currentProgramIdx + "| at -t " + moment(currentProgram.Show.StartTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1", {
+    var ret = execSync("echo 'cd " + __dirname + "; ./playback-show.sh' " + this.today.compiledLineupFilePath + " " + currentProgramIdx + "| at -t " + moment(currentProgram.Show.StartTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1", {
         encoding: 'utf-8'
     });
 

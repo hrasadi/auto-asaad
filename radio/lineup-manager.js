@@ -121,6 +121,7 @@ var LineupManager = function(radioConfig, cwd, radioObj) {
     this.today = {
         date: null,
         lineupFilePath: "",
+        compiledLineupFilePath: "",
         lineupFileWatcher: null,
         lineup: {},
         compiledLineup: {}
@@ -141,13 +142,19 @@ LineupManager.prototype.startMainLoop = function() {
                         // Read the new lineup from modified file
                         self.today.lineup = JSON.parse(self.fs.readFileSync(self.today.lineupFilePath, 'utf8'));
                         // Recompile
-                        self.compileLineup();
+                        try {
+                            self.compileLineup();
+                        } catch(e) {
+                            self.logger.error(e);
+                            // Nothing will really change until the file is touched again. Both in-mem copies of lineup and compiledLineup would be invalid during this period
+                        }
                     }
                     // else?
                 });   
         } catch (e) {
             self.generateLineup();
             self.compileLineup();
+            // This is the lineup generated from template. If it has any compile errors it would be fatal. So do not catch excpetions here!
             // try again!
             lineupWatcher();
         }
@@ -162,7 +169,8 @@ LineupManager.prototype.startMainLoop = function() {
         // start preparing for today
         self.today.date = self.moment().format("YYYY-MM-DD");
         self.today.lineupFilePath = self.cwd + "/lineups/" + self.radio.id + "-" + self.today.date + ".json";
-        
+        self.today.compiledLineupFilePath = self.today.lineupFilePath + ".compiled";
+
         self.logger = new Logger(self.cwd + "/logs/lm-" + self.radio.id + "-" + self.today.date + ".log");
 
         self.radio.reset(self.today.date, function() {
@@ -363,7 +371,7 @@ LineupManager.prototype.compileLineup = function() {
     this.scheduleLineupPlayback();
 
     // Persist the compiled lineup
-    this.fs.writeFileSync(this.today.lineupFilePath + ".compiled", JSON.stringify(this.today.compiledLineup, null, 2), 'utf-8');
+    this.fs.writeFileSync(this.today.compiledLineupFilePath, JSON.stringify(this.today.compiledLineup, null, 2), 'utf-8');
 
     // POST COMPILE EVENT IN THE RADIO
     this.radio.onLineupCompiled(this.today.compiledLineup);
