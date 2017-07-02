@@ -26,9 +26,7 @@ if (fs.existsSync(lineupFilePath)) {
 
 			    // write the new iterator value to file
 			    fs.writeFileSync(lineupFilePath + ".preshow.iter", preShowIter + 1);
-			} else if (iter == lineup.Programs[currentProgramIdx].PreShow.Clips.length) { // cleanup time!
-			    fs.unlinkSync(lineupFilePath + ".preshow.item");
-			}
+			} // playback_preshow.sh must make sure that the .preshow.iter does not exist
 			// else print nothing 
 
 		} else { // This program does not have a preshow, so wait a bit to see what happens in the next program
