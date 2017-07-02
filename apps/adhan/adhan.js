@@ -37,8 +37,12 @@ for (var i = 0; i < periodLengthInDays; i++) {
 	events.readEvent(startDate.toDate(), events.EventType.MAGHRIB, function(maghribTime) {
 
 	    var autoAsaadMessage = "حدود وقت اذان مغرب \\n <a>" + adhans[current_adhan]  + "</a>"
-	    	
+
 	    current_adhan++;
+
+	    if (current_adhan == adhans.length) {
+	    	current_adhan = 0;
+	    }
 
 		messaging.createCalEvent(maghribTime, "#scheduler", autoAsaadMessage);
 	});	
