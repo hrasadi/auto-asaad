@@ -72,34 +72,37 @@ Radio.prototype.onLineupCompiled = function(compiledLineup) {
 
 	var data = {};
 	data.array = [];
-	for (var i = 0; i < compiledLineup.length; i++) {
+	for (var i = 0; i < compiledLineup.Programs.length; i++) {
 		var entry = {};
-		entry.description = "";
 	
-		entry.title = compiledLineup[i].Title;
+		if (compiledLineup.Programs[i].Title) {
+                    entry.title = compiledLineup.Programs[i].Title;
+                } else {
+                    entry.title = "بی نام";
+                }
+                entry.description = "";
 
-		if (compiledLineup[i].PreShow) {
-			entry.time = compiledLineup[i].PreShow.Meta.TentativeStartTime;
+		if (compiledLineup.Programs[i].PreShow) {
+			entry.time = moment(compiledLineup.Programs[i].PreShow.Meta.TentativeStartTime).format('HH:mm');
 
-			for (var j = 0; j < compiledLineup[i].PreShow.Clips.length) {
-				if (compiledLineup[i].PreShow.Clips[j].Description) {
-					entry.description += compiledLineup[i].PreShow.Clips[j].Description;
+			for (var j = 0; j < compiledLineup.Programs[i].PreShow.Clips.length; j++) {
+				if (compiledLineup.Programs[i].PreShow.Clips[j].Description) {
+					entry.description += compiledLineup.Programs[i].PreShow.Clips[j].Description;
 					entry.description += "؛ ";
 				}
 			}
 		} else {
-			entry.time = compiledLineup[i].Show.Meta.TentativeStartTime;			
+			entry.time = moment(compiledLineup.Programs[i].Show.Meta.TentativeStartTime).format('HH:mm');			
 		}
-		for (var j = 0; j < compiledLineup[i].Show.Clips.length) {
-			if (compiledLineup[i].Show.Clips[j].Description) {
-				entry.description += compiledLineup[i].Show.Clips[j].Description;
+		for (var j = 0; j < compiledLineup.Programs[i].Show.Clips.length; j++) {
+			if (compiledLineup.Programs[i].Show.Clips[j].Description) {
+				entry.description += compiledLineup.Programs[i].Show.Clips[j].Description;
 				entry.description += "؛ ";
 			}
 		}
 		// remove the extra semi-colon
-		entry.description -= "؛ ";
-
-		data.push(entry);
+		
+                data.array.push(entry);
 	}
 
 	var resultText = lineupTemplateFn(data);
