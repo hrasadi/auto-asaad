@@ -203,6 +203,10 @@ LineupManager.prototype.generateLineup = function() {
         // Decide for the program from the template
         var program = this.createProgramFromTemplate(programTemplate);
 
+        if (i == 0) {
+            this.adjustFirstProgram(program);
+        }
+
         // The show might have start time. If the program has a pre-program show,
         // it is mandatory to specify start time for it!
         this.today.lineup.Programs.push(program);            
@@ -212,6 +216,19 @@ LineupManager.prototype.generateLineup = function() {
     this.fs.writeFileSync(this.today.lineupFilePath, JSON.stringify(this.today.lineup, null, 2), 'utf-8');
 
 }
+
+// When the radio first starts, it should play something (of course!). 
+// Therefore, either the first program in the list should be scheduled or 
+// otherwise we will schedule it for now.
+LineupManager.prototype.adjustFirstProgram = function(program) {
+    
+    if (program.Show.StartTime == undefined) {
+        this.logger.warn("First program should be scheduled but it was not. I will schedule it for playback in 5 minutes!");
+        // schedule it for a minute from now (to handle possible system delays)
+        program.Show.StartTime = moment().add(5, 'minute');
+    }
+}
+
 
 LineupManager.prototype.createProgramFromTemplate = function(programTemplate) {
     var program = {};
@@ -328,16 +345,17 @@ LineupManager.prototype.compileLineup = function() {
         compiledProgram = {};
         Object.assign(compiledProgram, this.today.lineup.Programs[i]);
 
-        if (i == 0) {
-            this.adjustFirstProgram(compiledProgram);
-        }
-
         this.calculateProgramTimes(this.today.lineup.Programs[i], compiledProgram);
         this.today.compiledLineup.Programs.push(compiledProgram);
     }
 
     // Validate that there is no overlap
     this.logger.debug("Compiling Lineup - Pass 2 (Validation)");
+    if (i == 0) {
+        if (!compiledLineup.Show.StartTime) {
+            throw "The first program in the list should specify the start time. Aborting!";
+        }
+    }
     this.validateLineup();
 
     // Schedule the playback
@@ -347,18 +365,6 @@ LineupManager.prototype.compileLineup = function() {
     // Persist the compiled lineup
     this.fs.writeFileSync(this.today.lineupFilePath + ".compiled", JSON.stringify(this.today.compiledLineup, null, 2), 'utf-8');
 
-}
-
-// When the radio first starts, it should play something (of course!). 
-// Therefore, either the first program in the list should be scheduled or 
-// otherwise we will schedule it for now.
-LineupManager.prototype.adjustFirstProgram = function(compiledProgram) {
-    
-    if (compiledProgram.Show.StartTime == undefined) {
-        this.logger.warn("First program should be scheduled but it was not. I will schedule it for playback in 5 minutes!");
-        // schedule it for a minute from now (to handle possible system delays)
-        compiledProgram.Show.StartTime = moment().add(5, 'minute');
-    }
 }
 
 LineupManager.prototype.calculateProgramTimes = function(program, compiledProgram) {

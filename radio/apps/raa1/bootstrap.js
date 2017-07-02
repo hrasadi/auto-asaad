@@ -64,6 +64,9 @@ var installLiquidsoapRadio = function(dates) {
 	execSync("lpm2 start raa1.js -- raa1.conf liquidsoap");
 	execSync("sudo pm2 startup ubuntu -u liquidsoap --hp " + RUNNING_DIR + "/pm2-home");
 	execSync("lpm2 save");
+
+  // link the output lineup file to raa web page
+  execSync("sudo ln -s ./lineups/lineup.html /var/www/html/lineup.html");
 }
 
 switch (DEPLOYMENT_MODE) {
