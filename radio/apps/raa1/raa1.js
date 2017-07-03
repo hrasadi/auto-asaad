@@ -9,6 +9,8 @@ var Events = require('../../../events');
 var Messaging = require('../../../messaging');
 var Utils = require('../../../utils');
 
+const { URL } = require('url');
+
 var lm = require('../../lineup-manager');
 
 var Raa1 = function(configFile, deploymentMode) {
@@ -96,7 +98,14 @@ Radio.prototype.onLineupCompiled = function(compiledLineup) {
         }
         for (var j = 0; j < compiledLineup.Programs[i].Show.Clips.length; j++) {
             if (compiledLineup.Programs[i].Show.Clips[j].Description) {
-                entry.description += compiledLineup.Programs[i].Show.Clips[j].Description;
+                if (compiledLineup.Programs[i].Show.Clips[j].HasVOD) {
+                    // reconstruct the relative path to the media from the absolute playback path
+                    vodRelativeURI = compiledLineup.Programs[i].Show.Clips[j].Path.replace(this.config.Radio.Media.BaseDir,"");
+                    vodUrl = new URL(vodRelativeURI, 'http://vod.raa.media/');
+                    entry.description += '<a class="vod-link" href="' + vodUrl.toString() + '">' + compiledLineup.Programs[i].Show.Clips[j].Description + "</a>";
+                } else {
+                    entry.description += compiledLineup.Programs[i].Show.Clips[j].Description;                
+                }               
                 
                 if (j != compiledLineup.Programs[i].Show.Clips.length - 1) { // Except for the last item
                     entry.description += "؛ ";

@@ -20,6 +20,8 @@ const rl = readline.createInterface({
 });
 
 var cwd = path.resolve(path.dirname(process.argv[2]));
+var config = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+
 var radioId = process.argv[3];
 var today = moment().format("YYYY-MM-DD");
 
@@ -57,7 +59,10 @@ var readClips = function() {
             readStartTime();
 
         } else {
-            program.Show.Clips.push(JSON.parse(fs.readFileSync(clipPath, 'utf8')));
+            var clip = JSON.parse(fs.readFileSync(clipPath, 'utf8'));
+            // Normalize the clip path
+            clip.Path = config.Radio.Media.BaseDir + "/" + clip.Path;
+            program.Show.Clips.push(clip);
             readClip();
         }
     });

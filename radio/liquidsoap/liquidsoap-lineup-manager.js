@@ -55,11 +55,19 @@ LiquidsoapLineupManager.prototype.schedulePlayback = function(currentProgram, cu
 LiquidsoapLineupManager.prototype.unschedulePlayback = function(program) {
     if (program.PreShow && program.PreShow.Scheduler) {
         // unschedule preshow
-        execSync('atrm ' + program.PreShow.Scheduler.SchedulerId);
+        try {
+            execSync('atrm ' + program.PreShow.Scheduler.SchedulerId);
+        } catch(e) {
+            this.logger.warn("Failed to remove job. Inner exception is: " + e);
+        }
     }
     if (program.Show.Scheduler) {
         // unschedule show
-        execSync('atrm ' + program.Show.Scheduler.SchedulerId);
+        try {
+            execSync('atrm ' + program.Show.Scheduler.SchedulerId);
+        } catch(e) {
+            this.logger.warn("Failed to remove job. Inner exception is: " + e);
+        }
     }
 }
 
