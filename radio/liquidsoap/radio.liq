@@ -9,7 +9,6 @@ running_dir = argv(2)
 # the initial lineup file is emptry, later on, the first 'radio-planner' should annouce the lineup file using telnet 
 current_lineup_file = interactive.string("current_lineup_file", "") 
 media_dir = argv(3)
-pre_show_filler = interactive.string("pre_show_filler", "")
 
 print("Scripts dir: "^script_dir)
 print("Running dir: "^running_dir)
