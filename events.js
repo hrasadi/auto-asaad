@@ -8,23 +8,24 @@ module.exports = function(eventsConfig) {
     this.EventType = {
         FAJR: 'Fajr',
         SUNRINSE: 'Sunrise',
-        DHUHR: 'Duhr',
+        DHUHR: 'Dhuhr',
         ASR:'Asr',
         SUNSET: 'Sunset',
         MAGHRIB: 'Maghrib',
         MIDNIGHT: 'Midnight'
     };
 
-    this.readTodayEvent = function(eventType, callback_fn) {
+    this.readTodayEvent = function(callback_fn) {
         var today = new Date();
 
-        this.readEvent(today, eventType, callback_fn);
+        this.readEvent(today, callback_fn);
     }
 
-    this.readEvent = function(referenceDate, eventType, callback_fn) {
+    this.readEvent = function(referenceDate, callback_fn) {
 
         var DateInEpochMillis = parseInt(referenceDate.getTime() / 1000);
 
+        self = this;
         Utils.httpGet('api.aladhan.com', 
                             '/timings/' + DateInEpochMillis + '?latitude=' + this.config.Latitude + '&longitude=' + 
                             this.config.Longitude + '&timezonestring=' + this.config.Timezone + '&method=' + 
@@ -32,14 +33,17 @@ module.exports = function(eventsConfig) {
                             function(body) {
                                 var parsed = JSON.parse(body);
 
-                                var eventTimeString = parsed.data.timings[eventType];
-                                var splitted = eventTimeString.split(/[\s:]+/);
-
-                                var date = moment(referenceDate).format('YYYY-MM-DD');
-                                var eventTime = date + "T" + splitted[0] + ":" + splitted[1] + ":00";
-
+                                events = {};
+                                for (var eventType in self.EventType) {
+                                    var eventTimeString = parsed.data.timings[self.EventType[eventType]];
+                                    var splitted = eventTimeString.split(/[\s:]+/);
+                                    var date = moment(referenceDate).format('YYYY-MM-DD');
+                                    var eventTime = date + "T" + splitted[0] + ":" + splitted[1] + ":00";
+                           
+                                    events[self.EventType[eventType]] = eventTime;
+                                }
                                 // callback
-                                callback_fn(eventTime);
+                                callback_fn(events);
                             });
     }
 

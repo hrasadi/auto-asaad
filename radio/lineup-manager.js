@@ -305,7 +305,8 @@ LineupManager.prototype.decideProgramPreShowClipsFromTemplate = function(program
         program.PreShow.Clips.push(media);
     }
 
-    var fillerMedia = this.config.Media[programTemplate.PreShow.FillerClip][0];
+    var fillerMedia = {};
+    Object.assign(fillerMedia, this.config.Media[programTemplate.PreShow.FillerClip][0]);
     fillerMedia.Path = this.config.Media.BaseDir + "/" + fillerMedia.Path;
     program.PreShow.FillerClip = fillerMedia;
 

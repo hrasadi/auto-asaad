@@ -49,9 +49,11 @@ Raa1.prototype.initialize = function() {
 Raa1.prototype.reset = function(currentDate, callback_fn) {
     this.dataProvider.currentDate = currentDate;
 
-    self = this;
-    this.events.readTodayEvent(this.events.EventType.MAGHRIB, function(maghribTime) {
-        self.dataProvider.maghribTime = maghribTime;    
+    var self = this;
+    this.events.readTodayEvent(function(eventsDict) {
+        self.dataProvider.fajrTime = events[self.events.EventType.FAJR];    
+        self.dataProvider.dhuhrTime = events[self.events.EventType.DHUHR];    
+        self.dataProvider.maghribTime = events[self.events.EventType.MAGHRIB];    
         
         // give back control to lineupManager
         callback_fn();
@@ -59,7 +61,11 @@ Raa1.prototype.reset = function(currentDate, callback_fn) {
 }
 
 Raa1.prototype.calculateProgramStartTime = function(program) {
-    if (program.Id == 'MaghribProgram') {
+    if (program.Id == 'FajrProgram') {
+        return this.dataProvider.fajrTime;       
+    } else if (program.Id == 'DhuhrProgram') {
+        return this.dataProvider.dhuhrTime;       
+    } else if (program.Id == 'MaghribProgram') {
         return this.dataProvider.maghribTime;       
     }
 }
