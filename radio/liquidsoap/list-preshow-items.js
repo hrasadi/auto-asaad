@@ -21,11 +21,6 @@ if (fs.existsSync(lineupFilePath)) {
 				process.exit(0);
 			}, 5000);
 		}
-	} else { // This case only should happen in the case that radio is not does yet with compiling the lineup, so bear it up!
-		setTimeout(function() {
-			process.exit(0);
-		}, 2000);
-	}
 } else { // LineupFilePath not accessible, maybe radio is not up yet
 	
 	setTimeout(function() {

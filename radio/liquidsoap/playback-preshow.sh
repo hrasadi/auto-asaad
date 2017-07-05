@@ -9,8 +9,11 @@ sleep $wait_time
 # There is a slight code duplication here with the playback-show.sh file. We may fix it later
 echo "${2}" > "${1}.program.iter"
 
-# delete any previous preshow iterator
-rm -rf "${1}.preshow.iter"
-
 { echo "var.set start_pre_show = true"; sleep 1; } | telnet localhost 1234 
 
+# The the lineup file should be introduced as paramter
+clips=`node list-preshow-items ${1} ${2}` 
+for line in $clips; do
+  # pass it to telnet
+  { echo "pre_show_q.push $line"; sleep 1; } | telnet localhost 1234
+done 

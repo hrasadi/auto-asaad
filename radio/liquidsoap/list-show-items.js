@@ -22,7 +22,7 @@ if (fs.existsSync(lineupFilePath)) {
         // We know by design that in this case, program cannot have a preshow.
         ++currentProgramIdx; // m
         // Either no more programs in the lineup or the next one is scheduled for another time
-        if (nextProgramIdx >= lineup.Programs.length || lineup.Programs[nextProgramIdx].Show.StartTime) { 
+        if (currentProgramIdx>= lineup.Programs.length || lineup.Programs[currentProgramIdx].Show.StartTime) { 
             hitSchedulingWall = true;
         }
     }
