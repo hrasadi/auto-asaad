@@ -421,7 +421,7 @@ LineupManager.prototype.calculateProgramTimes = function(program, compiledProgra
     if (this.hasPreProgram(program)) {
         compiledProgram.PreShow.Meta = {};
         // Preshow ends when the main show begins
-        compiledProgram.PreShow.Meta.TentativeEndTime = compiledProgram.Show.Meta.TentativeStartTime;
+	compiledProgram.PreShow.Meta.TentativeEndTime = compiledProgram.Show.Meta.TentativeStartTime;
 
         // Calculate the start time of the preshow
         var totalPreShowDuration = 0;
@@ -434,7 +434,7 @@ LineupManager.prototype.calculateProgramTimes = function(program, compiledProgra
         }
 
         compiledProgram.PreShow.Meta.TotalDuration = Math.ceil(totalPreShowDuration);
-        compiledProgram.PreShow.Meta.TentativeStartTime = moment(compiledProgram.PreShow.Meta.TentativeEndTime).subtract(compiledProgram.Show.Meta.TotalDuration, 'seconds');        
+        compiledProgram.PreShow.Meta.TentativeStartTime = moment(compiledProgram.PreShow.Meta.TentativeEndTime).subtract(compiledProgram.PreShow.Meta.TotalDuration, 'seconds');        
     }
 }
 

@@ -11,8 +11,7 @@ sleep $wait_time
 # There is a slight code duplication here with the playback-pre-show.sh file. We may fix it later
 echo "${2}" > "${1}.program.iter"
 
-# show is allowed to be played
-touch "${1}.show.lock"
-
 { echo "var.set start_pre_show = false"; sleep 1; } | telnet localhost 1234 
 
+# show is allowed to be played
+touch "${1}.show.lock"
