@@ -28,8 +28,7 @@ LiquidsoapLineupManager.prototype.schedulePlayback = function(currentProgram, cu
     // Register event using 'at'
     if (this.hasPreProgram(currentProgram)) {
 
-        // Start a bit earlier to give room to errors (will be filled by fillers)
-        var alignedPreShowStartTime = moment(currentProgram.PreShow.Meta.TentativeStartTime).set('second', 0);
+        var alignedPreShowStartTime = moment(currentProgram.PreShow.Meta.TentativeStartTime);
         // Register preshow and its filler if any
         this.logger.info("PreShow playback scheduled for " + alignedPreShowStartTime.format("YYYY-MM-DDTHH:mm:ss").toString());
         
