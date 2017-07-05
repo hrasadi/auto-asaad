@@ -7,6 +7,7 @@ set("server.telnet.port",1234)
 script_dir = argv(1) 
 running_dir = argv(2)
 # the initial lineup file is emptry, later on, the first 'radio-planner' should annouce the lineup file using telnet 
+# TODO get rid of this var! This can be done by persisting this value in a file in the lineups folder!
 current_lineup_file = interactive.string("current_lineup_file", "") 
 media_dir = argv(3)
 
