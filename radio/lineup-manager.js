@@ -257,13 +257,13 @@ LineupManager.prototype.adjustFirstProgram = function(program) {
 
 LineupManager.prototype.isProgramOnScheduleToday = function(programTemplate) {
     // Check the weekly schedule
-    if (!programTemplate.weeklySchedule) {
+    if (!programTemplate.WeeklySchedule) {
         return true;
     }
 
     todayDayOfWeek = this.today.momentObj.day();
-    for (var i = 0; i < programTemplate.weeklySchedule.length; i++) {
-        if (this.WeekDaysEnum[programTemplate.weeklySchedule] == todayDayOfWeek) { // Today is a day!
+    for (var i = 0; i < programTemplate.WeeklySchedule.length; i++) {
+        if (this.WeekDaysEnum[programTemplate.WeeklySchedule] == todayDayOfWeek) { // Today is a day!
             return true;
         }
     }
@@ -302,16 +302,6 @@ LineupManager.prototype.createProgramFromTemplate = function(programTemplate) {
     return program;
 }
 
-LineupManager.prototype.getWeeklySchedulingOffest = function(programTemplate, absolouteOffset) {
-    // Check the weekly schedule
-    if (!programTemplate.weeklySchedule) {
-        return 0;
-    }
-
-
-    // Finally
-}
-
 LineupManager.prototype.getMediaIdx = function(programTemplate, showType, clipIdx) {
     var mediaIdx = 0;
     var programOffset = 0;
@@ -325,13 +315,13 @@ LineupManager.prototype.getMediaIdx = function(programTemplate, showType, clipId
 
     var programAbsoluteIdx = todayEdition - programOffset;
 
-    if (!programTemplate.weeklySchedule) {
+    if (!programTemplate.WeeklySchedule) {
         // The idea is to count how many shows have been scheduled before today:
         // (# full weeks of show that is passed) * (number of program airings per week) + (how many shows since starting of this week)
         var appearanceIdxThisWeek = 0;
         todayDayOfWeek = this.today.momentObj.day();
-        for (var i = 0; i < programTemplate.weeklySchedule.length; i++) {
-            if (this.WeekDaysEnum[programTemplate.weeklySchedule] == todayDayOfWeek) { // Today is a day!
+        for (var i = 0; i < programTemplate.WeeklySchedule.length; i++) {
+            if (this.WeekDaysEnum[programTemplate.WeeklySchedule] == todayDayOfWeek) { // Today is a day!
                 // This condition must be met for one item because it is scheduled already
                 appearanceIdxThisWeek = i;
                 break;
