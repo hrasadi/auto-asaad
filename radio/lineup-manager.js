@@ -107,13 +107,13 @@ var LineupManager = function(radioConfig, cwd, radioObj) {
     
     // This is in-par with momentjs .day() convention
     this.WeekDaysEnum = {
-        'Sun': 0,
-        'Mon': 1,
-        'Tue': 2,
-        'Wed': 3,
-        'Thu': 4,
-        'Fri': 5,
-        'Sat': 6
+        "Sun": 0,
+        "Mon": 1,
+        "Tue": 2,
+        "Wed": 3,
+        "Thu": 4,
+        "Fri": 5,
+        "Sat": 6
     }
 
     this.moment = require('moment');
@@ -263,7 +263,7 @@ LineupManager.prototype.isProgramOnScheduleToday = function(programTemplate) {
 
     todayDayOfWeek = this.today.momentObj.day();
     for (var i = 0; i < programTemplate.WeeklySchedule.length; i++) {
-        if (this.WeekDaysEnum[programTemplate.WeeklySchedule] == todayDayOfWeek) { // Today is a day!
+        if (this.WeekDaysEnum[programTemplate.WeeklySchedule[i]] == todayDayOfWeek) { // Today is a day!
             return true;
         }
     }
@@ -315,13 +315,13 @@ LineupManager.prototype.getMediaIdx = function(programTemplate, showType, clipId
 
     var programAbsoluteIdx = todayEdition - programOffset;
 
-    if (!programTemplate.WeeklySchedule) {
+    if (programTemplate.WeeklySchedule) {
         // The idea is to count how many shows have been scheduled before today:
         // (# full weeks of show that is passed) * (number of program airings per week) + (how many shows since starting of this week)
         var appearanceIdxThisWeek = 0;
         todayDayOfWeek = this.today.momentObj.day();
         for (var i = 0; i < programTemplate.WeeklySchedule.length; i++) {
-            if (this.WeekDaysEnum[programTemplate.WeeklySchedule] == todayDayOfWeek) { // Today is a day!
+            if (this.WeekDaysEnum[programTemplate.WeeklySchedule[i]] == todayDayOfWeek) { // Today is a day!
                 // This condition must be met for one item because it is scheduled already
                 appearanceIdxThisWeek = i;
                 break;
@@ -330,7 +330,7 @@ LineupManager.prototype.getMediaIdx = function(programTemplate, showType, clipId
 
         var numFullWeeksBeforeThis = Math.trunc(programAbsoluteIdx / 7);
 
-        var numProgramsPerWeek = programTemplate.weeklySchedule.length; // max is 7, which is every day
+        var numProgramsPerWeek = programTemplate.WeeklySchedule.length; // max is 7, which is every day
         programAbsoluteIdx = (numFullWeeksBeforeThis * numProgramsPerWeek) + appearanceIdxThisWeek;
     }
 
