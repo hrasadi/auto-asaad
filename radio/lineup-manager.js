@@ -105,6 +105,17 @@ var LineupManager = function(radioConfig, cwd, radioObj) {
     this.logger = null;
     this.fs = require('fs');
     
+    // This is in-par with momentjs .day() convention
+    this.WeekDaysEnum = {
+        'Sun': 0,
+        'Mon': 1,
+        'Tue': 2,
+        'Wed': 3,
+        'Thu': 4,
+        'Fri': 5,
+        'Sat': 6
+    }
+
     this.moment = require('moment');
     // Custom format so that files are easier to read
     this.moment.prototype.toJSON = function() {
@@ -167,7 +178,8 @@ LineupManager.prototype.startMainLoop = function() {
         }
 
         // start preparing for today
-        self.today.date = self.moment().format("YYYY-MM-DD");
+        self.today.momentObj = self.moment();
+        self.today.date = self.today.momentObj.format("YYYY-MM-DD");
         self.today.lineupFilePath = self.cwd + "/lineups/" + self.radio.id + "-" + self.today.date + ".json";
         self.today.compiledLineupFilePath = self.today.lineupFilePath + ".compiled";
 
@@ -211,6 +223,12 @@ LineupManager.prototype.generateLineup = function() {
         // Decide for the program from the template
         var program = this.createProgramFromTemplate(programTemplate);
 
+        // if returned program is null, it means that the current template does not result into a program
+        // today (maybe because it should not be played today). In this case, igonore it
+        if (program == null) {
+            continue;
+        }
+
         if (i == 0) {
             this.adjustFirstProgram(program);
         }
@@ -237,8 +255,25 @@ LineupManager.prototype.adjustFirstProgram = function(program) {
     }
 }
 
+LineupManager.prototype.isProgramOnScheduleToday = function(programTemplate) {
+    // Check the weekly schedule
+    if (!programTemplate.weeklySchedule) {
+        return true;
+    }
+
+    todayDayOfWeek = this.today.momentObj.day();
+    for (var i = 0; i < programTemplate.weeklySchedule.length; i++) {
+        if (this.WeekDaysEnum[programTemplate.weeklySchedule] == todayDayOfWeek) { // Today is a day!
+            return true;
+        }
+    }
+}
 
 LineupManager.prototype.createProgramFromTemplate = function(programTemplate) {
+    if (!this.isProgramOnScheduleToday(programTemplate)) {
+        return null;
+    }
+
     var program = {};
     program.Id = programTemplate.Id;
     program.Title = programTemplate.Title;
@@ -267,19 +302,50 @@ LineupManager.prototype.createProgramFromTemplate = function(programTemplate) {
     return program;
 }
 
+LineupManager.prototype.getWeeklySchedulingOffest = function(programTemplate, absolouteOffset) {
+    // Check the weekly schedule
+    if (!programTemplate.weeklySchedule) {
+        return 0;
+    }
+
+
+    // Finally
+}
+
 LineupManager.prototype.getMediaIdx = function(programTemplate, showType, clipIdx) {
     var mediaIdx = 0;
     var programOffset = 0;
 
     var todayEdition = moment().diff(moment(this.config.RadioStartDate), 'days');
 
+    // If the show has a primiere date, take it into account
     if (programTemplate.PremiereDate) {
         programOffset = moment(programTemplate.PremiereDate).diff(moment(this.config.RadioStartDate), 'days');
     }
-    
-    clipsCount = this.config.Media[programTemplate[showType].Clips[clipIdx]].length;
 
-    mediaIdx = this.myMod(todayEdition - programOffset, clipsCount);
+    var programAbsoluteIdx = todayEdition - programOffset;
+
+    if (!programTemplate.weeklySchedule) {
+        // The idea is to count how many shows have been scheduled before today:
+        // (# full weeks of show that is passed) * (number of program airings per week) + (how many shows since starting of this week)
+        var appearanceIdxThisWeek = 0;
+        todayDayOfWeek = this.today.momentObj.day();
+        for (var i = 0; i < programTemplate.weeklySchedule.length; i++) {
+            if (this.WeekDaysEnum[programTemplate.weeklySchedule] == todayDayOfWeek) { // Today is a day!
+                // This condition must be met for one item because it is scheduled already
+                appearanceIdxThisWeek = i;
+                break;
+            }
+        }
+
+        var numFullWeeksBeforeThis = Math.trunc(programAbsoluteIdx / 7);
+
+        var numProgramsPerWeek = programTemplate.weeklySchedule.length; // max is 7, which is every day
+        programAbsoluteIdx = (numFullWeeksBeforeThis * numProgramsPerWeek) + appearanceIdxThisWeek;
+    }
+
+    clipsCount = this.config.Media[programTemplate[showType].Clips[clipIdx]].length;
+    mediaIdx = this.myMod(programAbsoluteIdx, clipsCount);
 
     return mediaIdx
 }
