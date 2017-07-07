@@ -39,5 +39,5 @@ lineup = fallback(track_sensitive=false, [
 
 main = audio_to_stereo(mksafe(lineup))
 
-output.icecast(%mp3, host="localhost", port=8000, password="icecast_password", mount="raa1.ogg", main)
+output.icecast(%mp3, host="localhost", port=8000, password="PASSWORD_HERE", mount="raa1.ogg", icy_metadata="true", description="Radio Auto-asaad", url="http://raa.media", main)
 

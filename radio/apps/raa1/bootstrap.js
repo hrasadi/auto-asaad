@@ -19,6 +19,7 @@ var installStandaloneRadio = function(dates) {
 var installLiquidsoapRadio = function(dates) {
 	// Copy the .liq file to /etc (The script should be executed with sudo)
 	fsExtra.copySync('../../liquidsoap/radio.liq', '/etc/liquidsoap/radio.liq'); 
+	// TODO set the password for icecast in the copied version
 	execSync('systemctl daemon-reload');
 
 	execSync("echo radio_LS_SCRIPT_DIR=" + LS_SCRIPT_DIR + " >> /etc/default/liquidsoap");
