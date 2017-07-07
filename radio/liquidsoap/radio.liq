@@ -10,6 +10,7 @@ running_dir = argv(2)
 # TODO get rid of this var! This can be done by persisting this value in a file in the lineups folder!
 current_lineup_file = interactive.string("current_lineup_file", "") 
 media_dir = argv(3)
+icecast_password = argv(4)
 
 print("Scripts dir: "^script_dir)
 print("Running dir: "^running_dir)
@@ -39,5 +40,5 @@ lineup = fallback(track_sensitive=false, [
 
 main = audio_to_stereo(mksafe(lineup))
 
-output.icecast(%mp3, host="localhost", port=8000, password="PASSWORD_HERE", mount="raa1.ogg", icy_metadata="true", description="Radio Auto-asaad", url="http://raa.media", main)
+output.icecast(%mp3, host="localhost", port=8000, password=icecast_password, mount="raa1.ogg", icy_metadata="true", description="Radio Auto-asaad", url="http://raa.media", main)
 
