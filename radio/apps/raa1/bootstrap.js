@@ -12,6 +12,8 @@ var LS_SCRIPT_DIR = path.resolve('../../liquidsoap');
 var RUNNING_DIR = path.resolve('./');
 var MEDIA_DIR = '/home/ubuntu/media';
 
+var ICECAST_PASSWORD = process.argv[2];
+
 var installStandaloneRadio = function(dates) {
 	// nothing!
 }
@@ -25,6 +27,7 @@ var installLiquidsoapRadio = function(dates) {
 	execSync("echo radio_LS_SCRIPT_DIR=" + LS_SCRIPT_DIR + " >> /etc/default/liquidsoap");
 	execSync("echo radio_RUNNING_DIR=" + RUNNING_DIR  + " >> /etc/default/liquidsoap");
 	execSync("echo radio_MEDIA_DIR=" + MEDIA_DIR  + " >> /etc/default/liquidsoap");
+        execSync("echo radio_ICECAST_PASSWORD=" + ICECAST_PASSWORD + " >> /etc/default/liquidsoap");
 	execSync("service liquidsoap restart"); 
 
 	// create necassary directories
