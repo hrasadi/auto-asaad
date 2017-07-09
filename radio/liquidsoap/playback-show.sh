@@ -2,7 +2,7 @@
 
 # Precise start of the target minute
 sleep 2 # Avoid running on xx:59, if cron starts immediately.
-wait_time=$((60-`date +%M`))
+wait_time=$((60-`date +%S`))
 sleep $wait_time
 
 # Change the current program
