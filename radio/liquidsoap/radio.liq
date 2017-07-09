@@ -27,14 +27,15 @@ end
 
 def update_metadata(m) = 
 	filename = m["filename"]
-
 	description = list.hd(get_process_lines("cd "^script_dir^"; node ./get-item-description.js "^current_lineup_file()^" "^filename))
-
 	#if description != "" then
 	[("title","#{description}")]	
-	#else
-	#	[("title","#{title}")]
-	#end
+end
+
+def on_blank_detected() =
+	print("Blank detected! Removing the title")
+	# Insert the metadata
+	imeta([("title","")])
 end
 
 pre_show_playlist = switch(track_sensitive=false, [
@@ -61,15 +62,7 @@ imeta = fst(ms)
 # The source with inserted metadata
 main = snd(ms)
 
-def on_blank_detected() =
-	print("Blank detected! Removing the title")
-	# Insert the metadata
-	imeta([("title","")])
-end
-
 main = on_blank(on_blank_detected, main)
-
 main = audio_to_stereo(main)
 
 output.icecast(%mp3, host="localhost", port=8000, password=icecast_password, mount="raa1.ogg", icy_metadata="true", description="Radio Auto-asaad", url="http://raa.media", main)
-
