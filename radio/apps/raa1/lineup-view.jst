@@ -1,43 +1,21 @@
-<!DOCTYPE HTML>
-<html dir="rtl">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-
-        <meta name="description" content="برنامه‌های امروز رادیو اتو-اسعد"/>
-        <title>رادیو اتو اسعد</title>
- 
-		<link rel="stylesheet" href="stylesheet.css" type="text/css" charset="utf-8"/>
-        <link href="bootstrap.min.css" rel="stylesheet"/>
-        <link rel="stylesheet" href="bootstrap-rtl.min.css"/>
-    </head>
-    <body>
-    	<div class="container">
-			<table class="table table-striped">
-			    <thead>
-			        <tr>
-			            <th>زمان</th>
-			            <th>برنامه</th>
-			        </tr>
-			    </thead>
-			    <tbody>
-					{{~it.array :value:index}}
-					<tr>
-				    	<td>{{=value.time}}</td>
-				    	<td>
- 							<p class="h4 program-title">{{=value.title}}</p>
-							<p class="program-description">{{=value.description}}</p>
-				    	</td>
-			    	</tr>
-					{{~}}		    		
-			    </tbody>
-			</table>    	
-    	</div>
-
-		<!-- Scripts at the bottom for improved performance.  -->
-		 <!-- jQuery, required for all responsive plugins.  -->
-		<script src="vendor/jquery-2.1.4.min.js"></script>		 
-        <script src="bootstrap.min.js"></script>
-    </body>
-</html> 
+<div>
+	<table class="table table-striped">
+	    <thead>
+	        <tr>
+	            <th>زمان</th>
+	            <th>برنامه</th>
+	        </tr>
+	    </thead>
+	    <tbody>
+			{{~it.array :value:index}}
+			<tr>
+		    	<td>{{=value.time}}</td>
+		    	<td>
+						<p class="h4 program-title">{{=value.title}}</p>
+					<p class="program-description">{{=value.description}}</p>
+		    	</td>
+	    	</tr>
+			{{~}}
+	    </tbody>
+	</table>
+</div>
