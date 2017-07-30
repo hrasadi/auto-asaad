@@ -324,6 +324,10 @@ LineupManager.prototype.getMediaIdx = function(programTemplate, showType, clipId
     var programAbsoluteIdx = todayEdition - programOffset;
 
     if (programTemplate.WeeklySchedule) {
+        var numFullWeeksBeforeThis = Math.trunc(programAbsoluteIdx / 7);
+
+        var numProgramsPerWeek = programTemplate.WeeklySchedule.length; // max is 7, which is every day
+
         // The idea is to count how many shows have been scheduled before today:
         // (# full weeks of show that is passed) * (number of program airings per week) + (how many shows since starting of this week)
         var appearanceIdxThisWeek = 0;
@@ -336,12 +340,23 @@ LineupManager.prototype.getMediaIdx = function(programTemplate, showType, clipId
             }
         }
 
-        var numFullWeeksBeforeThis = Math.trunc(programAbsoluteIdx / 7);
+        // Wait a second, for the first week the appearanceIdxThisWeek should be adjusted!
+        // The adjustment is to calculate how many shows we missed this week because the program has not been priemiered yet.
+        if (numFullWeeksBeforeThis == 0) {
+            if (programTemplate.PremiereDate) {
+                // We know it is premiered this week
+                premierDateDayOfWeek = moment(programTemplate.PremiereDate).day();
+                for (var i = 0; i < programTemplate.WeeklySchedule.length; i++) {
+                   if (this.WeekDaysEnum[programTemplate.WeeklySchedule[i]] < premierDateDayOfWeek) {
+                       appearanceIdxThisWeek--; // we missed a show
+                   }
+                }
+            }
+        }
 
-        var numProgramsPerWeek = programTemplate.WeeklySchedule.length; // max is 7, which is every day
         programAbsoluteIdx = (numFullWeeksBeforeThis * numProgramsPerWeek) + appearanceIdxThisWeek;
     }
-
+	console.log(numFullWeeksBeforeThis + "," + numProgramsPerWeek + "," +  appearanceIdxThisWeek);
     clipsCount = this.config.Media[programTemplate[showType].Clips[clipIdx]].length;
     mediaIdx = this.myMod(programAbsoluteIdx, clipsCount);
 
