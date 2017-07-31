@@ -14,7 +14,7 @@ if (fs.existsSync(lineupFilePath)) {
 	// In case of back-to-back programs, we need to move program iter when the first 
 	// track of the next programs begins to play.
 	if (lineup.Programs[currentProgramIdx + 1] && 
-		string.indexOf(lineup.Programs[currentProgramIdx].Show.Clips[0], currentTrackFilePath) != -1) {
+		currentTrackFilePath.indexOf(lineup.Programs[currentProgramIdx + 1].Show.Clips[0].Path) != -1) {
 		// Lets shift the current program iterator
 		currentProgramIdx++;
 		fs.writeFileSync(lineupFilePath + ".program.iter", currentProgramIdx);
