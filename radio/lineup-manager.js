@@ -356,7 +356,6 @@ LineupManager.prototype.getMediaIdx = function(programTemplate, showType, clipId
 
         programAbsoluteIdx = (numFullWeeksBeforeThis * numProgramsPerWeek) + appearanceIdxThisWeek;
     }
-	console.log(numFullWeeksBeforeThis + "," + numProgramsPerWeek + "," +  appearanceIdxThisWeek);
     clipsCount = this.config.Media[programTemplate[showType].Clips[clipIdx]].length;
     mediaIdx = this.myMod(programAbsoluteIdx, clipsCount);
 
