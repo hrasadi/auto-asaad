@@ -324,7 +324,7 @@ LineupManager.prototype.getMediaIdx = function(programTemplate, showType, clipId
     var programAbsoluteIdx = todayEdition - programOffset;
 
     if (programTemplate.WeeklySchedule) {
-        var numFullWeeksBeforeThis = Math.trunc(programAbsoluteIdx / 7);
+        var numFullWeeksBeforeThis = Math.ceil(programAbsoluteIdx / 7);
 
         var numProgramsPerWeek = programTemplate.WeeklySchedule.length; // max is 7, which is every day
 
@@ -342,15 +342,15 @@ LineupManager.prototype.getMediaIdx = function(programTemplate, showType, clipId
 
         // Wait a second, for the first week the appearanceIdxThisWeek should be adjusted!
         // The adjustment is to calculate how many shows we missed this week because the program has not been priemiered yet.
-        if (numFullWeeksBeforeThis == 0) {
-            if (programTemplate.PremiereDate) {
-                // We know it is premiered this week
-                premierDateDayOfWeek = moment(programTemplate.PremiereDate).day();
-                for (var i = 0; i < programTemplate.WeeklySchedule.length; i++) {
-                   if (this.WeekDaysEnum[programTemplate.WeeklySchedule[i]] < premierDateDayOfWeek) {
-                       appearanceIdxThisWeek--; // we missed a show
-                   }
-                }
+        // If this is not the first week of program, this still should be executed in order to capture the shows we missed 
+        // from the first week of show playback (this balances off the error we are entering by 'Math.ceil' a few lines before. 
+        if (programTemplate.PremiereDate) {
+            // We know it is premiered this week
+            premierDateDayOfWeek = moment(programTemplate.PremiereDate).day();
+            for (var i = 0; i < programTemplate.WeeklySchedule.length; i++) {
+               if (this.WeekDaysEnum[programTemplate.WeeklySchedule[i]] < premierDateDayOfWeek) {
+                   appearanceIdxThisWeek--; // we missed a show
+               }
             }
         }
 
