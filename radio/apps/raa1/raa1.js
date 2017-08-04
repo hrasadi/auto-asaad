@@ -146,7 +146,9 @@ Radio.prototype.onLineupCompiled = function(compiledLineup) {
     }
 
     var resultText = lineupTemplateFn(data);
-    fs.writeFileSync(this.cwd + "/lineups/lineup.html", resultText)
+    // A little bit hack here to recreate the current date 
+    today = moment(compiledLineup.Programs[0].Show.StartTime).format('YYYY-MM-DD');
+    fs.writeFileSync(this.cwd + "/lineups-html/lineup-" + today + ".html", resultText)
 }
 
 Radio.prototype.createRSSItemTemplate = function() {
@@ -156,7 +158,7 @@ Radio.prototype.createRSSItemTemplate = function() {
           {'itunes:author': 'رادیو اتو-اسعد'},
           {'itunes:image': {
             _attr: {
-              href: 'http://raa.media/img/raa-logo-256.png'
+              href: 'http://raa.media/img/raa-cover-itunes.png'
             }
           }}
         ]
