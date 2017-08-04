@@ -8,6 +8,7 @@ var dot = require('dot');
 var Events = require('../../../events');
 var Messaging = require('../../../messaging');
 var Utils = require('../../../utils');
+var RSSFeedGenerator = require('../../rss-feed-generator');
 
 const { URL } = require('url');
 
@@ -96,7 +97,10 @@ Radio.prototype.onLineupCompiled = function(compiledLineup) {
             for (var j = 0; j < compiledLineup.Programs[i].PreShow.Clips.length; j++) {
                 if (compiledLineup.Programs[i].PreShow.Clips[j].Description) {
                     entry.description += compiledLineup.Programs[i].PreShow.Clips[j].Description;
-                    entry.description += "؛ ";
+
+                    if (j != compiledLineup.Programs[i].PreShow.Clips.length - 1) { // Except for the last item
+                        entry.description += "؛ ";
+                    }
                 }
             }
         } else {
@@ -109,6 +113,25 @@ Radio.prototype.onLineupCompiled = function(compiledLineup) {
                     vodRelativeURI = compiledLineup.Programs[i].Show.Clips[j].Path.replace(this.config.Radio.Media.BaseDir,"");
                     vodUrl = new URL(vodRelativeURI, 'http://vod.raa.media/');
                     entry.description += '<a class="vod-link" href="' + vodUrl.toString() + '">' + compiledLineup.Programs[i].Show.Clips[j].Description + "</a>";
+
+                    /* Now update the RSS xml feed */  
+                    // Create a new feed gen item
+                    feedGen = this.createFeedGenerator();
+                    rssFeedItem = this.createRSSItemTemplate();
+                    rssFeedItem.title = compiledLineup.Programs[i].Title;
+                    rssFeedItem.description = compiledLineup.Programs[i].Show.Clips[j].Description;
+                    rssFeedItem.url = vodUrl;
+                    rssFeedItem.date = Date().toString();
+                    rssFeedItem.enclosure = {};
+                    rssFeedItem.enclosure.url = vodUrl;
+                    itunesSubtitleElement = {};
+                    itunesSubtitleElement["itunes:subtitle"] = compiledLineup.Programs[i].Show.Clips[j].Description;;
+                    rssFeedItem.custom_elements.push(itunesSubtitleElement);
+
+                    // Push the new item
+                    feedGen.addItem(rssFeedItem);
+                    feedGen.publishFeed(this.cwd + "/rss/rss.xml");
+
                 } else {
                     entry.description += compiledLineup.Programs[i].Show.Clips[j].Description;
                 }
@@ -124,6 +147,61 @@ Radio.prototype.onLineupCompiled = function(compiledLineup) {
 
     var resultText = lineupTemplateFn(data);
     fs.writeFileSync(this.cwd + "/lineups/lineup.html", resultText)
+}
+
+Radio.prototype.createRSSItemTemplate = function() {
+    return {
+        author: 'رادیو اتو-اسعد', 
+        custom_elements: [
+          {'itunes:author': 'رادیو اتو-اسعد'},
+          {'itunes:image': {
+            _attr: {
+              href: 'http://raa.media/img/raa-logo-256.png'
+            }
+          }}
+        ]
+    }
+}
+
+Radio.prototype.createFeedGenerator = function() {
+    return new RSSFeedGenerator({
+        title: 'رادیو اتو-اسعد',
+        custom_namespaces: {
+            'itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd'
+        },
+        description: 'پادکست‌های رادیو اتو-اسعد شامل برنامه‌هایی است که امکان پخش عمومی آن‌ها برای ما وجود داشته است.',
+        feed_url: 'http://raa.media/rss.xml',
+        site_url: 'http://raa.media',
+        image_url: 'http://raa.media/img/raa-cover-itunes.png',
+        copyright: '2017 Radio Auto-asaad',
+        language: 'fa',
+        pubDate: 'Aug 01, 2017 04:00:00 GMT',
+        ttl: '60',
+        custom_elements: [
+          {'itunes:subtitle': 'پارکست‌های رادیو اتو-اسعد'},
+          {'itunes:author': 'اتو-اسعد'},
+          {'itunes:explicit': false},
+          {'itunes:owner': [
+            {'itunes:name': 'Radio Auto-asaad'},
+            {'itunes:email': 'admin@raa.media'}
+          ]},
+          {'itunes:image': {
+            _attr: {
+              href: 'http://raa.media/img/raa-cover-itunes.png'
+            }
+          }},
+          {'itunes:category': [
+            {_attr: {
+              text: 'Arts'
+            }},
+            {'itunes:category': {
+              _attr: {
+                text: 'Literature'
+              }
+            }}
+          ]}
+        ]
+    });
 }
 
 // Entry Point
