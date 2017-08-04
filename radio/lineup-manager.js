@@ -315,7 +315,6 @@ LineupManager.prototype.getMediaIdx = function(programTemplate, showType, clipId
     var programOffset = 0;
 
     var todayEdition = moment().diff(moment(this.config.RadioStartDate), 'days');
-
     // If the show has a primiere date, take it into account
     if (programTemplate.PremiereDate) {
         programOffset = moment(programTemplate.PremiereDate).diff(moment(this.config.RadioStartDate), 'days');
@@ -324,7 +323,8 @@ LineupManager.prototype.getMediaIdx = function(programTemplate, showType, clipId
     var programAbsoluteIdx = todayEdition - programOffset;
 
     if (programTemplate.WeeklySchedule) {
-        var numFullWeeksBeforeThis = Math.ceil(programAbsoluteIdx / 7);
+        var primiereDateMoment = moment().subtract(programAbsoluteIdx, 'days');
+        var numWeeksPassed = moment().diff(primiereDateMoment, 'weeks');
 
         var numProgramsPerWeek = programTemplate.WeeklySchedule.length; // max is 7, which is every day
 
@@ -348,13 +348,14 @@ LineupManager.prototype.getMediaIdx = function(programTemplate, showType, clipId
             // We know it is premiered this week
             premierDateDayOfWeek = moment(programTemplate.PremiereDate).day();
             for (var i = 0; i < programTemplate.WeeklySchedule.length; i++) {
-               if (this.WeekDaysEnum[programTemplate.WeeklySchedule[i]] < premierDateDayOfWeek) {
-                   appearanceIdxThisWeek--; // we missed a show
+               if (this.WeekDaysEnum[programTemplate.WeeklySchedule[i]] >= premierDateDayOfWeek) {
+                   appearanceIdxThisWeek = appearanceIdxThisWeek - i; // we missed a show
+                   break;
                }
             }
         }
 
-        programAbsoluteIdx = (numFullWeeksBeforeThis * numProgramsPerWeek) + appearanceIdxThisWeek;
+        programAbsoluteIdx = (numWeeksPassed * numProgramsPerWeek) + appearanceIdxThisWeek;
     }
     clipsCount = this.config.Media[programTemplate[showType].Clips[clipIdx]].length;
     mediaIdx = this.myMod(programAbsoluteIdx, clipsCount);
