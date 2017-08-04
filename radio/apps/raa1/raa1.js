@@ -114,23 +114,28 @@ Radio.prototype.onLineupCompiled = function(compiledLineup) {
                     vodUrl = new URL(vodRelativeURI, 'http://vod.raa.media/');
                     entry.description += '<a class="vod-link" href="' + vodUrl.toString() + '">' + compiledLineup.Programs[i].Show.Clips[j].Description + "</a>";
 
-                    /* Now update the RSS xml feed */  
-                    // Create a new feed gen item
-                    feedGen = this.createFeedGenerator();
-                    rssFeedItem = this.createRSSItemTemplate();
-                    rssFeedItem.title = compiledLineup.Programs[i].Title;
-                    rssFeedItem.description = compiledLineup.Programs[i].Show.Clips[j].Description;
-                    rssFeedItem.url = vodUrl;
-                    rssFeedItem.date = Date().toString();
-                    rssFeedItem.enclosure = {};
-                    rssFeedItem.enclosure.url = vodUrl;
-                    itunesSubtitleElement = {};
-                    itunesSubtitleElement["itunes:subtitle"] = compiledLineup.Programs[i].Show.Clips[j].Description;;
-                    rssFeedItem.custom_elements.push(itunesSubtitleElement);
+                    
+                    /* Now update the RSS xml feed (If the clip should be published) */  
+                    // An example of an item which should not be published (although having VOD),
+                    // is the re-broadcast of a program.
+                    if (compiledLineup.Programs[i].PublishPodcast) {
+                        // Create a new feed gen item
+                        feedGen = this.createFeedGenerator();
+                        rssFeedItem = this.createRSSItemTemplate();
+                        rssFeedItem.title = compiledLineup.Programs[i].Title;
+                        rssFeedItem.description = compiledLineup.Programs[i].Show.Clips[j].Description;
+                        rssFeedItem.url = vodUrl;
+                        rssFeedItem.date = Date().toString();
+                        rssFeedItem.enclosure = {};
+                        rssFeedItem.enclosure.url = vodUrl;
+                        itunesSubtitleElement = {};
+                        itunesSubtitleElement["itunes:subtitle"] = compiledLineup.Programs[i].Show.Clips[j].Description;;
+                        rssFeedItem.custom_elements.push(itunesSubtitleElement);
 
-                    // Push the new item
-                    feedGen.addItem(rssFeedItem);
-                    feedGen.publishFeed(this.cwd + "/rss/rss.xml");
+                        // Push the new item
+                        feedGen.addItem(rssFeedItem);
+                        feedGen.publishFeed(this.cwd + "/rss/rss.xml");
+                    }
 
                 } else {
                     entry.description += compiledLineup.Programs[i].Show.Clips[j].Description;

@@ -286,6 +286,12 @@ LineupManager.prototype.createProgramFromTemplate = function(programTemplate) {
     program.Id = programTemplate.Id;
     program.Title = programTemplate.Title;
 
+    // Optional field, is the eligible (that have HasVOD=true) clips from this program 
+    // should also be published in the podcast feed
+    if (programTemplate.PublishPodcast) {
+        program.PublishPodcast = programTemplate.PublishPodcast;
+    }
+
     if (this.hasPreProgram(programTemplate)) {
         this.decideProgramPreShowClipsFromTemplate(programTemplate, program);
     }
