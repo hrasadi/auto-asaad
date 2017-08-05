@@ -27,7 +27,7 @@ end
 
 def update_metadata(m) = 
 	filename = m["filename"]
-	if filename == "" then
+	if filename == "" or filename == media_dir^"/no-program.mp3" then
 		print("Blank program. Remove title!")
 		[("title","BLANK"), ("artist", "")]
 	else 
@@ -48,7 +48,8 @@ show_playlist = request.equeue(id = "show_q")
 
 lineup = fallback(track_sensitive=false, [
 	show_playlist,
-	pre_show_playlist
+	pre_show_playlist,
+	single(media_dir^"/no-program.mp3")
 ])
 
 main = mksafe(lineup)

@@ -97,17 +97,14 @@ Radio.prototype.onLineupCompiled = function(compiledLineup) {
             for (var j = 0; j < compiledLineup.Programs[i].PreShow.Clips.length; j++) {
                 if (compiledLineup.Programs[i].PreShow.Clips[j].Description) {
                     entry.description += compiledLineup.Programs[i].PreShow.Clips[j].Description;
-
-                    if (j != compiledLineup.Programs[i].PreShow.Clips.length - 1) { // Except for the last item
-                        entry.description += "؛ ";
-                    }
+                    entry.description += "؛ ";
                 }
             }
         } else {
             entry.time = moment(compiledLineup.Programs[i].Show.Meta.TentativeStartTime).format('HH:mm');
         }
         for (var j = 0; j < compiledLineup.Programs[i].Show.Clips.length; j++) {
-            if (compiledLineup.Programs[i].Show.Clips[j].Description) {
+            if (compiledLineup.Programs[i].Show.Clips[j].Description && compiledLineup.Programs[i].Show.Clips[j].Description != "") {
                 if (compiledLineup.Programs[i].Show.Clips[j].HasVOD) {
                     // reconstruct the relative path to the media from the absolute playback path
                     vodRelativeURI = compiledLineup.Programs[i].Show.Clips[j].Path.replace(this.config.Radio.Media.BaseDir,"");
@@ -141,10 +138,15 @@ Radio.prototype.onLineupCompiled = function(compiledLineup) {
                     entry.description += compiledLineup.Programs[i].Show.Clips[j].Description;
                 }
 
-                if (j != compiledLineup.Programs[i].Show.Clips.length - 1) { // Except for the last item
+                if (j != compiledLineup.Programs[i].Show.Clips.length - 1) { // Except for the last item                    
                     entry.description += "؛ ";
                 }
             }
+        }
+
+        // Hack to remove extra semicolon if it is remained from before
+        if (entry.description.charAt(entry.description.length - 1) == ";") {
+            entry.description = entry.description.slice(0, -1);
         }
 
         data.array.push(entry);
