@@ -9,10 +9,10 @@
 	    <tbody>
 			{{~it.array :value:index}}
 			<tr>
-		    	<td>{{=value.time}}</td>
+		    	<td>{{=value.startTime}} - {{=value.endTime}}</td>
 		    	<td>
-						<p class="h4 program-title">{{=value.title}}</p>
-					  <p class="h5 program-description">{{=value.description}}</p>
+					<p class="h4 program-title">{{=value.title}}</p>
+					<p class="h5 program-description">{{=value.description}}</p>
 		    	</td>
 	    	</tr>
 			{{~}}

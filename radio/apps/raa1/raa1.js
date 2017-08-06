@@ -92,7 +92,7 @@ Radio.prototype.onLineupCompiled = function(compiledLineup) {
                 entry.description = "";
 
         if (compiledLineup.Programs[i].PreShow) {
-            entry.time = moment(compiledLineup.Programs[i].PreShow.Meta.TentativeStartTime).format('HH:mm');
+            entry.startTime = moment(compiledLineup.Programs[i].PreShow.Meta.TentativeStartTime).format('HH:mm');
 
             for (var j = 0; j < compiledLineup.Programs[i].PreShow.Clips.length; j++) {
                 if (compiledLineup.Programs[i].PreShow.Clips[j].Description) {
@@ -101,8 +101,10 @@ Radio.prototype.onLineupCompiled = function(compiledLineup) {
                 }
             }
         } else {
-            entry.time = moment(compiledLineup.Programs[i].Show.Meta.TentativeStartTime).format('HH:mm');
+            entry.startTime = moment(compiledLineup.Programs[i].Show.Meta.TentativeStartTime).format('HH:mm');
         }
+        entry.endTime = moment(compiledLineup.Programs[i].Show.Meta.TentativeEndTime).format('HH:mm');
+
         for (var j = 0; j < compiledLineup.Programs[i].Show.Clips.length; j++) {
             if (compiledLineup.Programs[i].Show.Clips[j].Description && compiledLineup.Programs[i].Show.Clips[j].Description != "") {
                 if (compiledLineup.Programs[i].Show.Clips[j].HasVOD) {
