@@ -189,7 +189,7 @@ Radio.prototype.createFeedGenerator = function() {
         pubDate: 'Aug 01, 2017 04:00:00 GMT',
         ttl: '60',
         custom_elements: [
-          {'itunes:subtitle': 'پارکست‌های رادیو اتو-اسعد'},
+          {'itunes:subtitle': 'پادکست‌های رادیو اتو-اسعد'},
           {'itunes:author': 'اتو-اسعد'},
           {'itunes:explicit': false},
           {'itunes:owner': [

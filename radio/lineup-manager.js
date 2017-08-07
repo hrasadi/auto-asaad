@@ -329,8 +329,9 @@ LineupManager.prototype.getMediaIdx = function(programTemplate, showType, clipId
     var programAbsoluteIdx = todayEdition - programOffset;
 
     if (programTemplate.WeeklySchedule) {
-        var primiereDateMoment = moment().subtract(programAbsoluteIdx, 'days');
-        var numWeeksPassed = moment().diff(primiereDateMoment, 'weeks');
+        var numWeeksPassed = moment().week() - moment(programTemplate.PremiereDate).week();
+
+        this.logger.debug("numWeeksPassed", numWeeksPassed);
 
         var numProgramsPerWeek = programTemplate.WeeklySchedule.length; // max is 7, which is every day
 
@@ -345,6 +346,7 @@ LineupManager.prototype.getMediaIdx = function(programTemplate, showType, clipId
                 break;
             }
         }
+        this.logger.debug("appearanceIdxThisWeek", appearanceIdxThisWeek);
 
         // Wait a second, for the first week the appearanceIdxThisWeek should be adjusted!
         // The adjustment is to calculate how many shows we missed this week because the program has not been priemiered yet.
@@ -360,6 +362,7 @@ LineupManager.prototype.getMediaIdx = function(programTemplate, showType, clipId
                }
             }
         }
+        this.logger.debug("adjusted appearanceIdxThisWeek", appearanceIdxThisWeek);
 
         programAbsoluteIdx = (numWeeksPassed * numProgramsPerWeek) + appearanceIdxThisWeek;
     }
