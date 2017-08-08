@@ -147,7 +147,7 @@ Radio.prototype.onLineupCompiled = function(compiledLineup) {
         }
 
         // Hack to remove extra semicolon if it is remained from before
-        if (entry.description.charAt(entry.description.length - 1) == ";") {
+        if (entry.description.charAt(entry.description.length - 1) == "؛") {
             entry.description = entry.description.slice(0, -1);
         }
 
