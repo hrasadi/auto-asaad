@@ -17,7 +17,7 @@ adhans = ['https://www.youtube.com/watch?v=cWJ0A2MGADc',
 
 var config = null;
 if (process.argv.length < 5) {
-	console.log("usage: adhan.js {config-file} {start-date(YYYY-MM-DD)} {end-date(YYYY-MM-DD)}");
+	console.log("usage: node adhan.js {config-file} {start-date(YYYY-MM-DD)} {end-date(YYYY-MM-DD)}");
 	process.exit(1);
 }
 
@@ -34,7 +34,7 @@ var current_adhan = 0;
 var periodLengthInDays = endDate.diff(startDate, 'day');
 
 for (var i = 0; i < periodLengthInDays; i++) {
-	events.readEvent(startDate.toDate(), events.EventType.MAGHRIB, function(maghribTime) {
+	events.readEvent(startDate.toDate(), function(date, eventslist) {
 
 	    var autoAsaadMessage = "حدود وقت اذان مغرب \\n <a>" + adhans[current_adhan]  + "</a>"
 
@@ -43,8 +43,12 @@ for (var i = 0; i < periodLengthInDays; i++) {
 	    if (current_adhan == adhans.length) {
 	    	current_adhan = 0;
 	    }
+	    
+	    maghribTime = eventslist[events.EventType.MAGHRIB];
 
 		messaging.createCalEvent(maghribTime, "#scheduler", autoAsaadMessage);
+
+		console.log("Calendar Event Created for: " + maghribTime);
 	});	
 
 	startDate.add(1, 'day');
