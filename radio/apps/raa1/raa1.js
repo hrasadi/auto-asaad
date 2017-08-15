@@ -56,17 +56,17 @@ Raa1.prototype.reset = function(currentDate, callback_fn) {
         self.dataProvider.dhuhrTime = events[self.events.EventType.DHUHR];
         self.dataProvider.maghribTime = events[self.events.EventType.MAGHRIB];
 
-        // give back control to lineupManager
+        // give control back to lineupManager
         callback_fn();
     });
 }
 
-Raa1.prototype.calculateProgramStartTime = function(program) {
-    if (program.Id == 'FajrProgram') {
+Raa1.prototype.calculateProgramStartTime = function(id) {
+    if (id == 'FajrProgram') {
         return this.dataProvider.fajrTime;
-    } else if (program.Id == 'DhuhrProgram') {
+    } else if (id == 'DhuhrProgram') {
         return this.dataProvider.dhuhrTime;
-    } else if (program.Id == 'MaghribProgram') {
+    } else if (id == 'MaghribProgram') {
         return this.dataProvider.maghribTime;
     }
 }

@@ -72,7 +72,6 @@ LiquidsoapLineupManager.prototype.unschedulePlayback = function(program) {
 }
 
 LiquidsoapLineupManager.prototype.getMediaDuration = function(media) {
-
     var cmd = 'mp3info -p "%S" ' + media.Path;
     var mediaDuration = parseFloat(execSync(cmd, {
         encoding: 'utf-8'
