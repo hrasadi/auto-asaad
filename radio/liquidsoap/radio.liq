@@ -27,7 +27,7 @@ end
 
 def update_metadata(m) = 
 	filename = m["filename"]
-	if filename == "" or filename == media_dir^"/no-program.mp3" then
+	if filename == "" or filename == media_dir^"/no-program.mp3" or filename == media_dir^"/blank.mp3" then
 		print("Blank program. Remove title!")
 		[("title","BLANK"), ("artist", "")]
 	else 
