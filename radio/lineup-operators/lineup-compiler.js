@@ -26,10 +26,11 @@ LineupCompiler.prototype.compileLineup = function(targetDateMoment) {
     var compiledLineupFilePath = this.generateCompilerLineupFilePath(targetDateMoment);
     
     // Backup the old compiled lineup, so that we can unschedule old lineup
-    if (!this.context.options.mode == 'deploy') {
-        if (this.fs.existsSync(compiledLineupFilePath)) {
+    if (this.context.options.mode == 'deploy') {
+        console.log(compiledLineupFilePath)
+        if (fs.existsSync(compiledLineupFilePath)) {
             // cp            
-            this.fsextra.copy(compiledLineupFilePath, compiledLineupFilePath + ".old", {force: true});
+            fsextra.copy(compiledLineupFilePath, compiledLineupFilePath + ".old", {force: true});
         }        
     }
 
@@ -51,7 +52,7 @@ LineupCompiler.prototype.compileLineup = function(targetDateMoment) {
 
     // Persist the compiled lineup
     if (this.context.options.mode == 'deploy') {        
-        this.fs.writeFileSync(compiledLineupFilePath, JSON.stringify(compiledLineup, null, 2), 'utf-8');
+        fs.writeFileSync(compiledLineupFilePath, JSON.stringify(compiledLineup, null, 2), 'utf-8');
         // POST COMPILE EVENT IN THE RADIO (e.g. generate lineup web page, publish rss, etc.)
         this.context.radio.onLineupCompiled(compiledLineup);
     }

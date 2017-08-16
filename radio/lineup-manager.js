@@ -28,6 +28,8 @@ var Stage = require('./staged-executor').Stage;
 var PartialConfigFlattener = require('./lineup-operators/partial-config-flattener').PartialConfigFlattener;
 var LineupPlanner = require('./lineup-operators/lineup-planner').LineupPlanner;
 var LineupCompiler = require('./lineup-operators/lineup-compiler').LineupCompiler;
+var Scheduler = require('./lineup-operators/scheduler').Scheduler;
+var PostOperator = require('./lineup-operators/post-operator').PostOperator;
 
 var LineupManager = function(radioConfig, cwd, radioObj) {
     StagedExecutor.call(this);
@@ -65,7 +67,8 @@ LineupManager.prototype.init = function() {
                             self.compileLineup();
                         } catch(e) {
                             self.logger.crit(e);
-                            // Nothing will really change until the file is touched again. Both in-mem copies of lineup and compiledLineup would be invalid during this period
+                            // Nothing will really change until the file is touched again. 
+                            // Both in-memory copies of lineup and compiledLineup would be invalid during this period
                         }
                     }
                     // else?
@@ -117,22 +120,18 @@ LineupManager.prototype.initStages = function() {
 
     this.options.currentDayMoment = moment();
     this.options.futureLineupsCount = 4;
-    this.options.verbose = true;
+    this.options.verbose = false;
     
-    this.options.mode = 'test'; // or 'deploy'
+    this.options.mode = 'deploy'; // or 'deploy'
 
     this.options.lineupFilePathPrefix = this.cwd + "/lineups/" + this.radio.id + "-";
 
     this.pushStage(this.instantiatePartialConfigFlattener());
     this.pushStage(this.instantiateLineupPlanner());
     this.pushStage(this.instantiateLineupCompiler());
+    this.pushStage(this.instantiateScheduler());
+    this.pushStage(this.instantiatePostOperator());
 
-    //this.pushStage(new GenerateTodayLineupStage(this));
-    // this.pushStage(new CompileTodayLineup());
-    // this.pushStage(new GenerateFutureLineupsStage());
-    // this.pushStage(new CompileFutureLineupsStage());
-    //this.pushStage(new CleanupStage());
-    // More?
     try {
         this.execute(this.config);
     } catch (e) {
@@ -163,6 +162,14 @@ LineupManager.prototype.instantiateLineupPlanner = function() {
 
 LineupManager.prototype.instantiateLineupCompiler = function() {
     return new LineupCompiler();
+}
+
+LineupManager.prototype.instantiateScheduler = function() {
+    return new Scheduler();
+}
+
+LineupManager.prototype.instantiatePostOperator = function() {
+    return new PostOperator();
 }
 /**/
 
