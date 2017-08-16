@@ -133,13 +133,24 @@ LineupManager.prototype.initStages = function() {
     // this.pushStage(new CompileFutureLineupsStage());
     //this.pushStage(new CleanupStage());
     // More?
-    this.execute(this.config);
+    try {
+        this.execute(this.config);
+    } catch (e) {
+        this.logger().fatal(e);
+    }
 }
 
 LineupManager.prototype.logger = function() {
     return this.loggerObj;
 }
 
+LineupManager.prototype.getLineupVersion = function(lineup) {
+    if (lineup.Version) {
+        return lineup.Version;
+    } else {
+        return "1.0";
+    }
+}
 
 /* the following builders can be extended by the subclasses to implement platform-specific traits of lineups */
 LineupManager.prototype.instantiatePartialConfigFlattener = function() {

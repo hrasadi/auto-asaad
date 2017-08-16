@@ -8,6 +8,10 @@ Radio.prototype.reset = function(currentDate, callback_fn) {
     console.log("Not implemented");
 }
 
+Radio.prototype.onLineupPlanned = function(lineup) {
+	console.log("Not implemented");
+}
+
 Radio.prototype.onLineupCompiled = function(compiledLineup) {
 	console.log("Not implemented");
 }

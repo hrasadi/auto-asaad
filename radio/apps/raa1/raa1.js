@@ -1,5 +1,6 @@
 var Radio = require('../../radio');
 
+var program = require('commander');
 var fs = require('fs');
 var moment = require('moment');
 var path = require('path');
@@ -216,12 +217,19 @@ Radio.prototype.createFeedGenerator = function() {
     });
 }
 
-// Entry Point
-if (process.argv.length < 4) {
-    console.log("usage: node raa1.js {config-file} {deployment-mode}");
+/* === Entry Point === */
+program
+    .version('1.0.0')
+    .option('-v, --verbose', 'Detailed logs')
+    .option('-t, --test', 'Test mode (no side effects)')
+    .parse(process.argv)
+
+console.log(program)
+if (program.args.length < 2) {
+    console.log("Usage: node raa1.js OPTIONS {config-file} {deployment-mode}");
     process.exit(1);
 }
 
-var raa1 = new Raa1(process.argv[2], process.argv[3]);
+var raa1 = new Raa1(process.argv[2], process.argv[3], program);
 
 raa1.initialize();

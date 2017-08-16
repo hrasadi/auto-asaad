@@ -24,6 +24,7 @@ LineupCompiler.prototype.perform = function(lineup) {
 
 LineupCompiler.prototype.compileLineup = function(targetDateMoment) {
     var compiledLineupFilePath = this.generateCompilerLineupFilePath(targetDateMoment);
+    
     // Backup the old compiled lineup, so that we can unschedule old lineup
     if (!this.context.options.mode == 'deploy') {
         if (this.fs.existsSync(compiledLineupFilePath)) {
@@ -34,35 +35,32 @@ LineupCompiler.prototype.compileLineup = function(targetDateMoment) {
 
     // we should flatten the programs and 'Unbox' them
     this.context.logger().debug("-- Compiling Lineup - Pass 0 (Unboxing programs)");
-    this.unboxLineup();
+    var unboxedLineup = this.unboxLineup();
 
     // Calculate the start and end times for all programs
-    this.logger.debug("-- Compiling Lineup - Pass 1 (Timing)");
-    this.arrangeLineupTiming();
+    this.context.logger().debug("-- Compiling Lineup - Pass 1 (Timing)");
+    var compiledLineup = this.arrangeLineupTiming(unboxedLineup);
 
-    // // Validate that there is no overlap
-    // this.logger.debug("-- Compiling Lineup - Pass 2 (Validation)");
-    // if (i == 0) {
-    //     if (!compiledLineup.Show.StartTime) {
-    //         throw "The first program in the list should specify the start time. Aborting!";
-    //     }
-    // }
-    // this.validateLineup();
+    compiledLineup.Version = this.lineup.Version; // Preserve the lineup syntax version
 
-    // Schedule the playback
-    // this.logger.debug("Compiling Lineup - Pass 3 (Scheduling)");
-    // this.scheduleLineupPlayback(oldCompiledLineupPrograms);
+    // TODO check that first program is scheduled for a specific time
 
-    // // Persist the compiled lineup
-    // this.fs.writeFileSync(this.today.compiledLineupFilePath, JSON.stringify(this.today.compiledLineup, null, 2), 'utf-8');
+    // Validate that there is no overlap
+    this.context.logger().debug("-- Compiling Lineup - Pass 2 (Validation)");
+    this.validateLineup(compiledLineup);
 
-    // // POST COMPILE EVENT IN THE RADIO (e.g. generate lineup web page etc.)
-    // this.radio.onLineupCompiled(this.today.compiledLineup);
-
-    if (this.context.options.verbose) {
-        this.context.logger().info(JSON.stringify(this.lineup, null, 2));
+    // Persist the compiled lineup
+    if (this.context.options.mode == 'deploy') {        
+        this.fs.writeFileSync(compiledLineupFilePath, JSON.stringify(compiledLineup, null, 2), 'utf-8');
+        // POST COMPILE EVENT IN THE RADIO (e.g. generate lineup web page, publish rss, etc.)
+        this.context.radio.onLineupCompiled(compiledLineup);
     }
 
+    if (this.context.options.verbose) {
+        this.context.logger().info(JSON.stringify(compiledLineup, null, 2));
+    }
+
+    return compiledLineup;
 }
 
 LineupCompiler.prototype.unboxLineup = function() {
@@ -75,8 +73,14 @@ LineupCompiler.prototype.unboxLineup = function() {
         if (this.lineup.Boxes[i].BoxId) {
             // this is a box (so unbox it!)
             for (var j = 0; j < this.lineup.Boxes[i].Programs.length; j++) {
+                
                 program = this.lineup.Boxes[i].Programs[j];
                 program.BoxId = this.lineup.Boxes[i].BoxId;
+
+                // Add start time to the first program if it does not have any
+                if (j == 0 && !program.StartTime) {
+                    program.Show.StartTime = this.lineup.Boxes[i].StartTime;
+                }
 
                 unboxedLineup.Programs.push(program);
             }
@@ -87,21 +91,26 @@ LineupCompiler.prototype.unboxLineup = function() {
         }
     }
 
-    this.lineup = unboxedLineup;
+    return unboxedLineup;
 }
 
-LineupCompiler.prototype.arrangeLineupTiming = function() {
-    for (var i = 0; i < this.lineup.Programs.length; i++) {
-        // Prepare compiled program object
-        compiledProgram = {};
-        Object.assign(compiledProgram, this.today.lineup.Programs[i]);
+LineupCompiler.prototype.arrangeLineupTiming = function(unboxedLineup) {
+    var compiledLineup = {};
+    compiledLineup.Programs = [];
 
-        this.calculateProgramTimes(this.today.lineup.Programs[i], compiledProgram);
-        this.today.compiledLineup.Programs.push(compiledProgram);
+    for (var i = 0; i < unboxedLineup.Programs.length; i++) {
+        
+        // Copy all data from planned program to compiled version (and complete the fields)
+        var compiledProgram = JSON.parse(JSON.stringify(unboxedLineup.Programs[i]));
+
+        this.calculateProgramTiming(unboxedLineup.Programs[i], compiledProgram, compiledLineup);
+        compiledLineup.Programs.push(compiledProgram);
     }
+
+    return compiledLineup;
 }
 
-LineupCompiler.prototype.calculateProgramTimes = function(program, compiledProgram) {
+LineupCompiler.prototype.calculateProgramTiming = function(program, compiledProgram, intermediateCompiledLineup) {
 
     // Calculate the show start and end time
     compiledProgram.Show.Meta = {};
@@ -110,7 +119,7 @@ LineupCompiler.prototype.calculateProgramTimes = function(program, compiledProgr
     // based on previous programs (and it should not have a pre-show program)
     if (program.Show.StartTime == undefined) {
         // Should start playback right after the last show
-        var mostRecentProgram = this.today.compiledLineup.Programs[this.today.compiledLineup.Programs.length - 1];
+        var mostRecentProgram = intermediateCompiledLineup.Programs[intermediateCompiledLineup.Programs.length - 1];
         compiledProgram.Show.Meta.TentativeStartTime = mostRecentProgram.Show.Meta.TentativeEndTime;
     } else {
         compiledProgram.Show.StartTime = moment(program.Show.StartTime);
@@ -131,7 +140,7 @@ LineupCompiler.prototype.calculateProgramTimes = function(program, compiledProgr
     compiledProgram.Show.Meta.TentativeEndTime = moment(compiledProgram.Show.Meta.TentativeStartTime).add(compiledProgram.Show.Meta.TotalDuration, 'seconds');
 
     // If there is a pre-show available calculate the timing for that too
-    if (this.hasPreProgram(program)) {
+    if (this.hasPreShow(program)) {
         compiledProgram.PreShow.Meta = {};
         // Preshow ends when the main show begins
 	compiledProgram.PreShow.Meta.TentativeEndTime = compiledProgram.Show.Meta.TentativeStartTime;
@@ -151,12 +160,12 @@ LineupCompiler.prototype.calculateProgramTimes = function(program, compiledProgr
     }
 }
 
-LineupCompiler.prototype.validateLineup = function() {
+LineupCompiler.prototype.validateLineup = function(compiledLineup) {
     var latestEndTimeObserved = 0;
-    for (var i = 0; i < this.today.compiledLineup.Programs.length; i++) {
-        var currentProgram = this.today.compiledLineup.Programs[i];
+    for (var i = 0; i < compiledLineup.Programs.length; i++) {
+        var currentProgram = compiledLineup.Programs[i];
 
-        var currentProgramStartTime = this.hasPreProgram(currentProgram) ?
+        var currentProgramStartTime = this.hasPreShow(currentProgram) ?
                         currentProgram.PreShow.Meta.TentativeStartTime :
                         currentProgram.Show.Meta.TentativeStartTime;
 

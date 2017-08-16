@@ -21,13 +21,17 @@ LineupPlanner.prototype.perform = function(flatTemplateConfig) {
     // for a day remains simple)
     this.config = flatTemplateConfig;
     
+    this.lineups = [];
     var currentLineup = this.planLineup(this.context.options.currentDayMoment);
+    // current lineup is index 0
+    this.lineups.push(currentLineup);
 
     // Now plan future lineups
     // first change state of the planner
     this.planningMode = 'future';
     for (var i = 1; i < this.context.options.futureLineupsCount; i++) {
-        this.planLineup(moment(this.context.options.currentDayMoment).add(i, 'days'));
+        var lineup = this.planLineup(moment(this.context.options.currentDayMoment).add(i, 'days'));
+        this.lineups.push(lineup);
     }
 
     return currentLineup;
@@ -35,6 +39,7 @@ LineupPlanner.prototype.perform = function(flatTemplateConfig) {
 
 LineupPlanner.prototype.planLineup = function(targetDateMoment) {
     var lineup = {};
+    lineup.Version = this.config.Version; // preserve the version of the lineup syntax
     lineup.Boxes = [];
 
     this.context.logger().info("- Planning lineup for " + targetDateMoment.format("YYYY-MM-DD"));
@@ -46,6 +51,10 @@ LineupPlanner.prototype.planLineup = function(targetDateMoment) {
             box.BoxId = this.config.BoxTemplates[i].BoxId;
             box.Programs = [];
             
+            if (!this.config.BoxTemplates[i].StartTime) {
+                throw "Error: Box" + box.BoxId + " did specify a start time!";
+            }
+
             this.calculateStartTime(box.BoxId, this.config.BoxTemplates[i], box);
 
             for (var j = 0; j < this.config.BoxTemplates[i].BoxProgramTemplates.length; j++) {
@@ -61,10 +70,19 @@ LineupPlanner.prototype.planLineup = function(targetDateMoment) {
                 if (i == 0) {
                     program.StartTime = box.StartTime;
                 }
-                box.Programs.push(program);
+                
+                // the program might be one object or a list of object (in case of replays)
+                // The concat trick, returns an array (even if program is a single item)
+                // This is to ensure correct call of push.apply
+                Array.prototype.push.apply(box.Programs, [].concat(program));
+                //box.Programs.push(program);
             }
 
-            lineup.Boxes.push(box);
+
+            // if the box has not program, skip it!
+            if (box.Programs.length > 0) {
+                lineup.Boxes.push(box);
+            }
         } else { // it is a program
             // Decide for the program from the template
             var program = this.planProgramFromTemplate(targetDateMoment, i);
@@ -72,9 +90,6 @@ LineupPlanner.prototype.planLineup = function(targetDateMoment) {
             // today (maybe because it should not be played today). In this case, igonore it
             if (program == null) {
                 continue;
-            }
-            if (i == 0) {
-                this.adjustFirstProgramStartTime(program);
             }
             // The show might have start time. If the program has a pre-program show,
             // it is mandatory to specify start time for it!
@@ -85,11 +100,10 @@ LineupPlanner.prototype.planLineup = function(targetDateMoment) {
     // Persist
     if (this.context.options.mode == 'deploy') {        
         fs.writeFileSync(this.generateLineupFilePath(targetDateMoment), JSON.stringify(lineup, null, 2), 'utf-8');
-        // for all lineups, we also need the lineup html 
-        // TODO
-        // Note that we create a brief lineup html here, the current lineup will get a full lineup page after compilation.
+        // For all lineups, we also need the lineup html
+        this.context.radio.onLineupPlanned(lineup);
     }
-    
+        
     if (this.context.options.verbose) {
         this.context.logger().info(JSON.stringify(lineup, null, 2));
     }
@@ -106,46 +120,129 @@ LineupPlanner.prototype.planProgramFromTemplate = function(targetDateMoment, box
         programIdx = -1;
     }
 
-    // TODO
-    if (programTemplate.ProgramType == "Replay") {
-        return;
-    }
-    
+    var program = null; // Could be an object to an array
+
+    // Check this for both replays and new episode templates
     if (!this.isProgramOnScheduleToday(programTemplate, targetDateMoment)) {
         return null;
     }
 
-    var program = {};
-    program.Id = programTemplate.Id;
-    program.Title = programTemplate.Title;
+    if (programTemplate.ProgramType == "Replay") {
 
-    // Optional field, is the eligible (that have HasVOD=true) clips from this program 
-    // should also be published in the podcast feed
-    if (programTemplate.PublishPodcast) {
-        program.PublishPodcast = programTemplate.PublishPodcast;
-    }
+        program = this.selectReplayProgram(programTemplate, targetDateMoment);
+        
+    } else { // New Episode
+        program = {};
 
-    if (this.hasPreShow(programTemplate)) {
-        this.selectProgramPreShowClipsFromTemplate(programTemplate, program, targetDateMoment, boxIdx, programIdx);
-    }
-    // if there is no media on for the show, we must reject the program
-    if (!this.selectProgramShowClipsFromTemplate(programTemplate, program, targetDateMoment, boxIdx, programIdx)) {
-        return null;
-    }
+        program.Id = programTemplate.Id;
+        program.Title = programTemplate.Title;
 
-    // If the program has a pre-show we must make sure that it is defined
-    // correctly
-    if (this.hasPreShow(programTemplate)) {
-        if (programTemplate.Show.StartTime == undefined || programTemplate.Show.StartTime == null) {
-            throw "Error: Program " + program.Id + " has a pre-show but does not specify exact start time for the program.";
+        // Optional field, is the eligible (that have HasVOD=true) clips from this program 
+        // should also be published in the podcast feed
+        if (programTemplate.PublishPodcast) {
+            program.PublishPodcast = programTemplate.PublishPodcast;
+        }
+
+        if (this.hasPreShow(programTemplate)) {
+            this.selectProgramPreShowClipsFromTemplate(programTemplate, program, targetDateMoment, boxIdx, programIdx);
+        }
+        // if there is no media on for the show, we must reject the program
+        if (!this.selectProgramShowClipsFromTemplate(programTemplate, program, targetDateMoment, boxIdx, programIdx)) {
+            return null;
+        }
+
+        // If the program has a pre-show we must make sure that it is defined
+        // correctly
+        if (this.hasPreShow(programTemplate)) {
+            if (programTemplate.Show.StartTime == undefined || programTemplate.Show.StartTime == null) {
+                throw "Error: Program " + program.Id + " has a pre-show but does not specify exact start time for the program.";
+            }
+        }
+
+        if (programTemplate.Show.StartTime) {
+            this.calculateStartTime(program.Id, programTemplate.Show, program.Show);
         }
     }
 
-    if (programTemplate.Show.StartTime) {
-        this.calculateStartTime(program.Id, programTemplate.Show, program.Show);
+    return program;
+}
+
+LineupPlanner.prototype.selectReplayProgram = function(programTemplate, targetDateMoment) {
+    originalAiringDateMoment = moment(targetDateMoment).subtract(parseInt(programTemplate.OriginalAiringOffset), 'days');
+    var originalAiringLineupFilePath = this.generateLineupFilePath(originalAiringDateMoment);
+
+    var originalAiringLineup = null;
+    // If this a point in future, refer to in-memory copies, otherwise read from file
+    if (originalAiringDateMoment.isBefore(this.context.options.currentDayMoment)) {
+        if (!fs.existsSync(originalAiringLineupFilePath)) {
+            this.context.logger().warn("   WARN: Replay for box " + programTemplate.OriginalBoxId +
+                 " requested but lineup file with for " + 
+                 originalAiringDateMoment.format('YYYY-MM-DD') + " cannot be found!");
+
+            return null;
+        }    
+        originalAiringLineup = JSON.parse(fs.readFileSync(originalAiringLineupFilePath, 'utf-8'));        
+    } else {
+        var offset = originalAiringDateMoment.diff(this.context.options.currentDayMoment, 'days');
+        originalAiringLineup = this.lineups[offset];
     }
 
-    return program;
+    if (!originalAiringLineup.Version || originalAiringLineup.Version == "1.0") {
+        // Not supported! Format too old
+        return null;
+    }
+
+    // Now check for the programs in the original airing and find the target programs
+
+    // Apply include filter
+    var programs = [];
+    for (var i = 0; i < originalAiringLineup.Boxes.length; i++) {
+        if (originalAiringLineup.Boxes[i].BoxId == programTemplate.OriginalBoxId) {
+            for (var j = 0; j < originalAiringLineup.Boxes[i].Programs.length; j++) {
+                var candidateProgram = originalAiringLineup.Boxes[i].Programs[j];
+                var replayEligible = false;
+
+                // Apply the include filter (no include section means *)
+                if (!programTemplate.Include || programTemplate.Include.includes(candidateProgram.Id)) {
+                    replayEligible = true;
+                }
+
+                // Apply the exclude filter (no include section means null)
+                if (programTemplate.Exclude && programTemplate.Exclude.includes(candidateProgram.Id)) {
+                    replayEligible = false
+                }
+
+                if (replayEligible) {
+                    programs.push(this.copyProgramForReplay(candidateProgram));
+                }
+            }
+            // We are done here
+            break;
+        }
+    }
+
+    if (programs.length == 0) {
+        return null;
+    }
+
+    return programs;
+}
+
+LineupPlanner.prototype.copyProgramForReplay = function(program) {
+    var replayProgram = {};
+    
+    // Mend the name and Id
+    replayProgram.Id = program.Id + "_replay";
+    replayProgram.Title = program.Title + " - تکرار";
+    // Replays do not publish podcast!
+    replayProgram.PublishPodcast = false;
+    // Copy the show and preshow clips as is
+    if (program.PreShow) {
+        replayProgram.PreShow = JSON.parse(JSON.stringify(program.PreShow));
+    }
+    replayProgram.Show = JSON.parse(JSON.stringify(program.Show));
+
+    return replayProgram;
 }
 
 LineupPlanner.prototype.selectProgramPreShowClipsFromTemplate = function(programTemplate, program, targetDateMoment, boxIdx, programIdx) {
@@ -185,10 +282,10 @@ LineupPlanner.prototype.selectProgramShowClipsFromTemplate = function(programTem
         var media = {};
         Object.assign(media, this.getMedia(programTemplate, targetDateMoment, boxIdx, programIdx, 'Show', i));
         if (media.Path != undefined) {
-            media.Path = this.config.Media.BaseDir + "/" +  media.Path;
+            media.Path = this.config.Media.BaseDir + "/" + media.Path;
             program.Show.Clips.push(media);
             
-            this.context.logger().debug("   * From " + programTemplate.Show.Clips[i].Media + " I have selected: " + media.Path);
+            this.context.logger().debug("   * From " + programTemplate.Show.Clips[i].MediaGroup + " I have selected: " + media.Path);
         }
     }
 
@@ -223,10 +320,6 @@ LineupPlanner.prototype.getMedia = function(programTemplate, targetDateMoment, b
 
 LineupPlanner.prototype.generateLineupFilePath = function(targetDateMoment) {
     return this.context.options.lineupFilePathPrefix + targetDateMoment.format("YYYY-MM-DD") + ".json";
-}
-
-LineupPlanner.prototype.hasPreShow = function(programTemplate) {
-    return programTemplate.PreShow ? true: false;
 }
 
 LineupPlanner.prototype.isProgramOnScheduleToday = function(programTemplate, targetDateMoment) {

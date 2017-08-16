@@ -15,6 +15,10 @@ var StagedExecutor = function() {
 	this.stages = [];
 }
 
+Stage.prototype.hasPreShow = function(program) {
+    return program.PreShow ? true: false;
+}
+
 // This should be implemented by subclasses
 StagedExecutor.logger = function() {
 	throw "Logger is not ready yet!";
