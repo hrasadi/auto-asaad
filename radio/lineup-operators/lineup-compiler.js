@@ -23,17 +23,6 @@ LineupCompiler.prototype.perform = function(lineup) {
 }
 
 LineupCompiler.prototype.compileLineup = function(targetDateMoment) {
-    var compiledLineupFilePath = this.generateCompilerLineupFilePath(targetDateMoment);
-    
-    // Backup the old compiled lineup, so that we can unschedule old lineup
-    if (this.context.options.mode == 'deploy') {
-        console.log(compiledLineupFilePath)
-        if (fs.existsSync(compiledLineupFilePath)) {
-            // cp            
-            fsextra.copy(compiledLineupFilePath, compiledLineupFilePath + ".old", {force: true});
-        }        
-    }
-
     // we should flatten the programs and 'Unbox' them
     this.context.logger().debug("-- Compiling Lineup - Pass 0 (Unboxing programs)");
     var unboxedLineup = this.unboxLineup();
@@ -49,17 +38,6 @@ LineupCompiler.prototype.compileLineup = function(targetDateMoment) {
     // Validate that there is no overlap
     this.context.logger().debug("-- Compiling Lineup - Pass 2 (Validation)");
     this.validateLineup(compiledLineup);
-
-    // Persist the compiled lineup
-    if (this.context.options.mode == 'deploy') {        
-        fs.writeFileSync(compiledLineupFilePath, JSON.stringify(compiledLineup, null, 2), 'utf-8');
-        // POST COMPILE EVENT IN THE RADIO (e.g. generate lineup web page, publish rss, etc.)
-        this.context.radio.onLineupCompiled(compiledLineup);
-    }
-
-    if (this.context.options.verbose) {
-        this.context.logger().info(JSON.stringify(compiledLineup, null, 2));
-    }
 
     return compiledLineup;
 }
@@ -176,10 +154,6 @@ LineupCompiler.prototype.validateLineup = function(compiledLineup) {
             latestEndTimeObserved = currentProgramStartTime;
         }
     }
-}
-
-LineupCompiler.prototype.generateCompilerLineupFilePath = function(targetDateMoment) {
-    return this.context.options.lineupFilePathPrefix + targetDateMoment.format("YYYY-MM-DD") + ".json.compiled";
 }
 
 // implemented in subclasses

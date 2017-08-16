@@ -17,9 +17,9 @@ OOUtils.inheritsFrom(Scheduler, Stage);
 Scheduler.prototype.perform = function(compiledLineup) {
     this.compiledLineup = compiledLineup;
     
-    this.scheduleLineupPlayback(this.context.options.currentDayMoment);
+    compiledLineupFilePath = this.scheduleLineupPlayback(this.context.options.currentDayMoment);
 
-    return compiledLineup;
+    return compiledLineupFilePath;
 }
 
 Scheduler.prototype.scheduleLineupPlayback = function(targetDateMoment) {
@@ -36,7 +36,9 @@ Scheduler.prototype.scheduleLineupPlayback = function(targetDateMoment) {
             // Hence, we are not prune to scheduling problems if admins modify the
             // lineup midway throughout the day
             if (currentProgram.Show.StartTime.isAfter(moment())) {
-                this.schedulePlayback(currentProgram, i);
+                if (this.context.options.mode == 'deploy') {        
+                    this.schedulePlayback(currentProgram, i);
+                }
             } else {
                 this.compiledLineup.PlaylistStartIdx = i + 1;
                 this.context.logger().warn("   WARN: Program " + currentProgram.Id + " start time is already passed. I do not schedule it.");
@@ -44,19 +46,41 @@ Scheduler.prototype.scheduleLineupPlayback = function(targetDateMoment) {
         }
     }
 
-    // Unschedule the old programs
-    var oldCompiledLineupFilePath = this.generateCompilerLineupFilePath(targetDateMoment);
-    if (fs.existsSync(oldCompiledLineupFilePath)) {
-        var oldCompiledLineupPrograms = JSON.parse(fs.readFileSync(oldCompiledLineupFilePath, 'utf-8')).Programs;
-        for (var i = 0; i < oldCompiledLineupPrograms.length; i++) {
-            this.unschedulePlayback(oldCompiledLineupPrograms[i]);
+    // Persist the compiled lineup
+    if (this.context.options.mode == 'deploy') {   
+
+        var compiledLineupFilePath = this.generateCompilerLineupFilePath(targetDateMoment);
+         
+        // Unschedule the old programs (if it should)
+        var oldCompiledLineupFilePath = this.generateOldCompiledLineupFilePath(targetDateMoment);
+        if (fs.existsSync(oldCompiledLineupFilePath)) {
+            var oldCompiledLineupPrograms = JSON.parse(fs.readFileSync(oldCompiledLineupFilePath, 'utf-8')).Programs;
+            this.unscheduleLineup(oldCompiledLineupPrograms);
             // Should we remove the old lineup? I donno! For now it is safe to keep it!
         }
+
+        // Backup the old compiled lineup, so that we can unschedule old lineup later
+        if (fs.existsSync(compiledLineupFilePath)) {
+            // cp            
+            fsextra.copy(compiledLineupFilePath, compiledLineupFilePath + ".old", {force: true});
+        }        
+
+        fs.writeFileSync(compiledLineupFilePath, JSON.stringify(this.compiledLineup, null, 2), 'utf-8');
     }
+
+    if (this.context.options.verbose) {
+        this.context.logger().info(JSON.stringify(this.compiledLineup, null, 2));
+    }
+
+    return compiledLineupFilePath; // undefined if in test mode (which is expected behavior)
 }
 
 Scheduler.prototype.generateCompilerLineupFilePath = function(targetDateMoment) {
-    return this.context.options.lineupFilePathPrefix + targetDateMoment.format("YYYY-MM-DD") + ".json.compiled.old";
+    return this.context.options.lineupFilePathPrefix + targetDateMoment.format("YYYY-MM-DD") + ".json.compiled";
+}
+
+Scheduler.prototype.generateOldCompiledLineupFilePath = function(targetDateMoment) {
+    return this.generateCompilerLineupFilePath + ".old";
 }
 
 // Implemented in subclasses
@@ -65,7 +89,7 @@ Scheduler.prototype.schedulePlayback = function(currentProgram, currentProgramId
 }
 
 // Implemented in subclasses
-Scheduler.prototype.unschedulePlayback = function(program) {
+Scheduler.prototype.unscheduleLineup = function(lineup) {
     console.log("Not implemented!");
 }
 

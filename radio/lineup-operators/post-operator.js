@@ -10,8 +10,16 @@ var PostOperator = function() {
 }
 OOUtils.inheritsFrom(PostOperator, Stage);
 
-PostOperator.prototype.perform = function() {
-	this.context.logger().info("Not implemented!");
+PostOperator.prototype.perform = function(compiledLineupFilePath) {
+	this.compiledLineupFilePath = compiledLineupFilePath
+
+	this.operate(compiledLineupFilePath);
+
+	return null;
+}
+
+PostOperator.prototype.operate = function() {
+	console.log("Not implemented!");
 }
 
 module.exports = {
