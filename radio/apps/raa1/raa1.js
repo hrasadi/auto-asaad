@@ -15,15 +15,16 @@ const { URL } = require('url');
 
 var lm = require('../../lineup-manager');
 
-var Raa1 = function(configFile, deploymentMode) {
-    this.configFilePath = path.resolve(configFile);
-    this.cwd = path.resolve(path.dirname(configFile));
+var Raa1 = function(program) {
+    this.configFilePath = path.resolve(program.args[0]);
+    this.cwd = path.resolve(path.dirname(program.args[0]) + '/..');
     this.config = null;
 
     this.events = null;
     this.messaging = null;
 
-    this.deploymentMode = deploymentMode;
+    this.deploymentMode = program.args[1];
+    this.options = program;
 
     this.dataProvider = {};
 
@@ -44,8 +45,8 @@ Raa1.prototype.initialize = function() {
     this.events = new Events(this.config.Events);
     this.messaging = new Messaging(this.config.Messaging);
 
-    var lineupManager = lm.build(process.argv[3], this.config.Radio, this.cwd, this);
-    lineupManager.startMainLoop();
+    var lineupManager = lm.build(this.deploymentMode, this.config.Radio, this.cwd, this);
+    lineupManager.init(this.options);
 }
 
 Raa1.prototype.reset = function(currentDate, callback_fn) {
@@ -224,12 +225,11 @@ program
     .option('-t, --test', 'Test mode (no side effects)')
     .parse(process.argv)
 
-console.log(program)
 if (program.args.length < 2) {
     console.log("Usage: node raa1.js OPTIONS {config-file} {deployment-mode}");
     process.exit(1);
 }
 
-var raa1 = new Raa1(process.argv[2], process.argv[3], program);
+var raa1 = new Raa1(program);
 
 raa1.initialize();

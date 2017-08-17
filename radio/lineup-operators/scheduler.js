@@ -15,6 +15,7 @@ var Scheduler = function() {
 OOUtils.inheritsFrom(Scheduler, Stage);
 
 Scheduler.prototype.perform = function(compiledLineup) {
+
     this.compiledLineup = compiledLineup;
     
     compiledLineupFilePath = this.scheduleLineupPlayback(this.context.options.currentDayMoment);
@@ -26,6 +27,8 @@ Scheduler.prototype.scheduleLineupPlayback = function(targetDateMoment) {
 
     this.compiledLineup.PlaylistStartIdx = 0;
 
+    var compiledLineupFilePath = this.generateCompilerLineupFilePath(targetDateMoment);
+
     for (var i = 0; i < this.compiledLineup.Programs.length; i++) {
         var currentProgram = this.compiledLineup.Programs[i];
 
@@ -36,9 +39,8 @@ Scheduler.prototype.scheduleLineupPlayback = function(targetDateMoment) {
             // Hence, we are not prune to scheduling problems if admins modify the
             // lineup midway throughout the day
             if (currentProgram.Show.StartTime.isAfter(moment())) {
-                if (this.context.options.mode == 'deploy') {        
-                    this.schedulePlayback(currentProgram, i);
-                }
+                // the implementation is responsible to handling the mode
+                this.schedulePlayback(compiledLineupFilePath, currentProgram, i);
             } else {
                 this.compiledLineup.PlaylistStartIdx = i + 1;
                 this.context.logger().warn("   WARN: Program " + currentProgram.Id + " start time is already passed. I do not schedule it.");
@@ -48,8 +50,6 @@ Scheduler.prototype.scheduleLineupPlayback = function(targetDateMoment) {
 
     // Persist the compiled lineup
     if (this.context.options.mode == 'deploy') {   
-
-        var compiledLineupFilePath = this.generateCompilerLineupFilePath(targetDateMoment);
          
         // Unschedule the old programs (if it should)
         var oldCompiledLineupFilePath = this.generateOldCompiledLineupFilePath(targetDateMoment);
@@ -84,7 +84,7 @@ Scheduler.prototype.generateOldCompiledLineupFilePath = function(targetDateMomen
 }
 
 // Implemented in subclasses
-Scheduler.prototype.schedulePlayback = function(currentProgram, currentProgramIdx) {
+Scheduler.prototype.schedulePlayback = function(compiledLineupFilePath, currentProgram, currentProgramIdx) {
     console.log("Not implemented!");
 }
 

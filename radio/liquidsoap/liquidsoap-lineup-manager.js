@@ -49,50 +49,78 @@ var LiquidsoapScheduler = function() {
 }
 OOUtils.inheritsFrom(LiquidsoapScheduler, Scheduler);
 
-LiquidsoapScheduler.prototype.schedulePlayback = function(currentProgram, currentProgramIdx) {
+LiquidsoapScheduler.prototype.schedulePlayback = function(compiledLineupFilePath, currentProgram, currentProgramIdx) {
     /** We should now register cron events **/
     // Register event using 'at'
     if (this.hasPreShow(currentProgram)) {
 
         var alignedPreShowStartTime = moment(currentProgram.PreShow.Meta.TentativeStartTime);
         // Register preshow and its filler if any
-        this.logger.info("PreShow playback scheduled for " + alignedPreShowStartTime.format("YYYY-MM-DDTHH:mm:ss").toString());
+        this.context.logger().info("PreShow playback scheduled for " + alignedPreShowStartTime.format("YYYY-MM-DDTHH:mm:ss").toString());
         
-        var ret = execSync("echo 'cd " + __dirname + "; ./playback-preshow.sh' " + this.today.compiledLineupFilePath + " " + currentProgramIdx + " | at -t " + alignedPreShowStartTime.subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1", {
-            encoding: 'utf-8'
-        });                    
+        var preShowSchedulerCmd = "echo 'cd " + __dirname + "; ./playback-preshow.sh' " + compiledLineupFilePath + " " + currentProgramIdx + " | at -t " + alignedPreShowStartTime.subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1";
+        if (this.context.options.mode == 'deploy') {   
+            var ret = execSync(preShowSchedulerCmd, {
+                encoding: 'utf-8'
+            });                    
 
-        currentProgram.PreShow.Scheduler = {};
-        currentProgram.PreShow.Scheduler.ScheduledAt = currentProgram.PreShow.Meta.TentativeStartTime;
-        currentProgram.PreShow.Scheduler.SchedulerId = ret.split("\n")[1].split(" ")[1]; // The second token (e.g. "warning .... \n job xxx at Thu Jun 29 20:24:58 2017")
+            currentProgram.PreShow.Scheduler = {};
+            currentProgram.PreShow.Scheduler.ScheduledAt = currentProgram.PreShow.Meta.TentativeStartTime;
+            currentProgram.PreShow.Scheduler.SchedulerId = ret.split("\n")[1].split(" ")[1]; // The second token (e.g. "warning .... \n job xxx at Thu Jun 29 20:24:58 2017")
+        } else {
+            this.context.logger().debug("PreShow scheduler command is: " + preShowSchedulerCmd);
+        }
     }
 
-    // Register auto-asaad program announcement! (One minute earlier and the rest is handled in the shell file)
-    this.logger.info("Show playback scheduled for " + moment(currentProgram.Show.StartTime).format("YYYY-MM-DDTHH:mm:ss").toString());
-    var ret = execSync("echo 'cd " + __dirname + "; ./playback-show.sh' " + this.today.compiledLineupFilePath + " " + currentProgramIdx + "| at -t " + moment(currentProgram.Show.StartTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1", {
-        encoding: 'utf-8'
-    });
+    // Register auto-asaad program (One minute earlier and the rest is handled in the shell file)
+    var showSchedulerCmd = "echo 'cd " + __dirname + "; ./playback-show.sh' " + compiledLineupFilePath + " " + currentProgramIdx + "| at -t " + moment(currentProgram.Show.StartTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1";
+    if (this.context.options.mode == 'deploy') {
+        this.context.logger().info("Show playback scheduled for " + moment(currentProgram.Show.StartTime).format("YYYY-MM-DDTHH:mm:ss").toString());
+    
+        var ret = execSync(showSchedulerCmd, {
+            encoding: 'utf-8'
+        });        
+    
+        currentProgram.Show.Scheduler = {};
+        currentProgram.Show.Scheduler.ScheduledAt = currentProgram.Show.StartTime;
+        currentProgram.Show.Scheduler.SchedulerId = ret.split("\n")[1].split(" ")[1]; // The second token (e.g. "job xxx at Thu Jun 29 20:24:58 2017")
+    } else {
+        this.context.logger().debug("Show scheduler command is: " + showSchedulerCmd);            
+    }
 
-    currentProgram.Show.Scheduler = {};
-    currentProgram.Show.Scheduler.ScheduledAt = currentProgram.Show.StartTime;
-    currentProgram.Show.Scheduler.SchedulerId = ret.split("\n")[1].split(" ")[1]; // The second token (e.g. "job xxx at Thu Jun 29 20:24:58 2017")
 }
 
 LiquidsoapScheduler.prototype.unscheduleLineup = function(lineup) {
-    if (program.PreShow && program.PreShow.Scheduler) {
-        // unschedule preshow
-        try {
-            execSync('atrm ' + program.PreShow.Scheduler.SchedulerId);
-        } catch(e) {
-            this.logger.warn("Failed to remove job. Inner exception is: " + e);
+    for (var i = 0; i < lineup.Programs.length; i++) {
+        program = lineup.Programs[i];
+        if (program.PreShow && program.PreShow.Scheduler) {
+            // unschedule preshow
+            cmd = 'atrm ' + program.PreShow.Scheduler.SchedulerId;
+            
+            if (this.context.options.mode == 'deploy') {
+                try {
+                    execSync(cmd);
+                } catch(e) {
+                    this.logger.warn("Failed to remove job. Inner exception is: " + e);
+               }
+            } else {
+                this.context.logger().debug("Unscheduling PreShow command is: " + cmd)
+            }
         }
-    }
-    if (program.Show.Scheduler) {
-        // unschedule show
-        try {
-            execSync('atrm ' + program.Show.Scheduler.SchedulerId);
-        } catch(e) {
-            this.logger.warn("Failed to remove job. Inner exception is: " + e);
+
+        if (program.Show.Scheduler) {
+            // unschedule show
+            cmd = 'atrm ' + program.Show.Scheduler.SchedulerId;
+
+            if (this.context.options.mode == 'deploy') {
+                try {
+                    execSync(cmd);
+                } catch(e) {
+                    this.logger.warn("Failed to remove job. Inner exception is: " + e);
+               }
+            } else {
+                this.context.logger().debug("Unscheduling Show command is: " + cmd)
+            }
         }
     }
 }
@@ -101,13 +129,14 @@ LiquidsoapScheduler.prototype.unscheduleLineup = function(lineup) {
 var LiquidsoapPostOperator = function() {
     PostOperator.call(this);
 }
-OOUtils.inheritsFrom(LiquidsoapLineupManager, LineupManager);
+OOUtils.inheritsFrom(LiquidsoapPostOperator, PostOperator);
 
 LiquidsoapPostOperator.prototype.operate = function() {
+    // TODO - A BIG ONE! (We definitely need to break this reverse dependency (liquidsoap to raa))
     // the var will be set only if in deploy mode. In the test mode, we do not create any side effects
     if (this.compiledLineupFilePath) {
         // Let Liquidsoap know that the lineup has been changed
-        this.logger.info("Changing the current lineup file to " + this.compiledLineupFilePath);
+        this.context.logger().info("Changing the current lineup file to " + this.compiledLineupFilePath);
         try {
             execSync("cd " + __dirname + "; ./update-lineup-file.sh " + this.compiledLineupFilePath, { encoding: 'utf-8' });        
         } catch (e) {

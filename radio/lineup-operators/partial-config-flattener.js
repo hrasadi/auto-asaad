@@ -13,7 +13,7 @@ OOUtils.inheritsFrom(PartialConfigFlattener, Stage);
 
 PartialConfigFlattener.prototype.perform = function(templateConfig) {
     
-    partialConfigFilePrefix = this.context.cwd + "/conf.d/";
+    partialConfigFilePrefix = this.context.cwd + "/conf/partials/";
 
     var flatTemplateConfig = {};
     // What a way to duplicate the json!
@@ -27,8 +27,6 @@ PartialConfigFlattener.prototype.perform = function(templateConfig) {
         flatTemplateConfig.Media[templateConfig.Media.Partials[i].Name] = partialConf;
     }
 
-    //console.log(JSON.stringify(flatTemplateConfig, null, 2));
-    
     return flatTemplateConfig;
 }
 

@@ -1,0 +1,3 @@
+[submodule "radio/apps/raa1/conf"]
+	path = radio/apps/raa1/conf
+	url = git@gitlab.com:hrasadi/raa-conf.git

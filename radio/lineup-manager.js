@@ -46,14 +46,33 @@ var LineupManager = function(radioConfig, cwd, radioObj) {
     // radio specific logic in the form of callbacks.
     this.radio = radioObj;
 
-    //this.initStages();
+    this.initStages();
 }
 
 Utils.inheritsFrom(LineupManager, StagedExecutor);
 
-LineupManager.prototype.init = function() {
-    var self = this;
+LineupManager.prototype.init = function(options) {
+    this.options = {};
 
+    this.options.currentDayMoment = moment();
+    this.options.futureLineupsCount = (options.futureLineupsCount == undefined) ? options.futureLineupsCount : 4;
+    this.options.verbose = options.verbose != undefined ? options.verbose : 4;    
+    this.options.mode = options.test != undefined ? 'test' : 'deploy';
+    this.options.lineupFilePathPrefix = this.cwd + "/lineups/" + this.radio.id + "-";
+
+    if (this.options.mode == 'test') {
+        try {
+            this.loggerObj = new Logger();
+
+            this.execute(this.config);
+        } catch (e) {
+            this.logger().fatal(e);
+        }
+        return;
+    } 
+
+    // In deploy mode
+    var self = this;
     var lineupWatcher = function() {
         // Watch the lineup file for changes
         try {
@@ -61,12 +80,12 @@ LineupManager.prototype.init = function() {
                 function(eventType, fileName) {
                     if (eventType == 'change') {
                         // Read the new lineup from modified file
-                        self.today.lineup = JSON.parse(self.fs.readFileSync(self.today.lineupFilePath, 'utf8'));
+                        // self.lineup = JSON.parse(self.fs.readFileSync(self.today.lineupFilePath, 'utf8'));
                         // Recompile
                         try {
-                            self.compileLineup();
+                            self.execute(self.config, "LineupCompiler");
                         } catch(e) {
-                            self.logger.crit(e);
+                            self.logger().fatal(e);
                             // Nothing will really change until the file is touched again. 
                             // Both in-memory copies of lineup and compiledLineup would be invalid during this period
                         }
@@ -74,9 +93,11 @@ LineupManager.prototype.init = function() {
                     // else?
                 });
         } catch (e) {
-            self.generateLineup();
-            self.compileLineup();
-            // This is the lineup generated from template. If it has any compile errors it would be fatal. So do not catch excpetions here!
+            try {
+                self.execute(self.config);
+            } catch (e) {
+                self.logger().fatal(e);
+            }            // This is the lineup generated from template. If it has any compile errors it would be fatal. So do not catch excpetions here!
             // try again!
             lineupWatcher();
         }
@@ -84,13 +105,13 @@ LineupManager.prototype.init = function() {
 
     var resetRadio = function() {
         // unwatch the old file
-        if (self.today.lineupFileWatcher != null) {
-        self.fs.close(self.today.lineupFileWatcher);
+        if (self.lineupFileWatcher != null) {
+        self.fs.close(self.lineupFileWatcher);
         }
 
-        self.loggerObj = new Logger(self.cwd + "/logs/lm-" + self.radio.id + "-" + self.today.date + ".log");
+        self.loggerObj = new Logger(self.cwd + "/logs/lm-" + self.radio.id + "-" + self.options.currentDayMoment.format("YYYY-MM-DD") + ".log");
 
-        self.radio.reset(self.todayLineup.date, function() {
+        self.radio.reset(self.options.currentDayMoment, function() {
             lineupWatcher();
         });
     }
@@ -109,34 +130,17 @@ LineupManager.prototype.init = function() {
 
         }, nextDayStartsInMillis);
 
-    this.logger.info("Scheduled next lineup regeneration in " + nextDayStartsInMillis +
+    this.logger().info("Scheduled next lineup regeneration in " + nextDayStartsInMillis +
                 "ms. (" + tomorrow.toString() + ")");
 
 }
 
 LineupManager.prototype.initStages = function() {
-
-    this.options = {};
-
-    this.options.currentDayMoment = moment();
-    this.options.futureLineupsCount = 4;
-    this.options.verbose = false;
-    
-    this.options.mode = 'deploy'; // or 'deploy'
-
-    this.options.lineupFilePathPrefix = this.cwd + "/lineups/" + this.radio.id + "-";
-
     this.pushStage(this.instantiatePartialConfigFlattener());
     this.pushStage(this.instantiateLineupPlanner());
     this.pushStage(this.instantiateLineupCompiler());
     this.pushStage(this.instantiateScheduler());
     this.pushStage(this.instantiatePostOperator());
-
-    try {
-        this.execute(this.config);
-    } catch (e) {
-        this.logger().fatal(e);
-    }
 }
 
 LineupManager.prototype.logger = function() {
