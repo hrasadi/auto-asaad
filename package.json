@@ -4,6 +4,7 @@
   "description": "Auto-asaad is a set of scripts for social media automation",
   "dependencies": {
     "child_process": "^1.0.2",
+    "commander": "^2.11.0",
     "dot": "^1.1.2",
     "fs-extra": "^3.0.1",
     "jsesc": "^2.5.1",
