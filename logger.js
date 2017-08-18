@@ -14,25 +14,46 @@ module.exports = function(logFilePath) {
     fatal: 'red'
   }
 
-  var logger = new (winston.Logger)({
-    colors: customColors,
-    level: logLevel,
-    levels: {
-      fatal: 0,
-      crit: 1,
-      warn: 2,
-      info: 3,
-      debug: 4,
-      trace: 5
-    },
-    transports: [
-      new (winston.transports.Console)({
-        colorize: true,
-        timestamp: true
-      }),
-      new (winston.transports.File)({ filename: logFilePath })
-    ]
-  })
+  if (logFilePath) {
+    var logger = new (winston.Logger)({
+      colors: customColors,
+      level: logLevel,
+      levels: {
+        fatal: 0,
+        crit: 1,
+        warn: 2,
+        info: 3,
+        debug: 4,
+        trace: 5
+      },
+      transports: [
+        new (winston.transports.Console)({
+          colorize: true,
+          timestamp: true
+        }),
+        new (winston.transports.File)({ filename: logFilePath })
+      ]
+    })    
+  } else {
+    var logger = new (winston.Logger)({
+      colors: customColors,
+      level: logLevel,
+      levels: {
+        fatal: 0,
+        crit: 1,
+        warn: 2,
+        info: 3,
+        debug: 4,
+        trace: 5
+      },
+      transports: [
+        new (winston.transports.Console)({
+          colorize: true,
+          timestamp: true
+        })
+      ]
+    })
+  }
 
   winston.addColors(customColors)
 
