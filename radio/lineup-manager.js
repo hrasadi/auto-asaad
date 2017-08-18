@@ -17,7 +17,6 @@ to modify the program lineups.
 **/
 
 var fs = require('fs');
-var moment = require('moment');
 
 var Utils = require('../utils');
 var Logger = require('../logger');
@@ -54,33 +53,21 @@ Utils.inheritsFrom(LineupManager, StagedExecutor);
 LineupManager.prototype.init = function(options) {
     this.options = {};
 
-    this.options.currentDayMoment = moment();
-    this.options.futureLineupsCount = (options.futureLineupsCount == undefined) ? options.futureLineupsCount : 4;
+    this.options.futureLineupsCount = (options.futureLineupsCount != undefined) ? options.futureLineupsCount : 4;
     this.options.verbose = options.verbose != undefined ? options.verbose : 4;    
     this.options.mode = options.test != undefined ? 'test' : 'deploy';
     this.options.lineupFilePathPrefix = this.cwd + "/lineups/" + this.radio.id + "-";
-
-    if (this.options.mode == 'test') {
-        try {
-            this.loggerObj = new Logger();
-
-            this.execute(this.config);
-        } catch (e) {
-            this.logger().fatal(e);
-        }
-        return;
-    } 
+    this.options.currentDayMoment = (options.targetDate != undefined) ? this.moment(options.targetDate) : this.moment();
 
     // In deploy mode
     var self = this;
     var lineupWatcher = function() {
         // Watch the lineup file for changes
         try {
-            self.today.lineupFileWatcher = self.fs.watch(self.today.lineupFilePath,
+            self.lineupFileWatcher = self.fs.watch(self.lineupFilePath,
                 function(eventType, fileName) {
                     if (eventType == 'change') {
                         // Read the new lineup from modified file
-                        // self.lineup = JSON.parse(self.fs.readFileSync(self.today.lineupFilePath, 'utf8'));
                         // Recompile
                         try {
                             self.execute(self.config, "LineupCompiler");
@@ -104,35 +91,41 @@ LineupManager.prototype.init = function(options) {
     }
 
     var resetRadio = function() {
-        // unwatch the old file
         if (self.lineupFileWatcher != null) {
-        self.fs.close(self.lineupFileWatcher);
+            self.fs.close(self.lineupFileWatcher);
         }
 
-        self.loggerObj = new Logger(self.cwd + "/logs/lm-" + self.radio.id + "-" + self.options.currentDayMoment.format("YYYY-MM-DD") + ".log");
-
         self.radio.reset(self.options.currentDayMoment, function() {
-            lineupWatcher();
+            if (self.options.mode == 'deploy') {
+                self.loggerObj = new Logger(self.cwd + "/logs/lm-" + self.radio.id + "-" + self.options.currentDayMoment.format("YYYY-MM-DD") + ".log");
+        
+                // unwatch the old file
+                lineupWatcher();
+            } else {
+                // In test mode, run everything once and return
+                try {
+                    self.loggerObj = new Logger();
+                    self.execute(self.config);
+                } catch (e) {
+                    self.logger().fatal(e);
+                }                
+            }
         });
     }
 
     resetRadio();
 
-    // Wake up at the end of the day and reset the manager
-    var tomorrow = this.moment().add(1, 'day').set('hour', 0).set('minute', 0).set('second', 0);
-    var nextDayStartsInMillis = tomorrow.diff(this.moment());
+    if (self.options.mode == 'deploy') {
+        // Wake up at the end of the day and reset the manager
+        self.options.currentDayMoment = self.options.currentDayMoment.add(1, 'day').set('hour', 0).set('minute', 0).set('second', 0);
+        var nextDayStartsInMillis = self.options.currentDayMoment.diff(this.moment());
 
-    setTimeout(function() {
-
-            // reset lineup manager, the file watcher will hence generate the new
-            // lineup automatically.
-            resetRadio(self);
-
-        }, nextDayStartsInMillis);
-
-    this.logger().info("Scheduled next lineup regeneration in " + nextDayStartsInMillis +
-                "ms. (" + tomorrow.toString() + ")");
-
+        setTimeout(function() {
+                // reset lineup manager, the file watcher will hence generate the new
+                // lineup automatically.
+                resetRadio(self);
+            }, nextDayStartsInMillis);
+    }   
 }
 
 LineupManager.prototype.initStages = function() {

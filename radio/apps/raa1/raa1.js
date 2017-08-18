@@ -30,11 +30,9 @@ var Raa1 = function(program) {
 
     Radio.call(this, "Raa1", "Radio Auto-asaad");
 }
-
 Utils.inheritsFrom(Raa1, Radio);
 
 Raa1.prototype.initialize = function() {
-
     this.config = JSON.parse(fs.readFileSync(this.configFilePath, 'utf8'));
 
     if (this.config == null) {
@@ -45,32 +43,49 @@ Raa1.prototype.initialize = function() {
     this.events = new Events(this.config.Events);
     this.messaging = new Messaging(this.config.Messaging);
 
-    var lineupManager = lm.build(this.deploymentMode, this.config.Radio, this.cwd, this);
-    lineupManager.init(this.options);
+    this.lineupManager = lm.build(this.deploymentMode, this.config.Radio, this.cwd, this);
+    this.lineupManager.init(this.options);
 }
 
 Raa1.prototype.reset = function(currentDate, callback_fn) {
-    this.dataProvider.currentDate = currentDate;
-
     var self = this;
-    this.events.readTodayEvent(function(eventsDict) {
-        self.dataProvider.fajrTime = events[self.events.EventType.FAJR];
-        self.dataProvider.dhuhrTime = events[self.events.EventType.DHUHR];
-        self.dataProvider.maghribTime = events[self.events.EventType.MAGHRIB];
+    var d = moment(this.lineupManager.options.currentDayMoment);
 
-        // give control back to lineupManager
+    this.dataProvider = {};
+
+    var onAllEventsCollection = function() {
         callback_fn();
-    });
+    }
+
+    for (var i = 0; i <= this.lineupManager.options.futureLineupsCount; i++) {
+        this.events.readEvent(d.toDate(), function(d, eventsDict) {
+            dateString = moment(d).format("YYYYMMDD");
+            self.dataProvider[dateString] = {};
+            self.dataProvider[dateString].fajrTime = events[self.events.EventType.FAJR];
+            self.dataProvider[dateString].dhuhrTime = events[self.events.EventType.DHUHR];
+            self.dataProvider[dateString].maghribTime = events[self.events.EventType.MAGHRIB];
+
+            if (Object.keys(self.dataProvider).length > self.lineupManager.options.futureLineupsCount) {
+                onAllEventsCollection();
+            }
+        });
+        d.add(1, 'days');
+    }
 }
 
-Raa1.prototype.calculateProgramStartTime = function(id) {
+Raa1.prototype.calculateProgramStartTime = function(targetDateMoment, id) {
     if (id == 'FajrProgram') {
-        return this.dataProvider.fajrTime;
+        return this.dataProvider[targetDateMoment.format("YYYYMMDD")].fajrTime;
     } else if (id == 'DhuhrProgram') {
-        return this.dataProvider.dhuhrTime;
+        return this.dataProvider[targetDateMoment.format("YYYYMMDD")].dhuhrTime;
     } else if (id == 'MaghribProgram') {
-        return this.dataProvider.maghribTime;
+        return this.dataProvider[targetDateMoment.format("YYYYMMDD")].maghribTime;
     }
+}
+
+// For raa1, we should generate the lineup HTML
+Radio.prototype.onLineupPlanned = function(targetDateMoment, lineup) {
+    // TODO
 }
 
 // For raa1, we should generate the lineup HTML

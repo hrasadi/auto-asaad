@@ -55,7 +55,7 @@ LineupPlanner.prototype.planLineup = function(targetDateMoment) {
                 throw "Error: Box" + box.BoxId + " did specify a start time!";
             }
 
-            this.calculateStartTime(box.BoxId, this.config.BoxTemplates[i], box);
+            this.calculateStartTime(targetDateMoment, box.BoxId, this.config.BoxTemplates[i], box);
 
             for (var j = 0; j < this.config.BoxTemplates[i].BoxProgramTemplates.length; j++) {
                 // Decide for the program from the template
@@ -101,7 +101,7 @@ LineupPlanner.prototype.planLineup = function(targetDateMoment) {
     if (this.context.options.mode == 'deploy') {        
         fs.writeFileSync(this.generateLineupFilePath(targetDateMoment), JSON.stringify(lineup, null, 2), 'utf-8');
         // For all lineups, we also need the lineup html
-        this.context.radio.onLineupPlanned(lineup);
+        this.context.radio.onLineupPlanned(targetDateMoment, lineup);
     }
         
     if (this.context.options.verbose) {
@@ -160,7 +160,7 @@ LineupPlanner.prototype.planProgramFromTemplate = function(targetDateMoment, box
         }
 
         if (programTemplate.Show.StartTime) {
-            this.calculateStartTime(program.Id, programTemplate.Show, program.Show);
+            this.calculateStartTime(targetDateMoment, program.Id, programTemplate.Show, program.Show);
         }
     }
 
@@ -343,11 +343,11 @@ LineupPlanner.prototype.isProgramOnScheduleToday = function(programTemplate, tar
     }
 }
 
-LineupPlanner.prototype.calculateStartTime = function(itemId, template, generated) {
+LineupPlanner.prototype.calculateStartTime = function(targetDateMoment, itemId, template, generated) {
     if (template.StartTime.CalculationMethod == 'static') {
         generated.StartTime = moment(template.StartTime.At, ['h:m:s', 'H:m:s']);
     } else {
-        generated.StartTime = moment(this.context.radio[template.StartTime.Calculator](itemId));
+        generated.StartTime = moment(this.context.radio[template.StartTime.Calculator](targetDateMoment, itemId));
     }
 }
 

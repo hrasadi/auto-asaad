@@ -51,10 +51,11 @@ StandaloneScheduler.prototype.schedulePlayback = function(compiledLineupFilePath
     // Register event using 'at'
     if (this.hasPreShow(currentProgram)) {
         preShowStartTimeString = moment(currentProgram.PreShow.Meta.TentativeStartTime).format("YYYYMMDDHHmm.ss").toString();
-        this.logger.info("PreShow playback scheduled for " + preShowStartTimeString);
+        this.context.logger().info("PreShow playback scheduled for " + preShowStartTimeString);
         
+        var preShowSchedulerCmd = "echo 'cd " + __dirname + "; node playback-pre-program.js " + compiledLineupFilePath + " " + currentProgram.PreShow.FillerClip.path + " ' | at -t " + preShowStartTimeString + " 2>&1";
         if (this.context.options.mode == 'deploy') {   
-            var ret = execSync("echo 'cd " + __dirname + "; node playback-pre-program.js " + compiledLineupFilePath + " " + currentProgram.PreShow.FillerClip.path + " ' | at -t " + preShowStartTimeString + " 2>&1", {
+            var ret = execSync(preShowSchedulerCmd, {
                 encoding: 'utf-8'
             });
 

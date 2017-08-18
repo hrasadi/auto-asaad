@@ -19,7 +19,6 @@ PostOperator.prototype.perform = function(compiledLineupFilePath) {
 }
 
 PostOperator.prototype.operate = function() {
-	console.log("Not implemented!");
 }
 
 module.exports = {
