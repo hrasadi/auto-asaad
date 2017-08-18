@@ -43,7 +43,7 @@ module.exports = function(eventsConfig) {
                                     events[self.EventType[eventType]] = eventTime;
                                 }
                                 // callback
-                                callback_fn(events);
+                                callback_fn(referenceDate, events);
                             });
     }
 
