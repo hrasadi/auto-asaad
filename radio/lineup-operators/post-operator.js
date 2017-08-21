@@ -18,6 +18,7 @@ PostOperator.prototype.perform = function(compiledLineupFilePath) {
 	return null;
 }
 
+// Subclass implementation is responsible for handling the mode
 PostOperator.prototype.operate = function() {
 }
 
