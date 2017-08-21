@@ -54,6 +54,10 @@ LineupPlanner.prototype.planLineup = function(targetDateMoment) {
             if (!this.config.BoxTemplates[i].StartTime) {
                 throw "Error: Box" + box.BoxId + " did specify a start time!";
             }
+            // Check this for each box, if not scheduled. 
+            if (!this.isProgramOnScheduleToday(this.config.BoxTemplates[i], targetDateMoment)) {
+                continue;
+            }
 
             this.calculateStartTime(targetDateMoment, box.BoxId, this.config.BoxTemplates[i], box);
 
@@ -341,6 +345,8 @@ LineupPlanner.prototype.isProgramOnScheduleToday = function(programTemplate, tar
             return true;
         }
     }
+
+    return false;
 }
 
 LineupPlanner.prototype.calculateStartTime = function(targetDateMoment, itemId, template, generated) {
