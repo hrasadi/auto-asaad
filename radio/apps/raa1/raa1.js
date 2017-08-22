@@ -1,9 +1,12 @@
 var Radio = require('../../radio');
 
 var program = require('commander');
+
 var fs = require('fs');
+var fsextra = require('fs-extra');
 var moment = require('moment');
 var path = require('path');
+
 var dot = require('dot');
 
 var Events = require('../../../events');

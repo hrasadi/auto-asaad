@@ -14,16 +14,29 @@ RSSFeedGenerator.prototype.addAllItems = function(items) {
 	this.items = this.items.concat(items);	
 }
 
-RSSFeedGenerator.prototype.publishFeed = function(feedPath) {
+RSSFeedGenerator.prototype.publishFeed = function(targetDateMoment, feedPath) {
+         
+	var feedJSONPath = this.generateFeedJSONPath(targetDateMoment, feedPath);
+
+    if (!fs.existsSync(feedJSONPath)) {
+    	// We are in a new day, so remove outdated json (day before yesterday)
+    	var outdatedJSONPath = this.generateFeedJSONPath(moment(targetDateMoment).subtract(2, 'days'), feedPath);
+    	if (fs.existsSync(outdatedJSONPath)) {
+    		fsextra.removeSync(outdatedJSONPath);
+    	}
+    }
+	// In any case we create the base json is what we have generated yesterday
+    fsextra.copy(this.generateFeedJSONPath(moement(targetDateMoment).subtract(1, 'days'), feedPath), feedJSONPath, {force: true});
+
 
 	// Read the old feed JSON, append to it and write it back
 	var currentItems = [];
 	if (fs.existsSync(feedPath + ".json")) {
-		currentItems = JSON.parse(fs.readFileSync(feedPath + ".json", "utf-8"));
+		currentItems = JSON.parse(fs.readFileSync(feedJSONPath, "utf-8"));
 	}
 
 	var newItems = currentItems.concat(this.items);
-	fs.writeFileSync(feedPath + ".json", JSON.stringify(newItems, null, 2));
+	fs.writeFileSync(feedJSONPath, JSON.stringify(newItems, null, 2));
 
 	var feed = new RSS(this.options)
 
@@ -37,5 +50,8 @@ RSSFeedGenerator.prototype.publishFeed = function(feedPath) {
 	fs.writeFileSync(feedPath, xml);
 }
 
+RSSFeedGenerator.prototype.generateFeedJSONPath(targetDateMoment, feedPath) {
+	return feedPath + ".json." + targetDateMoment.format("YYYY-MM-DD");
+}
 
 module.exports = RSSFeedGenerator;
