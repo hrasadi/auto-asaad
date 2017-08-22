@@ -59,7 +59,7 @@ LiquidsoapScheduler.prototype.schedulePlayback = function(compiledLineupFilePath
         this.context.logger().info("PreShow playback scheduled for " + alignedPreShowStartTime.format("YYYY-MM-DDTHH:mm:ss").toString());
         
         var preShowSchedulerCmd = "echo 'cd " + __dirname + "; ./playback-preshow.sh' " + compiledLineupFilePath + " " + currentProgramIdx + " | at -t " + alignedPreShowStartTime.subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1";
-        if (this.context.options.mode == 'deploy') {   
+        if (this.context.options.mode == 'deploy' && !this.context.options.noScheduling) {   
             var ret = execSync(preShowSchedulerCmd, {
                 encoding: 'utf-8'
             });                    
@@ -74,7 +74,7 @@ LiquidsoapScheduler.prototype.schedulePlayback = function(compiledLineupFilePath
 
     // Register auto-asaad program (One minute earlier and the rest is handled in the shell file)
     var showSchedulerCmd = "echo 'cd " + __dirname + "; ./playback-show.sh' " + compiledLineupFilePath + " " + currentProgramIdx + "| at -t " + moment(currentProgram.Show.StartTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1";
-    if (this.context.options.mode == 'deploy') {
+    if (this.context.options.mode == 'deploy' && !this.context.options.noScheduling) {
         this.context.logger().info("Show playback scheduled for " + moment(currentProgram.Show.StartTime).format("YYYY-MM-DDTHH:mm:ss").toString());
     
         var ret = execSync(showSchedulerCmd, {
@@ -97,7 +97,7 @@ LiquidsoapScheduler.prototype.unscheduleLineup = function(lineup) {
             // unschedule preshow
             cmd = 'atrm ' + program.PreShow.Scheduler.SchedulerId;
             
-            if (this.context.options.mode == 'deploy') {
+            if (this.context.options.mode == 'deploy' && !this.context.options.noScheduling) {
                 try {
                     execSync(cmd);
                 } catch(e) {
@@ -112,7 +112,7 @@ LiquidsoapScheduler.prototype.unscheduleLineup = function(lineup) {
             // unschedule show
             cmd = 'atrm ' + program.Show.Scheduler.SchedulerId;
 
-            if (this.context.options.mode == 'deploy') {
+            if (this.context.options.mode == 'deploy' && !this.context.options.noScheduling) {
                 try {
                     execSync(cmd);
                 } catch(e) {
@@ -134,7 +134,7 @@ OOUtils.inheritsFrom(LiquidsoapPostOperator, PostOperator);
 LiquidsoapPostOperator.prototype.operate = function() {
     // TODO - A BIG ONE! (We definitely need to break this reverse dependency (liquidsoap to raa))
     // the var will be set only if in deploy mode. In the test mode, we do not create any side effects
-    if (this.context.options.mode == 'deploy') {
+    if (this.context.options.mode == 'deploy' && !this.context.options.noScheduling) {
         if (this.compiledLineupFilePath) {
             // Let Liquidsoap know that the lineup has been changed
             this.context.logger().info("Changing the current lineup file to " + this.compiledLineupFilePath);

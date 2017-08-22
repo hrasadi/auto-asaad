@@ -239,7 +239,7 @@ program
     .option('-v, --verbose', 'Detailed logs')
     .option('-t, --test', 'Test mode (no side effects)')
     .option('-n --no-scheduling', 'Persist all steps except scheduling (For advacned testing only)')
-    .option('-d --date [date]', "Target date in YYYY-MM-DD format", moment)
+    .option('-d --target-date [date]', "Target date in YYYY-MM-DD format", moment)
     .parse(process.argv)
 
 if (program.args.length < 2) {

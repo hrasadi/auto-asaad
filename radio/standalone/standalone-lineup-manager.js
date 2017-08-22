@@ -54,7 +54,7 @@ StandaloneScheduler.prototype.schedulePlayback = function(compiledLineupFilePath
         this.context.logger().info("PreShow playback scheduled for " + preShowStartTimeString);
         
         var preShowSchedulerCmd = "echo 'cd " + __dirname + "; node playback-pre-program.js " + compiledLineupFilePath + " " + currentProgram.PreShow.FillerClip.path + " ' | at -t " + preShowStartTimeString + " 2>&1";
-        if (this.context.options.mode == 'deploy') {   
+        if (this.context.options.mode == 'deploy' && !this.context.options.noScheduling) {   
             var ret = execSync(preShowSchedulerCmd, {
                 encoding: 'utf-8'
             });
@@ -70,7 +70,7 @@ StandaloneScheduler.prototype.schedulePlayback = function(compiledLineupFilePath
     // Register auto-asaad program announcement!
     var showStartTimeString = moment(currentProgram.Show.StartTime).format("YYYYMMDDHHmm.ss").toString();
     var showSchedulerCmd = "echo 'cd " + __dirname + "; node playback-program.js' " + compiledLineupFilePath + " | at -t " + showStartTimeString + " 2>&1";
-    if (this.context.options.mode == 'deploy') {
+    if (this.context.options.mode == 'deploy' && !this.context.options.noScheduling) {
         this.context.logger().info("Show playback scheduled for " + showStartTimeString);
     
         var ret = execSync(showSchedulerCmd, {
@@ -92,7 +92,7 @@ StandaloneScheduler.prototype.unscheduleLineup = function(lineup) {
             // unschedule preshow
             cmd = 'atrm ' + program.PreShow.Scheduler.SchedulerId;
             
-            if (this.context.options.mode == 'deploy') {
+            if (this.context.options.mode == 'deploy' && !this.context.options.noScheduling) {
                 try {
                     execSync(cmd);
                 } catch(e) {
@@ -107,7 +107,7 @@ StandaloneScheduler.prototype.unscheduleLineup = function(lineup) {
             // unschedule show
             cmd = 'atrm ' + program.Show.Scheduler.SchedulerId;
 
-            if (this.context.options.mode == 'deploy') {
+            if (this.context.options.mode == 'deploy' && !this.context.options.noScheduling) {
                 try {
                     execSync(cmd);
                 } catch(e) {

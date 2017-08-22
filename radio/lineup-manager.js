@@ -51,13 +51,16 @@ var LineupManager = function(radioConfig, cwd, radioObj) {
 Utils.inheritsFrom(LineupManager, StagedExecutor);
 
 LineupManager.prototype.init = function(options) {
+    this.serviceLogger = new Logger(self.cwd + "/logs/service.log");
+
     this.options = {};
 
     this.options.futureLineupsCount = (options.futureLineupsCount != undefined) ? options.futureLineupsCount : 4;
-    this.options.verbose = options.verbose != undefined ? options.verbose : 4;    
+    this.options.verbose = (options.verbose != undefined) ? true : false;    
     this.options.mode = options.test != undefined ? 'test' : 'deploy';
     this.options.lineupFilePathPrefix = this.cwd + "/lineups/" + this.radio.id + "-";
     this.options.currentDayMoment = (options.targetDate != undefined) ? this.moment(options.targetDate) : this.moment();
+    this.options.noScheduling = (options.noScheduling != undefined) ? true : false
 
     // In deploy mode
     var self = this;
@@ -124,7 +127,7 @@ LineupManager.prototype.init = function(options) {
         newDateMoment = moment(self.options.currentDayMoment).add(1, 'day').set('hour', 0).set('minute', 0).set('second', 0).set('millis', 0);
         var nextDayStartsInMillis = newDateMoment.diff(this.moment());
 
-        console.log("Next lineup generation will happen in " + nextDayStartsInMillis + "ms");
+        self.serviceLogger.info("Next lineup generation will happen in " + nextDayStartsInMillis + "ms");
         setTimeout(function() {
                 // reset lineup manager, the file watcher will hence generate the new
                 // lineup automatically.
