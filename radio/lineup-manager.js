@@ -83,16 +83,18 @@ LineupManager.prototype.init = function(options) {
                         setTimeout(function() {
                             // Read the new lineup from modified file
                             // Recompile
-                            if (!fs.existsSync(currentLineupFilePath)) {
-                                throw "The lineup file does not exist! Regenerate";
-                            }
                             try {
-                                self.execute(JSON.parse(fs.readFileSync(currentLineupFilePath, 'utf-8')), "LineupCompiler");
+                                if (!fs.existsSync(currentLineupFilePath)) {
+                                    self.logger().info("The lineup file does not exist! Replanning...");
+                                    self.execute(self.config);
+                                } else {
+                                    self.execute(JSON.parse(fs.readFileSync(currentLineupFilePath, 'utf-8')), "LineupCompiler");
+                                }
                             } catch(e) {
                                 self.logger().fatal(e);
                                 // Nothing will really change until the file is touched again. 
                                 // Both in-memory copies of lineup and compiledLineup would be invalid during this period
-                            }                            
+                            }                                                        
                         }, 2000);
                     }
                     // else?
