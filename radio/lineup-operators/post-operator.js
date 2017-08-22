@@ -15,7 +15,7 @@ PostOperator.prototype.perform = function(compiledLineupFilePath) {
 
 	this.operate(compiledLineupFilePath);
 
-	return null;
+	return compiledLineupFilePath;
 }
 
 // Subclass implementation is responsible for handling the mode

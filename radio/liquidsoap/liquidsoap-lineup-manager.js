@@ -55,11 +55,12 @@ LiquidsoapScheduler.prototype.schedulePlayback = function(compiledLineupFilePath
     if (this.hasPreShow(currentProgram)) {
 
         var alignedPreShowStartTime = moment(currentProgram.PreShow.Meta.TentativeStartTime);
-        // Register preshow and its filler if any
-        this.context.logger().info("PreShow playback scheduled for " + alignedPreShowStartTime.format("YYYY-MM-DDTHH:mm:ss").toString());
         
         var preShowSchedulerCmd = "echo 'cd " + __dirname + "; ./playback-preshow.sh' " + compiledLineupFilePath + " " + currentProgramIdx + " | at -t " + alignedPreShowStartTime.subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1";
         if (this.context.options.mode == 'deploy' && this.context.options.scheduling) {   
+            // Register preshow and its filler if any
+            this.context.logger().info("PreShow playback scheduled for " + alignedPreShowStartTime.format("YYYY-MM-DDTHH:mm:ss").toString());
+            
             var ret = execSync(preShowSchedulerCmd, {
                 encoding: 'utf-8'
             });                    

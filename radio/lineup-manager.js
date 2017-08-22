@@ -65,15 +65,17 @@ LineupManager.prototype.init = function(options) {
     // In deploy mode
     var self = this;
     var lineupWatcher = function() {
+        var currentLineupFilePath = null;
         // Watch the lineup file for changes
         try {
-            self.lineupFileWatcher = fs.watch(self.lineupFilePath,
+            // if current lineup is not set, we will resume in the catch clause
+            self.lineupFileWatcher = fs.watch(currentLineupFilePath,
                 function(eventType, fileName) {
                     if (eventType == 'change') {
                         // Read the new lineup from modified file
                         // Recompile
                         try {
-                            self.execute(self.config, "LineupCompiler");
+                            currentLineupFilePath = self.execute(self.config, "LineupCompiler");
                         } catch(e) {
                             self.logger().fatal(e);
                             // Nothing will really change until the file is touched again. 
@@ -84,7 +86,7 @@ LineupManager.prototype.init = function(options) {
                 });
         } catch (e) {
             try {
-                self.execute(self.config);
+                currentLineupFilePath = self.execute(self.config);
             } catch (e) {
                 self.logger().fatal(e);
             }            // This is the lineup generated from template. If it has any compile errors it would be fatal. So do not catch excpetions here!

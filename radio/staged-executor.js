@@ -54,6 +54,8 @@ StagedExecutor.prototype.execute = function(initialInput, firstStageName) {
 		this.logger().info("Executing stage " + (i + 1) + " of " + this.stages.length + " (" + this.stages[i].name + ")");
 		pipeObject = this.stages[i].perform(pipeObject);
 	}
+
+	return pipeObject;
 }
 
 module.exports = {
