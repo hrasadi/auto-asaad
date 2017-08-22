@@ -83,6 +83,9 @@ LineupManager.prototype.init = function(options) {
                         setTimeout(function() {
                             // Read the new lineup from modified file
                             // Recompile
+                            if (!fs.existsSync(currentLineupFilePath) {
+                                throw "The lineup file does not exist! Regenerate";
+                            }
                             try {
                                 self.execute(JSON.parse(fs.readFileSync(currentLineupFilePath, 'utf-8')), "LineupCompiler");
                             } catch(e) {
