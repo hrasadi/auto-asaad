@@ -357,7 +357,10 @@ LineupPlanner.prototype.isProgramOnScheduleToday = function(programTemplate, tar
 
 LineupPlanner.prototype.calculateStartTime = function(targetDateMoment, itemId, template, generated) {
     if (template.StartTime.CalculationMethod == 'static') {
-        generated.StartTime = moment(template.StartTime.At, ['h:m:s', 'H:m:s']);
+        var startTime = moment(template.StartTime.At, ['h:m:s', 'H:m:s']);
+        generated.StartTime = moment(targetDateMoment).hours(startTime.hours())
+                                                        .minutes(startTime.minutes())
+                                                        .seconds(startTime.seconds());
     } else {
         generated.StartTime = moment(this.context.radio[template.StartTime.Calculator](targetDateMoment, itemId));
     }
