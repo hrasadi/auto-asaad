@@ -68,7 +68,7 @@ LineupManager.prototype.init = function(options) {
         // Watch the lineup file for changes
         try {
             // if current lineup is not set, we will resume in the catch clause
-            var currentLineupFilePath = self.getStage("LineupPlanner").generateLineupFilePath(self.currentDayMoment);
+            var currentLineupFilePath = self.getStage("LineupPlanner").generateLineupFilePath(self.options.currentDayMoment);
             self.lineupFileWatcher = fs.watch(currentLineupFilePath,
                 function(eventType, fileName) {
                     if (eventType == 'change') {
