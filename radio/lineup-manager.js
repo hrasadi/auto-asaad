@@ -84,7 +84,7 @@ LineupManager.prototype.init = function(options) {
                             // Read the new lineup from modified file
                             // Recompile
                             try {
-                                self.execute(fs.readFileSync(currentLineupFilePath, 'utf-8'), "LineupCompiler");
+                                self.execute(JSON.parse(fs.readFileSync(currentLineupFilePath, 'utf-8')), "LineupCompiler");
                             } catch(e) {
                                 self.logger().fatal(e);
                                 // Nothing will really change until the file is touched again. 
