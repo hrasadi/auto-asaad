@@ -26,13 +26,16 @@ RSSFeedGenerator.prototype.publishFeed = function(targetDateMoment, feedPath) {
             fsextra.removeSync(outdatedJSONPath);
         }
     }
+    
+    var yesterdayFeedJSONPath = this.generateFeedJSONPath(moment(targetDateMoment).subtract(1, 'days'), feedPath);
     // In any case we create the base json is what we have generated yesterday
-    fsextra.copy(this.generateFeedJSONPath(moment(targetDateMoment).subtract(1, 'days'), feedPath), feedJSONPath, {force: true});
-
+    if (fs.existsSync(yesterdayFeedJSONPath)) {
+        fsextra.copy(yesterdayFeedJSONPath, feedJSONPath, {force: true});
+    }
 
     // Read the old feed JSON, append to it and write it back
     var currentItems = [];
-    if (fs.existsSync(feedPath + ".json")) {
+    if (fs.existsSync(feedJSONPath)) {
         currentItems = JSON.parse(fs.readFileSync(feedJSONPath, "utf-8"));
     }
 
