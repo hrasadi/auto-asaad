@@ -69,6 +69,13 @@ LineupManager.prototype.init = function(options) {
         try {
             // if current lineup is not set, we will resume in the catch clause
             var currentLineupFilePath = self.getStage("LineupPlanner").generateLineupFilePath(self.options.currentDayMoment);
+            // For the current day, we should regenerate everything once (at 12am) and then lock the lineup. This is to
+            // reflect any more changes made to the templates and/or planned lineup during the day (note that this then-future 
+            // lineup file is first generated a few days back)
+            // In case admin wants to lock a lineup before 12am, a [/lineupFilePath].lock file should be generated
+            if (!fs.existsSync(currentLineupFilePath + ".lock")) {
+                throw "Only locked lineups will be watched, regenerate and lock then come back!";
+            }
             self.lineupFileWatcher = fs.watch(currentLineupFilePath,
                 function(eventType, fileName) {
                     if (eventType == 'change') {
@@ -87,6 +94,8 @@ LineupManager.prototype.init = function(options) {
         } catch (e) {
             try {
                 self.execute(self.config);
+                // lock the file as current, admin can now change the lineup without re-planning lineup
+                fs.writeFileSync(currentLineupFilePath + ".lock", "");
             } catch (e) {
                 self.logger().fatal(e);
             }            // This is the lineup generated from template. If it has any compile errors it would be fatal. So do not catch excpetions here!

@@ -138,7 +138,7 @@ LiquidsoapPostOperator.prototype.operate = function() {
         if (this.compiledLineupFilePath) {
             // Let Liquidsoap know that the lineup has been changed
             this.context.logger().info("Changing the current lineup file to " + this.compiledLineupFilePath);
-            fs.writeFileSynch(this.context.cwd + "/lineups/current", this.compiledLineupFilePath);
+            fs.writeFileSync(this.context.cwd + "/lineups/current", this.compiledLineupFilePath);
         }
     } else {
         this.context.logger().debug("Lineup file to change to is: " + this.compiledLineupFilePath);
