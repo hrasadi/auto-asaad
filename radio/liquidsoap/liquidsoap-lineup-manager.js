@@ -1,6 +1,7 @@
 var execSync = require('child_process').execSync;
 var moment = require('moment');
 var path = require('path');
+var fs = require('fs');
 
 var OOUtils = require('../../utils');
 var LineupManager = require('../lineup-manager');
