@@ -27,7 +27,7 @@ RSSFeedGenerator.prototype.publishFeed = function(targetDateMoment, feedPath) {
     	}
     }
 	// In any case we create the base json is what we have generated yesterday
-    fsextra.copy(this.generateFeedJSONPath(moement(targetDateMoment).subtract(1, 'days'), feedPath), feedJSONPath, {force: true});
+    fsextra.copy(this.generateFeedJSONPath(moment(targetDateMoment).subtract(1, 'days'), feedPath), feedJSONPath, {force: true});
 
 
 	// Read the old feed JSON, append to it and write it back
