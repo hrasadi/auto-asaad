@@ -89,7 +89,7 @@ Radio.prototype.onLineupPlanned = function(targetDateMoment, lineup) {
 }
 
 // For raa1, we should generate the lineup HTML
-Radio.prototype.onLineupCompiled = function(compiledLineup) {
+Radio.prototype.onLineupCompiled = function(targetDateMoment, compiledLineup) {
 
     var lineupTemplateText = fs.readFileSync('lineup-view.jst', 'utf8');
     dot.templateSettings.strip = false;
