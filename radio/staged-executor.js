@@ -33,7 +33,7 @@ StagedExecutor.prototype.pushStage = function(stage) {
 
 StagedExecutor.prototype.getStage = function(stageName) {
 	for (var i = 0 ; i < this.stages.length; i++) {
-		if (this.stages[i].name == firstStageName) {
+		if (this.stages[i].name == stageName) {
 			return this.stages[i];
 		}
 	}
