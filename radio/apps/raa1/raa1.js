@@ -166,8 +166,6 @@ Radio.prototype.onLineupCompiled = function(targetDateMoment, compiledLineup) {
             }
         }
 
-        feedGen.publishFeed(targetDateMoment, this.cwd + "/rss/rss.xml");
-
         entry.description = entry.description.trim();
         // Hack to remove extra semicolon if it is remained from before
         if (entry.description.charAt(entry.description.length - 1) == "؛") {
@@ -176,11 +174,14 @@ Radio.prototype.onLineupCompiled = function(targetDateMoment, compiledLineup) {
 
         data.array.push(entry);
     }
-
+    
     var resultText = lineupTemplateFn(data);
     // A little bit hack here to recreate the current date 
     today = moment(compiledLineup.Programs[0].Show.StartTime).format('YYYY-MM-DD');
     fs.writeFileSync(this.cwd + "/lineups-html/lineup-" + today + ".html", resultText)
+
+    // Publish the RSS feed
+    feedGen.publishFeed(targetDateMoment, this.cwd + "/rss/rss.xml");
 }
 
 Radio.prototype.createRSSItemTemplate = function() {
