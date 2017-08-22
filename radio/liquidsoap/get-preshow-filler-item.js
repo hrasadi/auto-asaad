@@ -3,7 +3,8 @@ var moment = require('moment');
 var execSync = require('child_process').execSync;
 
 // path to the lineup file
-var lineupFilePath = process.argv[2];
+var running_dir = process.argv[2];
+var lineupFilePath = fs.readFileSync(running_dir + "lineups/current", 'utf8');
 
 if (fs.existsSync(lineupFilePath)) {
 	lineup = JSON.parse(fs.readFileSync(lineupFilePath, 'utf8'));

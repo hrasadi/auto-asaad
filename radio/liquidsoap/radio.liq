@@ -6,9 +6,6 @@ set("server.telnet.port",1234)
 
 script_dir = argv(1) 
 running_dir = argv(2)
-# the initial lineup file is emptry, later on, the first 'radio-planner' should annouce the lineup file using telnet 
-# TODO get rid of this var! This can be done by persisting this value in a file in the lineups folder!
-current_lineup_file = interactive.string("current_lineup_file", "") 
 media_dir = argv(3)
 icecast_password = argv(4)
 
@@ -20,7 +17,7 @@ start_pre_show = interactive.bool("start_pre_show", false)
 
 def read_pre_show_filler() =
 	# Get the URI
-	file = list.hd(get_process_lines("cd "^script_dir^"; node ./get-preshow-filler-item.js "^current_lineup_file()))
+	file = list.hd(get_process_lines("cd "^script_dir^"; node ./get-preshow-filler-item.js "^running_dir))
 	
 	request.create(file)
 end
@@ -32,7 +29,7 @@ def update_metadata(m) =
 		[("title","BLANK"), ("artist", "")]
 	else 
 		print("Obtaining title for #{filename}.")
-		description = list.hd(get_process_lines("cd "^script_dir^"; node ./get-item-description.js "^current_lineup_file()^" "^filename))
+		description = list.hd(get_process_lines("cd "^script_dir^"; node ./get-item-description.js "^running_dir^" "^filename))
 		[("title","#{description}"), ("artist", "")]	
 	end
 end
