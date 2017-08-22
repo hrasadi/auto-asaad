@@ -79,15 +79,18 @@ LineupManager.prototype.init = function(options) {
             self.lineupFileWatcher = fs.watch(currentLineupFilePath,
                 function(eventType, fileName) {
                     if (eventType == 'change') {
-                        // Read the new lineup from modified file
-                        // Recompile
-                        try {
-                            self.execute(self.config, "LineupCompiler");
-                        } catch(e) {
-                            self.logger().fatal(e);
-                            // Nothing will really change until the file is touched again. 
-                            // Both in-memory copies of lineup and compiledLineup would be invalid during this period
-                        }
+                        // Wait for changes to flush to disk
+                        setTimeout(function() {
+                            // Read the new lineup from modified file
+                            // Recompile
+                            try {
+                                self.execute(fs.readFileSync(currentLineupFilePath, 'utf-8'), "LineupCompiler");
+                            } catch(e) {
+                                self.logger().fatal(e);
+                                // Nothing will really change until the file is touched again. 
+                                // Both in-memory copies of lineup and compiledLineup would be invalid during this period
+                            }                            
+                        }, 2000);
                     }
                     // else?
                 });
