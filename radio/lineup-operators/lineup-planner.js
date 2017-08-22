@@ -290,6 +290,11 @@ LineupPlanner.prototype.selectProgramShowClipsFromTemplate = function(programTem
             program.Show.Clips.push(media);
             
             this.context.logger().debug("   * From " + programTemplate.Show.Clips[i].MediaGroup + " I have selected: " + media.Path);
+        } else {
+            // If the main clip of a program is empty, the whole program should not be planned
+            if (programTemplate.Show.Clips[i].IsMainClip) {
+                return false;
+            }
         }
     }
 
