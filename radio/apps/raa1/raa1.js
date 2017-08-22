@@ -153,7 +153,7 @@ Radio.prototype.onLineupCompiled = function(targetDateMoment, compiledLineup) {
 
                         // Push the new item
                         feedGen.addItem(rssFeedItem);
-                        feedGen.publishFeed(this.cwd + "/rss/rss.xml");
+                        feedGen.publishFeed(targetDateMoment, this.cwd + "/rss/rss.xml");
                     }
 
                 } else {
