@@ -1,6 +1,5 @@
 var RSS = require('rss');
-var fs = require('fs');
-var fsextra = require('fs-extra');
+var fs = require('fs-extra');
 
 var RSSFeedGenerator = function(options) {
     this.options = options;
@@ -23,14 +22,14 @@ RSSFeedGenerator.prototype.publishFeed = function(targetDateMoment, feedPath) {
         // We are in a new day, so remove outdated json (day before yesterday)
         var outdatedJSONPath = this.generateFeedJSONPath(moment(targetDateMoment).subtract(2, 'days'), feedPath);
         if (fs.existsSync(outdatedJSONPath)) {
-            fsextra.removeSync(outdatedJSONPath);
+            fs.removeSync(outdatedJSONPath);
         }
     }
     
     var yesterdayFeedJSONPath = this.generateFeedJSONPath(moment(targetDateMoment).subtract(1, 'days'), feedPath);
     // In any case we create the base json is what we have generated yesterday
     if (fs.existsSync(yesterdayFeedJSONPath)) {
-        fsextra.copy(yesterdayFeedJSONPath, feedJSONPath, {force: true});
+        fs.copySync(yesterdayFeedJSONPath, feedJSONPath, {force: true});
     }
 
     // Read the old feed JSON, append to it and write it back
