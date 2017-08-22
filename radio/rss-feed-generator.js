@@ -1,5 +1,6 @@
 var RSS = require('rss');
 var fs = require('fs');
+var fsextra = require('fs-extra');
 
 var RSSFeedGenerator = function(options) {
 	this.options = options;
