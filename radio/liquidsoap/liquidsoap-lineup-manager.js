@@ -145,7 +145,7 @@ LiquidsoapPostOperator.prototype.operate = function() {
             }
         }
     } else {
-        this.context.logger().debug("Lineup file will to change to is: " + this.compiledLineupFilePath);
+        this.context.logger().debug("Lineup file to change to is: " + this.compiledLineupFilePath);
     }
 }
 

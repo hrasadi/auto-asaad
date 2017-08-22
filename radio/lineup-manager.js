@@ -64,7 +64,7 @@ LineupManager.prototype.init = function(options) {
     var lineupWatcher = function() {
         // Watch the lineup file for changes
         try {
-            self.lineupFileWatcher = self.fs.watch(self.lineupFilePath,
+            self.lineupFileWatcher = fs.watch(self.lineupFilePath,
                 function(eventType, fileName) {
                     if (eventType == 'change') {
                         // Read the new lineup from modified file
@@ -90,7 +90,11 @@ LineupManager.prototype.init = function(options) {
         }
     }
 
-    var resetRadio = function() {
+    var resetRadio = function(newDateMoment) {
+        if (newDateMoment) {
+            self.options.currentDayMoment = newDateMoment;
+        }
+
         if (self.lineupFileWatcher != null) {
             self.fs.close(self.lineupFileWatcher);
         }
@@ -117,13 +121,13 @@ LineupManager.prototype.init = function(options) {
 
     if (self.options.mode == 'deploy') {
         // Wake up at the end of the day and reset the manager
-        self.options.currentDayMoment = self.options.currentDayMoment.add(1, 'day').set('hour', 0).set('minute', 0).set('second', 0);
-        var nextDayStartsInMillis = self.options.currentDayMoment.diff(this.moment());
+        newDateMoment = moment(self.options.currentDayMoment).add(1, 'day').set('hour', 0).set('minute', 0).set('second', 0).set('millis', 0);
+        var nextDayStartsInMillis = newDateMoment.diff(this.moment());
 
         setTimeout(function() {
                 // reset lineup manager, the file watcher will hence generate the new
                 // lineup automatically.
-                resetRadio(self);
+                resetRadio(self, newDateMoment);
             }, nextDayStartsInMillis);
     }   
 }
