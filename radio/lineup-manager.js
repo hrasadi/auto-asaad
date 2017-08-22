@@ -60,7 +60,7 @@ LineupManager.prototype.init = function(options) {
     this.options.mode = options.test != undefined ? 'test' : 'deploy';
     this.options.lineupFilePathPrefix = this.cwd + "/lineups/" + this.radio.id + "-";
     this.options.currentDayMoment = (options.targetDate != undefined) ? this.moment(options.targetDate) : this.moment();
-    this.options.noScheduling = (options.noScheduling != undefined) ? true : false
+    this.options.scheduling = options.scheduling;
 
     // In deploy mode
     var self = this;

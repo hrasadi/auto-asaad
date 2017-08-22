@@ -97,7 +97,7 @@ LiquidsoapScheduler.prototype.unscheduleLineup = function(lineup) {
             // unschedule preshow
             cmd = 'atrm ' + program.PreShow.Scheduler.SchedulerId;
             
-            if (this.context.options.mode == 'deploy' && !this.context.options.noScheduling) {
+            if (this.context.options.mode == 'deploy' && this.context.options.scheduling) {
                 try {
                     execSync(cmd);
                 } catch(e) {
@@ -112,7 +112,7 @@ LiquidsoapScheduler.prototype.unscheduleLineup = function(lineup) {
             // unschedule show
             cmd = 'atrm ' + program.Show.Scheduler.SchedulerId;
 
-            if (this.context.options.mode == 'deploy' && !this.context.options.noScheduling) {
+            if (this.context.options.mode == 'deploy' && this.context.options.scheduling) {
                 try {
                     execSync(cmd);
                 } catch(e) {
@@ -134,7 +134,7 @@ OOUtils.inheritsFrom(LiquidsoapPostOperator, PostOperator);
 LiquidsoapPostOperator.prototype.operate = function() {
     // TODO - A BIG ONE! (We definitely need to break this reverse dependency (liquidsoap to raa))
     // the var will be set only if in deploy mode. In the test mode, we do not create any side effects
-    if (this.context.options.mode == 'deploy' && !this.context.options.noScheduling) {
+    if (this.context.options.mode == 'deploy' && this.context.options.scheduling) {
         if (this.compiledLineupFilePath) {
             // Let Liquidsoap know that the lineup has been changed
             this.context.logger().info("Changing the current lineup file to " + this.compiledLineupFilePath);
