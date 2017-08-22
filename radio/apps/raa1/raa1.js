@@ -125,6 +125,8 @@ Radio.prototype.onLineupCompiled = function(targetDateMoment, compiledLineup) {
         }
         entry.endTime = moment(compiledLineup.Programs[i].Show.Meta.TentativeEndTime).format('HH:mm');
 
+        var feedGen = this.createFeedGenerator();
+
         for (var j = 0; j < compiledLineup.Programs[i].Show.Clips.length; j++) {
             if (compiledLineup.Programs[i].Show.Clips[j].Description && compiledLineup.Programs[i].Show.Clips[j].Description != "") {
                 if (compiledLineup.Programs[i].Show.Clips[j].HasVOD) {
@@ -139,7 +141,6 @@ Radio.prototype.onLineupCompiled = function(targetDateMoment, compiledLineup) {
                     // is the re-broadcast of a program.
                     if (compiledLineup.Programs[i].PublishPodcast) {
                         // Create a new feed gen item
-                        feedGen = this.createFeedGenerator();
                         rssFeedItem = this.createRSSItemTemplate();
                         rssFeedItem.title = compiledLineup.Programs[i].Title;
                         rssFeedItem.description = compiledLineup.Programs[i].Show.Clips[j].Description;
@@ -153,7 +154,6 @@ Radio.prototype.onLineupCompiled = function(targetDateMoment, compiledLineup) {
 
                         // Push the new item
                         feedGen.addItem(rssFeedItem);
-                        feedGen.publishFeed(targetDateMoment, this.cwd + "/rss/rss.xml");
                     }
 
                 } else {
@@ -165,6 +165,8 @@ Radio.prototype.onLineupCompiled = function(targetDateMoment, compiledLineup) {
                 }
             }
         }
+
+        feedGen.publishFeed(targetDateMoment, this.cwd + "/rss/rss.xml");
 
         entry.description = entry.description.trim();
         // Hack to remove extra semicolon if it is remained from before
