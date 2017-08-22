@@ -133,17 +133,11 @@ var LiquidsoapPostOperator = function() {
 OOUtils.inheritsFrom(LiquidsoapPostOperator, PostOperator);
 
 LiquidsoapPostOperator.prototype.operate = function() {
-    // TODO - A BIG ONE! (We definitely need to break this reverse dependency (liquidsoap to raa))
-    // the var will be set only if in deploy mode. In the test mode, we do not create any side effects
     if (this.context.options.mode == 'deploy' && this.context.options.scheduling) {
         if (this.compiledLineupFilePath) {
             // Let Liquidsoap know that the lineup has been changed
             this.context.logger().info("Changing the current lineup file to " + this.compiledLineupFilePath);
-            try {
-                execSync("cd " + __dirname + "; ./update-lineup-file.sh " + this.compiledLineupFilePath, { encoding: 'utf-8' });        
-            } catch (e) {
-                    // telnet returns non-zero exit code, simply ignore it!
-            }
+            fs.writeFileSynch(this.context.cwd + "/lineups/current", this.compiledLineupFilePath);
         }
     } else {
         this.context.logger().debug("Lineup file to change to is: " + this.compiledLineupFilePath);
