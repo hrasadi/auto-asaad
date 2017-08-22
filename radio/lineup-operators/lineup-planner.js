@@ -10,13 +10,14 @@ var Utils = require('./utils');
 
 var LineupPlanner = function() {
     Stage.call(this, "LineupPlanner");
-
-    this.planningMode = 'current';
-    this.iterators = {};
 }
 OOUtils.inheritsFrom(LineupPlanner, Stage);
 
 LineupPlanner.prototype.perform = function(flatTemplateConfig) {
+    // reset the state for every planning round
+    this.planningMode = 'current';
+    this.iterators = {};
+
     // We should select the media items, but keep the boxes in place (so that modifying programs 
     // for a day remains simple)
     this.config = flatTemplateConfig;
