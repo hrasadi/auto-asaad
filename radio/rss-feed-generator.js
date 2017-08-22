@@ -50,7 +50,7 @@ RSSFeedGenerator.prototype.publishFeed = function(targetDateMoment, feedPath) {
 	fs.writeFileSync(feedPath, xml);
 }
 
-RSSFeedGenerator.prototype.generateFeedJSONPath(targetDateMoment, feedPath) {
+RSSFeedGenerator.prototype.generateFeedJSONPath = function(targetDateMoment, feedPath) {
 	return feedPath + ".json." + targetDateMoment.format("YYYY-MM-DD");
 }
 
