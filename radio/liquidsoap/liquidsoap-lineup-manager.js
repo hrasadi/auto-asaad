@@ -97,7 +97,7 @@ LiquidsoapScheduler.prototype.unscheduleLineup = function(lineup) {
             // unschedule preshow
             cmd = 'atrm ' + program.PreShow.Scheduler.SchedulerId;
             
-            if (this.context.options.mode == 'deploy' && this.context.options.scheduling {
+            if (this.context.options.mode == 'deploy' && this.context.options.scheduling) {
                 try {
                     execSync(cmd);
                 } catch(e) {
