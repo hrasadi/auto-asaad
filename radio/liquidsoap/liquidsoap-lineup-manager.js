@@ -59,7 +59,7 @@ LiquidsoapScheduler.prototype.schedulePlayback = function(compiledLineupFilePath
         this.context.logger().info("PreShow playback scheduled for " + alignedPreShowStartTime.format("YYYY-MM-DDTHH:mm:ss").toString());
         
         var preShowSchedulerCmd = "echo 'cd " + __dirname + "; ./playback-preshow.sh' " + compiledLineupFilePath + " " + currentProgramIdx + " | at -t " + alignedPreShowStartTime.subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1";
-        if (this.context.options.mode == 'deploy' && !this.context.options.noScheduling) {   
+        if (this.context.options.mode == 'deploy' && this.context.options.scheduling) {   
             var ret = execSync(preShowSchedulerCmd, {
                 encoding: 'utf-8'
             });                    
@@ -74,7 +74,7 @@ LiquidsoapScheduler.prototype.schedulePlayback = function(compiledLineupFilePath
 
     // Register auto-asaad program (One minute earlier and the rest is handled in the shell file)
     var showSchedulerCmd = "echo 'cd " + __dirname + "; ./playback-show.sh' " + compiledLineupFilePath + " " + currentProgramIdx + "| at -t " + moment(currentProgram.Show.StartTime).subtract(1, 'minutes').format("YYYYMMDDHHmm.ss").toString() + " 2>&1";
-    if (this.context.options.mode == 'deploy' && !this.context.options.noScheduling) {
+    if (this.context.options.mode == 'deploy' && this.context.options.scheduling) {
         this.context.logger().info("Show playback scheduled for " + moment(currentProgram.Show.StartTime).format("YYYY-MM-DDTHH:mm:ss").toString());
     
         var ret = execSync(showSchedulerCmd, {
@@ -97,7 +97,7 @@ LiquidsoapScheduler.prototype.unscheduleLineup = function(lineup) {
             // unschedule preshow
             cmd = 'atrm ' + program.PreShow.Scheduler.SchedulerId;
             
-            if (this.context.options.mode == 'deploy' && this.context.options.scheduling) {
+            if (this.context.options.mode == 'deploy' && this.context.options.scheduling {
                 try {
                     execSync(cmd);
                 } catch(e) {
