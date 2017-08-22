@@ -95,6 +95,7 @@ LineupManager.prototype.init = function(options) {
             self.options.currentDayMoment = newDateMoment;
         }
 
+        // unwatch the old file
         if (self.lineupFileWatcher != null) {
             self.fs.close(self.lineupFileWatcher);
         }
@@ -103,7 +104,6 @@ LineupManager.prototype.init = function(options) {
             if (self.options.mode == 'deploy') {
                 self.loggerObj = new Logger(self.cwd + "/logs/lm-" + self.radio.id + "-" + self.options.currentDayMoment.format("YYYY-MM-DD") + ".log");
         
-                // unwatch the old file
                 lineupWatcher();
             } else {
                 // In test mode, run everything once and return
@@ -124,6 +124,7 @@ LineupManager.prototype.init = function(options) {
         newDateMoment = moment(self.options.currentDayMoment).add(1, 'day').set('hour', 0).set('minute', 0).set('second', 0).set('millis', 0);
         var nextDayStartsInMillis = newDateMoment.diff(this.moment());
 
+        self.logger().info("Next lineup generation will happen in " + nextDayStartsInMillis + "ms");
         setTimeout(function() {
                 // reset lineup manager, the file watcher will hence generate the new
                 // lineup automatically.
