@@ -27,6 +27,10 @@ PartialConfigFlattener.prototype.perform = function(templateConfig) {
         flatTemplateConfig.Media[templateConfig.Media.Partials[i].Name] = partialConf;
     }
 
+    if (this.context.options.verbose) {
+        this.context.logger().info(JSON.stringify(flatTemplateConfig, null, 2));
+    }
+
     return flatTemplateConfig;
 }
 
