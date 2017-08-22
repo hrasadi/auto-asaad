@@ -101,6 +101,9 @@ Radio.prototype.onLineupCompiled = function(targetDateMoment, compiledLineup) {
 
     var data = {};
     data.array = [];
+
+    var feedGen = this.createFeedGenerator();
+
     for (var i = 0; i < compiledLineup.Programs.length; i++) {
         var entry = {};
 
@@ -124,8 +127,6 @@ Radio.prototype.onLineupCompiled = function(targetDateMoment, compiledLineup) {
             entry.startTime = moment(compiledLineup.Programs[i].Show.Meta.TentativeStartTime).format('HH:mm');
         }
         entry.endTime = moment(compiledLineup.Programs[i].Show.Meta.TentativeEndTime).format('HH:mm');
-
-        var feedGen = this.createFeedGenerator();
 
         for (var j = 0; j < compiledLineup.Programs[i].Show.Clips.length; j++) {
             if (compiledLineup.Programs[i].Show.Clips[j].Description && compiledLineup.Programs[i].Show.Clips[j].Description != "") {
