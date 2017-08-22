@@ -31,6 +31,15 @@ StagedExecutor.prototype.pushStage = function(stage) {
 	this.stages.push(stage);
 }
 
+StagedExecutor.prototype.getStage = function(stageName) {
+	for (var i = 0 ; i < this.stages.length; i++) {
+		if (this.stages[i].name == firstStageName) {
+			return this.stages[i];
+		}
+	}
+	throw "Reqeusted stage " + stageName + " is not registered with this executor.";
+}
+
 StagedExecutor.prototype.execute = function(initialInput, firstStageName) {	
 	
 	var firstStageIdx = 0;
