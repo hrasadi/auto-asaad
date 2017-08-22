@@ -149,7 +149,7 @@ LineupCompiler.prototype.validateLineup = function(compiledLineup) {
                         currentProgram.Show.Meta.TentativeStartTime;
 
         if (currentProgramStartTime < latestEndTimeObserved) {
-            throw "   Error: Program " + currentProgram.Id + " from box: " + currentProgram.BoxId + " overlaps with the program before that. ("+ currentProgramStartTime + " < " latestEndTimeObserved + ")";
+            throw "   Error: Program " + currentProgram.Id + " from box: " + currentProgram.BoxId + " overlaps with the program before that. ("+ currentProgramStartTime + " < " + latestEndTimeObserved + ")";
         } else {
             latestEndTimeObserved = currentProgramStartTime;
         }
