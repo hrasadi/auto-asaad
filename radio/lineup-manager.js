@@ -51,7 +51,7 @@ var LineupManager = function(radioConfig, cwd, radioObj) {
 Utils.inheritsFrom(LineupManager, StagedExecutor);
 
 LineupManager.prototype.init = function(options) {
-    this.serviceLogger = new Logger(self.cwd + "/logs/service.log");
+    this.serviceLogger = new Logger(this.cwd + "/logs/service.log");
 
     this.options = {};
 
