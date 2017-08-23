@@ -28,11 +28,11 @@ CyclicIterator.prototype.next = function(requesterTag, offset) {
     }
 
     if (requesterTag == this.tag) {
-        var adjustedIdx = adjustIteratorByOffset(this.iteratorValue - 1, offset);
+        var adjustedIdx = this.adjustIteratorByOffset(this.iteratorValue - 1, offset);
         resultItem = this.list[adjustedIdx];
 
     } else if (this.linearListHasNext()) {
-        var adjustedIdx = adjustIteratorByOffset(this.iteratorValue, offset);
+        var adjustedIdx = this.adjustIteratorByOffset(this.iteratorValue, offset);
         resultItem = this.list[adjustedIdx];
         
         this.iteratorValue++;
