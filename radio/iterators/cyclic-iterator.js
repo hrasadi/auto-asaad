@@ -12,7 +12,7 @@ CyclicIterator.prototype.clone = function(sourceIterator, persistent = false, li
     return new CyclicIterator(sourceIterator.list, persistent, listIteratorFile);
 }
 
-CyclicIterator.prototype.next = function(requesterTag) {
+CyclicIterator.prototype.next = function(requesterTag, offset) {
     if (requesterTag == undefined) {
         throw "Tag should be provided for all requests";
     }
@@ -28,20 +28,32 @@ CyclicIterator.prototype.next = function(requesterTag) {
     }
 
     if (requesterTag == this.tag) {
-        resultItem = this.list[this.iteratorValue - 1];
+        var adjustedIdx = adjustIteratorByOffset(this.iteratorValue - 1, offset);
+        resultItem = this.list[adjustedIdx];
+
     } else if (this.linearListHasNext()) {
-        resultItem = this.list[this.iteratorValue];
+        var adjustedIdx = adjustIteratorByOffset(this.iteratorValue, offset);
+        resultItem = this.list[adjustedIdx];
         
         this.iteratorValue++;
         this.tag = requesterTag;
         this.persistIteratorValue();
     } else {
         this.reset();
-        resultItem = this.next(requesterTag);
+        // Offset will be taken into consideration after resetting the iterator
+        resultItem = this.next(requesterTag, offset);
     }
 
     return resultItem;
 }
+
+CyclicIterator.prototype.adjustIteratorByOffset = function(base, offset) {
+    if (offset) {
+        return (base + offset) % this.list.length;
+    } else {
+        return base;
+    }
+}   
 
 CyclicIterator.prototype.linearListHasNext = function() {
     return Iterator.prototype.hasNext.call(this);

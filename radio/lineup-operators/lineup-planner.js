@@ -325,7 +325,10 @@ LineupPlanner.prototype.getMedia = function(programTemplate, targetDateMoment, b
             iterator = this.iterators[iteratorId];
         }
     }
-    return iterator.next(this.tag(targetDateMoment));
+    
+    offset = this.config.Media[programTemplate[showType].Clips[clipIdx].Offset] ? 
+                                    parseInt(this.config.Media[programTemplate[showType].Clips[clipIdx].Offset]) : undefined;
+    return iterator.next(this.tag(targetDateMoment), offset);
 }
 
 LineupPlanner.prototype.generateLineupFilePath = function(targetDateMoment) {
