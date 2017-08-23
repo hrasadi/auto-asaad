@@ -4,7 +4,7 @@ var execSync = require('child_process').execSync;
 
 // path to the lineup file
 var running_dir = process.argv[2];
-var lineupFilePath = fs.readFileSync(running_dir + "lineups/current", 'utf8');
+var lineupFilePath = fs.readFileSync(running_dir + "/lineups/current", 'utf8');
 
 if (fs.existsSync(lineupFilePath)) {
 	lineup = JSON.parse(fs.readFileSync(lineupFilePath, 'utf8'));
