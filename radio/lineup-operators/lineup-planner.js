@@ -73,7 +73,7 @@ LineupPlanner.prototype.planLineup = function(targetDateMoment) {
                 // StartTime MUST be specified for a Box, and hence the first program StartTime
                 // will be overriden by this start time value 
                 if (i == 0) {
-                    program.StartTime = box.StartTime;
+                    program.Show.StartTime = moment(box.StartTime);
                 }
                 
                 // the program might be one object or a list of object (in case of replays)
