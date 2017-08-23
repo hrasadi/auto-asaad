@@ -144,7 +144,9 @@ LineupManager.prototype.init = function(options) {
     if (self.options.mode == 'deploy') {
         // Wake up at the end of the day and reset the manager
         newDateMoment = moment(self.options.currentDayMoment).add(1, 'day').set('hour', 0).set('minute', 0).set('second', 0).set('millis', 0);
-        var nextDayStartsInMillis = newDateMoment.diff(this.moment());
+        
+        // close the tomorrows lineup at 11:30pm so that there is enough time for manual validation
+        var nextDayStartsInMillis = moment(newDateMoment).subtract(30, 'minutes').diff(this.moment());
 
         self.serviceLogger.info("Next lineup generation will happen in " + nextDayStartsInMillis + "ms");
         setTimeout(function() {

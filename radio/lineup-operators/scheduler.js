@@ -66,6 +66,9 @@ Scheduler.prototype.scheduleLineupPlayback = function(targetDateMoment) {
         }        
 
         fs.writeFileSync(compiledLineupFilePath, JSON.stringify(this.compiledLineup, null, 2), 'utf-8');
+        // Write the ".program.iter" file
+        fs.writeFileSync(compiledLineupFilePath + '.program.iter', this.compiledLineup.PlaylistStartIdx);
+        
         this.context.radio.onLineupCompiled(targetDateMoment, this.compiledLineup);
     }
 
