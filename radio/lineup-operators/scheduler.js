@@ -51,19 +51,11 @@ Scheduler.prototype.scheduleLineupPlayback = function(targetDateMoment) {
     // Persist the compiled lineup
     if (this.context.options.mode == 'deploy') {   
          
-        // Unschedule the old programs (if it should)
-        var oldCompiledLineupFilePath = this.generateOldCompiledLineupFilePath(targetDateMoment);
-        if (fs.existsSync(oldCompiledLineupFilePath)) {
-            var oldCompiledLineupPrograms = JSON.parse(fs.readFileSync(oldCompiledLineupFilePath, 'utf-8')).Programs;
-            this.unscheduleLineup(oldCompiledLineupPrograms);
-            // Should we remove the old lineup? I donno! For now it is safe to keep it!
-        }
-
-        // Backup the old compiled lineup, so that we can unschedule old lineup later
+        // Unschedule the old programs (if there is any)
         if (fs.existsSync(compiledLineupFilePath)) {
-            // cp            
-            fsextra.copy(compiledLineupFilePath, compiledLineupFilePath + ".old", {force: true});
-        }        
+            var oldCompiledLineupPrograms = JSON.parse(fs.readFileSync(compiledLineupFilePath, 'utf-8')).Programs;
+            this.unscheduleLineup(oldCompiledLineupPrograms);
+        }
 
         fs.writeFileSync(compiledLineupFilePath, JSON.stringify(this.compiledLineup, null, 2), 'utf-8');
         // Write the ".program.iter" file
@@ -81,10 +73,6 @@ Scheduler.prototype.scheduleLineupPlayback = function(targetDateMoment) {
 
 Scheduler.prototype.generateCompilerLineupFilePath = function(targetDateMoment) {
     return this.context.options.lineupFilePathPrefix + targetDateMoment.format("YYYY-MM-DD") + ".json.compiled";
-}
-
-Scheduler.prototype.generateOldCompiledLineupFilePath = function(targetDateMoment) {
-    return this.generateCompilerLineupFilePath + ".old";
 }
 
 // Implemented in subclasses
