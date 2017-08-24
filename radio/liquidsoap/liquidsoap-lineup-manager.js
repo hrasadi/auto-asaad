@@ -79,9 +79,7 @@ LiquidsoapScheduler.prototype.schedulePlayback = function(compiledLineupFilePath
     if (this.context.options.mode == 'deploy' && this.context.options.scheduling) {
         this.context.logger().info("Show playback scheduled for " + moment(currentProgram.Show.StartTime).format("YYYY-MM-DDTHH:mm:ss").toString());
     
-        var ret = execSync(showSchedulerCmd, {
-            encoding: 'utf-8'
-        });        
+        var ret = execSync(showSchedulerCmd, {encoding: 'utf-8'});        
     
         currentProgram.Show.Scheduler = {};
         currentProgram.Show.Scheduler.ScheduledAt = currentProgram.Show.StartTime;
@@ -89,7 +87,6 @@ LiquidsoapScheduler.prototype.schedulePlayback = function(compiledLineupFilePath
     } else {
         this.context.logger().debug("Show scheduler command is: " + showSchedulerCmd);            
     }
-
 }
 
 LiquidsoapScheduler.prototype.unscheduleLineup = function(lineup) {
@@ -101,7 +98,7 @@ LiquidsoapScheduler.prototype.unscheduleLineup = function(lineup) {
             
             if (this.context.options.mode == 'deploy' && this.context.options.scheduling) {
                 try {
-                    execSync(cmd);
+                    execSync(cmd, {encoding: 'utf-8'});
                 } catch(e) {
                     this.logger.warn("Failed to remove job. Inner exception is: " + e);
                }
@@ -116,7 +113,7 @@ LiquidsoapScheduler.prototype.unscheduleLineup = function(lineup) {
 
             if (this.context.options.mode == 'deploy' && this.context.options.scheduling) {
                 try {
-                    execSync(cmd);
+                    execSync(cmd, {encoding: 'utf-8'});
                 } catch(e) {
                     this.logger.warn("Failed to remove job. Inner exception is: " + e);
                }

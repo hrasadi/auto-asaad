@@ -119,7 +119,7 @@ LineupManager.prototype.init = function(options) {
 
         // unwatch the old file
         if (self.lineupFileWatcher != null) {
-            self.fs.close(self.lineupFileWatcher);
+            self.lineupFileWatcher.close();
         }
 
         self.radio.reset(self.options.currentDayMoment, function() {
@@ -141,19 +141,26 @@ LineupManager.prototype.init = function(options) {
 
     resetRadio();
 
-    if (self.options.mode == 'deploy') {
+    var managerLoop = function() {
         // Wake up at the end of the day and reset the manager
         newDateMoment = moment(self.options.currentDayMoment).add(1, 'day').set('hour', 0).set('minute', 0).set('second', 0).set('millis', 0);
         
         // close the tomorrows lineup at 11:30pm so that there is enough time for manual validation
-        var nextDayStartsInMillis = moment(newDateMoment).subtract(30, 'minutes').diff(this.moment());
+        var nextDayStartsInMillis = 1000;//moment(newDateMoment).subtract(30, 'minutes').diff(this.moment());
 
         self.serviceLogger.info("Next lineup generation will happen in " + nextDayStartsInMillis + "ms");
         setTimeout(function() {
                 // reset lineup manager, the file watcher will hence generate the new
                 // lineup automatically.
-                resetRadio(self, newDateMoment);
+                resetRadio(newDateMoment);
+
+                // wait for next day
+                managerLoop();
             }, nextDayStartsInMillis);
+    }
+
+    if (self.options.mode == 'deploy') {
+        managerLoop();
     }   
 }
 

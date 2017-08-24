@@ -70,11 +70,6 @@ LineupPlanner.prototype.planLineup = function(targetDateMoment) {
                 if (program == null) {
                     continue;
                 }
-                // StartTime MUST be specified for a Box, and hence the first program StartTime
-                // will be overriden by this start time value 
-                if (j == 0) {
-                    program.Show.StartTime = moment(box.StartTime);
-                }
                 
                 // the program might be one object or a list of object (in case of replays)
                 // The concat trick, returns an array (even if program is a single item)
@@ -125,7 +120,7 @@ LineupPlanner.prototype.planProgramFromTemplate = function(targetDateMoment, box
         programIdx = -1;
     }
 
-    var program = null; // Could be an object to an array
+    var program = null; // Could be an object or an array
 
     // Check this for both replays and new episode templates
     if (!this.isProgramOnScheduleToday(programTemplate, targetDateMoment)) {

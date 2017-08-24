@@ -56,9 +56,10 @@ LineupCompiler.prototype.unboxLineup = function() {
                 program = this.lineup.Boxes[i].Programs[j];
                 program.BoxId = this.lineup.Boxes[i].BoxId;
 
+                // StartTime MUST be specified for a Box, and hence the first program StartTime
                 // Add start time to the first program if it does not have any
-                if (j == 0 && !program.StartTime) {
-                    program.Show.StartTime = this.lineup.Boxes[i].StartTime;
+                if (j == 0 && !program.Show.StartTime) {
+                    program.Show.StartTime = moment(this.lineup.Boxes[i].StartTime);
                 }
 
                 unboxedLineup.Programs.push(program);
