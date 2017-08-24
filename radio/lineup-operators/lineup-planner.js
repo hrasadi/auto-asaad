@@ -326,8 +326,8 @@ LineupPlanner.prototype.getMedia = function(programTemplate, targetDateMoment, b
         }
     }
     
-    offset = this.config.Media[programTemplate[showType].Clips[clipIdx].Offset] ? 
-                                    parseInt(this.config.Media[programTemplate[showType].Clips[clipIdx].Offset]) : undefined;
+    offset = programTemplate[showType].Clips[clipIdx].Offset ? 
+                                    parseInt(programTemplate[showType].Clips[clipIdx].Offset) : undefined;
     return iterator.next(this.tag(targetDateMoment), offset);
 }
 
