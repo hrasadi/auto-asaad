@@ -48,15 +48,15 @@ Scheduler.prototype.scheduleLineupPlayback = function(targetDateMoment) {
         }
     }
 
-    // Persist the compiled lineup
-    if (this.context.options.mode == 'deploy') {   
-         
-        // Unschedule the old programs (if there is any)
-        if (fs.existsSync(compiledLineupFilePath)) {
-            var oldCompiledLineup = JSON.parse(fs.readFileSync(compiledLineupFilePath, 'utf-8'));
-            this.unscheduleLineup(oldCompiledLineup);
-        }
+    // Unschedule the old programs (if there is any)
+    // unschedule function is responsible for handling the mode
+    if (fs.existsSync(compiledLineupFilePath)) {
+        var oldCompiledLineup = JSON.parse(fs.readFileSync(compiledLineupFilePath, 'utf-8'));
+        this.unscheduleLineup(oldCompiledLineup);
+    }
 
+    // Persist the compiled lineup
+    if (this.context.options.mode == 'deploy') {           
         fs.writeFileSync(compiledLineupFilePath, JSON.stringify(this.compiledLineup, null, 2), 'utf-8');
         // Write the ".program.iter" file
         fs.writeFileSync(compiledLineupFilePath + '.program.iter', this.compiledLineup.PlaylistStartIdx);
