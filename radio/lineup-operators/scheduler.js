@@ -53,8 +53,8 @@ Scheduler.prototype.scheduleLineupPlayback = function(targetDateMoment) {
          
         // Unschedule the old programs (if there is any)
         if (fs.existsSync(compiledLineupFilePath)) {
-            var oldCompiledLineupPrograms = JSON.parse(fs.readFileSync(compiledLineupFilePath, 'utf-8')).Programs;
-            this.unscheduleLineup(oldCompiledLineupPrograms);
+            var oldCompiledLineup = JSON.parse(fs.readFileSync(compiledLineupFilePath, 'utf-8'));
+            this.unscheduleLineup(oldCompiledLineup);
         }
 
         fs.writeFileSync(compiledLineupFilePath, JSON.stringify(this.compiledLineup, null, 2), 'utf-8');
