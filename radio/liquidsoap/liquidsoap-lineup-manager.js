@@ -100,7 +100,7 @@ LiquidsoapScheduler.prototype.unscheduleLineup = function(lineup) {
                 try {
                     execSync(cmd, {encoding: 'utf-8'});
                 } catch(e) {
-                    this.logger.warn("Failed to remove job. Inner exception is: " + e);
+                    this.context.logger().warn("Failed to remove job. Inner exception is: " + e);
                }
             } else {
                 this.context.logger().debug("Unscheduling PreShow command is: " + cmd)
@@ -115,7 +115,7 @@ LiquidsoapScheduler.prototype.unscheduleLineup = function(lineup) {
                 try {
                     execSync(cmd, {encoding: 'utf-8'});
                 } catch(e) {
-                    this.logger.warn("Failed to remove job. Inner exception is: " + e);
+                    this.context.logger().warn("Failed to remove job. Inner exception is: " + e);
                }
             } else {
                 this.context.logger().debug("Unscheduling Show command is: " + cmd)
