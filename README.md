@@ -1,4 +1,4 @@
-# <img src=./auto-asaad.png width="100"/> Auto-asaad
+# <img src=./auto-asaad.png width="150"/> Auto-asaad
 
 Auto-asaad is developed as a social media companion and notification manager. 
 This may look quite vague of a project description to you. Well, guess what! 
