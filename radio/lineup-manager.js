@@ -30,7 +30,7 @@ var LineupCompiler = require('./lineup-operators/lineup-compiler').LineupCompile
 var Scheduler = require('./lineup-operators/scheduler').Scheduler;
 var PostOperator = require('./lineup-operators/post-operator').PostOperator;
 
-var LineupManager = function(radioConfig, cwd, radioObj) {
+var LineupManager = function(cwd, radioObj) {
     StagedExecutor.call(this);
 
     this.moment = require('moment');
@@ -39,7 +39,6 @@ var LineupManager = function(radioConfig, cwd, radioObj) {
         return this.format();
     }
 
-    this.config = radioConfig;
     this.cwd = cwd;
     // This is the radio object who calls us, should implement any
     // radio specific logic in the form of callbacks.
@@ -86,7 +85,7 @@ LineupManager.prototype.init = function(options) {
                             try {
                                 if (!fs.existsSync(currentLineupFilePath)) {
                                     self.logger().info("The lineup file does not exist! Replanning...");
-                                    self.execute(self.config);
+                                    self.execute(self.radio.getRadioConfig());
                                 } else {
                                     self.execute(JSON.parse(fs.readFileSync(currentLineupFilePath, 'utf-8')), "LineupCompiler");
                                 }
@@ -101,7 +100,7 @@ LineupManager.prototype.init = function(options) {
                 });
         } catch (e) {
             try {
-                self.execute(self.config);
+                self.execute(self.radio.getRadioConfig());
                 // lock the file as current, admin can now change the lineup without re-planning lineup
                 fs.writeFileSync(currentLineupFilePath + ".lock", "");
             } catch (e) {
@@ -131,7 +130,7 @@ LineupManager.prototype.init = function(options) {
                 // In test mode, run everything once and return
                 try {
                     self.loggerObj = new Logger();
-                    self.execute(self.config);
+                    self.execute(self.radio.getRadioConfig());
                 } catch (e) {
                     self.logger().fatal(e);
                 }                
@@ -211,7 +210,7 @@ LineupManager.prototype.DeploymentMode = {
     LIQUIDSOAP: "liquidsoap"
 }
 
-LineupManager.build = function(deploymentMode, radioConfig, configFile, radioObj) {
+LineupManager.build = function(deploymentMode, configFile, radioObj) {
     var clazz;
     switch (deploymentMode) {
         case LineupManager.prototype.DeploymentMode.STANDALONE:
@@ -221,7 +220,7 @@ LineupManager.build = function(deploymentMode, radioConfig, configFile, radioObj
             clazz = require('./liquidsoap/liquidsoap-lineup-manager');
             break;
     }
-    return new clazz(radioConfig, configFile, radioObj);
+    return new clazz(configFile, radioObj);
 }
 
 module.exports = LineupManager;

@@ -4,6 +4,10 @@ var Radio = function(radioId, description) {
 }
 
 // Will be called at the beginning of each day of program (new lineup)
+Radio.prototype.getRadioConfig = function() {
+	console.log("Not implemented");
+}
+
 Radio.prototype.reset = function(currentDate, callback_fn) {
     console.log("Not implemented");
 }

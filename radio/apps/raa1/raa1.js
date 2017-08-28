@@ -46,8 +46,19 @@ Raa1.prototype.initialize = function() {
     this.events = new Events(this.config.Events);
     this.messaging = new Messaging(this.config.Messaging);
 
-    this.lineupManager = lm.build(this.deploymentMode, this.config.Radio, this.cwd, this);
+    this.lineupManager = lm.build(this.deploymentMode, this.cwd, this);
     this.lineupManager.init(this.options);
+}
+
+Raa1.prototype.getRadioConfig = function() {
+    this.config = JSON.parse(fs.readFileSync(this.configFilePath, 'utf8'));
+
+    if (this.config == null) {
+        console.log("FATAL ERROR: Error reading config file");
+        process.exit(1);
+    }
+
+    return this.config.Radio;
 }
 
 Raa1.prototype.reset = function(currentDate, callback_fn) {
