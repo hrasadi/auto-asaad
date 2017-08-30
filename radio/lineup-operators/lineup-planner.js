@@ -213,7 +213,10 @@ LineupPlanner.prototype.selectReplayProgram = function(programTemplate, targetDa
                 }
 
                 if (replayEligible) {
-                    programs.push(this.copyProgramForReplay(candidateProgram));
+                    var replayProgram = this.copyProgramForReplay(candidateProgram);
+                    if (replayProgram != null) {
+                        programs.push(replayProgram);
+                    }
                 }
             }
             // We are done here
@@ -253,7 +256,12 @@ LineupPlanner.prototype.copyProgramForReplay = function(program) {
         }
     }
 
-    return replayProgram;
+    if (replayProgram.Show.Clips.length > 0) {
+        return replayProgram;
+    } else {
+        // If there is no clips to this program, do not include it at all
+        return null;
+    }
 }
 
 LineupPlanner.prototype.selectProgramPreShowClipsFromTemplate = function(programTemplate, program, targetDateMoment, boxIdx, programIdx) {
