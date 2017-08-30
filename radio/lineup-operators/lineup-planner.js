@@ -240,7 +240,18 @@ LineupPlanner.prototype.copyProgramForReplay = function(program) {
     if (program.PreShow) {
         replayProgram.PreShow = JSON.parse(JSON.stringify(program.PreShow));
     }
-    replayProgram.Show = JSON.parse(JSON.stringify(program.Show));
+    
+    // Only add the main clips in replay boxes
+    replayProgram.Show = {};
+    replayProgram.Show.Clips = [];
+    originalShow = JSON.parse(JSON.stringify(program.Show));
+
+    for (var i = 0; i < originalShow.Clips.length; i++) {
+        var clip = originalShow.Clips[i];
+        if (clip.IsMainClip) {
+            replayProgram.Show.Clips.push(clip);
+        }
+    }
 
     return replayProgram;
 }
