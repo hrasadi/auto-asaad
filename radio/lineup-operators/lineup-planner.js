@@ -112,12 +112,14 @@ LineupPlanner.prototype.planLineup = function(targetDateMoment) {
 }
 
 LineupPlanner.prototype.planProgramFromTemplate = function(targetDateMoment, boxIdx, programIdx) { 
+    programOrBoxId = null;
     programTemplate = null;
     if (programIdx != undefined) {
         programTemplate = this.config.BoxTemplates[boxIdx].BoxProgramTemplates[programIdx];
+        programOrBoxId = this.config.BoxTemplates[boxIdx].BoxId;
     } else {
         programTemplate = this.config.BoxTemplates[boxIdx];
-        programIdx = -1;
+        programOrBoxId = this.config.BoxTemplates[boxIdx].Id;
     }
 
     var program = null; // Could be an object or an array
@@ -144,10 +146,10 @@ LineupPlanner.prototype.planProgramFromTemplate = function(targetDateMoment, box
         }
 
         if (this.hasPreShow(programTemplate)) {
-            this.selectProgramPreShowClipsFromTemplate(programTemplate, program, targetDateMoment, boxIdx, programIdx);
+            this.selectProgramPreShowClipsFromTemplate(programTemplate, program, targetDateMoment, programOrBoxId);
         }
         // if there is no media on for the show, we must reject the program
-        if (!this.selectProgramShowClipsFromTemplate(programTemplate, program, targetDateMoment, boxIdx, programIdx)) {
+        if (!this.selectProgramShowClipsFromTemplate(programTemplate, program, targetDateMoment, programOrBoxId)) {
             return null;
         }
 
@@ -264,7 +266,7 @@ LineupPlanner.prototype.copyProgramForReplay = function(program) {
     }
 }
 
-LineupPlanner.prototype.selectProgramPreShowClipsFromTemplate = function(programTemplate, program, targetDateMoment, boxIdx, programIdx) {
+LineupPlanner.prototype.selectProgramPreShowClipsFromTemplate = function(programTemplate, program, targetDateMoment, programOrBoxId) {
     this.context.logger().debug("-- Preshow plannig for program: " + programTemplate.Id);
 
     program.PreShow = {}
@@ -273,7 +275,7 @@ LineupPlanner.prototype.selectProgramPreShowClipsFromTemplate = function(program
     for (var i = 0; i < programTemplate.PreShow.Clips.length; i++) {
         // resolve the media file path before writing down to lineup
         media = {};
-        Object.assign(media, this.getMedia(programTemplate, targetDateMoment, boxIdx, programIdx, 'PreShow', i));
+        Object.assign(media, this.getMedia(programTemplate, targetDateMoment, programOrBoxId, 'PreShow', i));
         if (media.Path != undefined) {
             media.Path = this.config.Media.BaseDir + "/" + media.Path;
             program.PreShow.Clips.push(media);
@@ -290,7 +292,7 @@ LineupPlanner.prototype.selectProgramPreShowClipsFromTemplate = function(program
     this.context.logger().debug("   * Filler clip is " + fillerMedia.Path);
 }
 
-LineupPlanner.prototype.selectProgramShowClipsFromTemplate = function(programTemplate, program, targetDateMoment, boxIdx, programIdx) {
+LineupPlanner.prototype.selectProgramShowClipsFromTemplate = function(programTemplate, program, targetDateMoment, boxIdx) {
     this.context.logger().debug("-- Show planning for program: " + programTemplate.Id);
 
     program.Show = {}
@@ -299,7 +301,7 @@ LineupPlanner.prototype.selectProgramShowClipsFromTemplate = function(programTem
     for (var i = 0; i < programTemplate.Show.Clips.length; i++) {
         // resolve the media file path before writing down to lineup
         var media = {};
-        Object.assign(media, this.getMedia(programTemplate, targetDateMoment, boxIdx, programIdx, 'Show', i));
+        Object.assign(media, this.getMedia(programTemplate, targetDateMoment, programOrBoxId, 'Show', i));
         if (media.Path != undefined) {
             media.Path = this.config.Media.BaseDir + "/" + media.Path;
             if (programTemplate.Show.Clips[i].IsMainClip) {
@@ -322,8 +324,8 @@ LineupPlanner.prototype.selectProgramShowClipsFromTemplate = function(programTem
     return true;
 }
 
-LineupPlanner.prototype.getMedia = function(programTemplate, targetDateMoment, boxIdx, programIdx, showType, clipIdx) {
-    var iteratorId = programTemplate.Id + "-" + boxIdx + "-" + programIdx + "-" + showType + "-" + clipIdx;
+LineupPlanner.prototype.getMedia = function(programTemplate, targetDateMoment, programOrBoxId, showType, clipIdx) {
+    var iteratorId = programTemplate.Id + "-" + programOrBoxId + "-" + showType + "-" + clipIdx;
     var persistentIteratorFilePath = this.context.cwd + "/run/" + iteratorId + ".iterator";
 
     var iterator = null;
