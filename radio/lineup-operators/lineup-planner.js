@@ -294,6 +294,9 @@ LineupPlanner.prototype.selectProgramShowClipsFromTemplate = function(programTem
         Object.assign(media, this.getMedia(programTemplate, targetDateMoment, boxIdx, programIdx, 'Show', i));
         if (media.Path != undefined) {
             media.Path = this.config.Media.BaseDir + "/" + media.Path;
+            if (programTemplate.Show.Clips[i].IsMainClip) {
+                media.IsMainClip = true;
+            }
             program.Show.Clips.push(media);
             
             this.context.logger().debug("   * From " + programTemplate.Show.Clips[i].MediaGroup + " I have selected: " + media.Path);

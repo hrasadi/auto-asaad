@@ -10,7 +10,6 @@ var path = require('path');
 var dot = require('dot');
 
 var Events = require('../../../events');
-var Messaging = require('../../../messaging');
 var Utils = require('../../../utils');
 var RSSFeedGenerator = require('../../rss-feed-generator');
 
@@ -24,7 +23,6 @@ var Raa1 = function(program) {
     this.config = null;
 
     this.events = null;
-    this.messaging = null;
 
     this.deploymentMode = program.args[1];
     this.options = program;
@@ -44,7 +42,6 @@ Raa1.prototype.initialize = function() {
     }
 
     this.events = new Events(this.config.Events);
-    this.messaging = new Messaging(this.config.Messaging);
 
     this.lineupManager = lm.build(this.deploymentMode, this.cwd, this);
     this.lineupManager.init(this.options);
