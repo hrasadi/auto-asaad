@@ -55,7 +55,6 @@ LineupPlanner.prototype.planLineup = function(targetDateMoment) {
             if (!this.config.BoxTemplates[i].StartTime) {
                 throw "Error: Box" + box.BoxId + " did specify a start time!";
             }
-            console.log(this.config.BoxTemplates[i].BoxId)
             // Check this for each box, if not scheduled. 
             if (!this.isProgramOnScheduleToday(this.config.BoxTemplates[i], targetDateMoment)) {
                 continue;
