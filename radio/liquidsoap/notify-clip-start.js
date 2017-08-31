@@ -60,7 +60,7 @@ if (fs.existsSync(lineupFilePath)) {
 		status.currentProgram = lineup.Programs[currentProgramIdx].Title;
 		status.currentClip = clip.Description ? clip.Description : "";
 
-		fs.writeFileSync(running_dir + "/web/status.json", status);
+		fs.writeFileSync(running_dir + "/web/status.json", JSON.stringify(status));
 
 	} else {
 		// No programs right now! Instead publish the countdown
