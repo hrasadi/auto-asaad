@@ -23,7 +23,7 @@ var findClip = function(programIdx, clipAbsolutePath) {
 		}
 	}
 	for (var i = 0; i < program.Show.Clips.length; i++) {
-		var cAbsolutePath = path.resolve(media_dir, program.PreShow.Clips[i].Path);
+		var cAbsolutePath = path.resolve(media_dir, program.Show.Clips[i].Path);
 		if (clipAbsolutePath == cAbsolutePath) {
 			return program.Show.Clips[i];
 		}		
