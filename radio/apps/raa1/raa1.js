@@ -187,7 +187,7 @@ Radio.prototype.onLineupCompiled = function(targetDateMoment, compiledLineup) {
     var resultText = lineupTemplateFn(data);
     // A little bit hack here to recreate the current date 
     today = moment(compiledLineup.Programs[0].Show.StartTime).format('YYYY-MM-DD');
-    fs.writeFileSync(this.cwd + "/lineups-html/lineup-" + today + ".html", resultText)
+    fs.writeFileSync(this.cwd + "/web/lineup-" + today + ".html", resultText)
 
     // Publish the RSS feed
     feedGen.publishFeed(targetDateMoment, this.cwd + "/rss/rss.xml");
