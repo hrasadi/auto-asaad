@@ -66,7 +66,7 @@ if (fs.existsSync(lineupFilePath)) {
 		// No programs right now! Instead publish the countdown
 		status = {};
 		status.isCurrentlyPlaying = false;
-		status.currentProgram = BLANK;
+		status.currentProgram = "BLANK";
 		status.now = moment().format();
 
 		if (lineup.Programs[currentProgramIdx + 1]) {
