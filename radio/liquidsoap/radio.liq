@@ -23,8 +23,8 @@ def read_pre_show_filler() =
 end
 
 def update_metadata(m) =
-	get_process_lines("cd "^script_dir^"; node ./notify-clup-start.js "^running_dir^" "^media_dir^" "^filename) 
 	filename = m["filename"]
+	get_process_lines("cd "^script_dir^"; node ./notify-clup-start.js "^running_dir^" "^media_dir^" "^filename) 
 	if filename == "" or filename == media_dir^"/no-program.mp3" or filename == media_dir^"/blank.mp3" then
 		print("Blank program. Remove title!")
 		[("title","BLANK"), ("artist", "")]
