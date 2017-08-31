@@ -40,14 +40,15 @@ if (fs.existsSync(lineupFilePath)) {
 
 	// might be 
 	if (!clip) {
+		upcomingClipAbsolutePath = path.resolve(media_dir, currentClipFilePathlineup.Programs[currentProgramIdx + 1].Show.Clips[0].Path)
 		if (lineup.Programs[currentProgramIdx + 1] && 
-			clipAbsolutePath == currentClipFilePathlineup.Programs[currentProgramIdx + 1].Show.Clips[0].Path) {
-			// TODO
+			currentClipFilePath == upcomingClipAbsolutePath) {
 			// In case of back-to-back programs, we need to move program iter when the first 
 			// media of the next program begins to play.
 			// Lets shift the current program iterator
 			currentProgramIdx++;
 			clip = findClip(currentProgramIdx, currentClipFilePath);
+			// TODO
 			// fs.writeFileSync(lineupFilePath + ".program.iter", currentProgramIdx);
 		}
 	}
