@@ -81,6 +81,6 @@ if (fs.existsSync(lineupFilePath)) {
 			// Todays programs is over, we should check the next days lineup 
 		}
 
-		fs.writeFileSync(running_dir + "/web/status.json", status);
+		fs.writeFileSync(running_dir + "/web/status.json", JSON.stringify(status);
 	}
 }
