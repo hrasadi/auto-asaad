@@ -40,7 +40,7 @@ if (fs.existsSync(lineupFilePath)) {
 
 	// might be 
 	if (!clip) {
-		upcomingClipAbsolutePath = path.resolve(media_dir, currentClipFilePathlineup.Programs[currentProgramIdx + 1].Show.Clips[0].Path)
+		upcomingClipAbsolutePath = path.resolve(media_dir, lineup.Programs[currentProgramIdx + 1].Show.Clips[0].Path)
 		if (lineup.Programs[currentProgramIdx + 1] && 
 			currentClipFilePath == upcomingClipAbsolutePath) {
 			// In case of back-to-back programs, we need to move program iter when the first 
