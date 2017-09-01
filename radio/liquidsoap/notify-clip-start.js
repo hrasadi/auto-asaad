@@ -21,6 +21,14 @@ var findClip = function(programIdx, clipAbsolutePath) {
 				return program.PreShow.Clips[i];
 			}
 		}
+		// it might be the filler clip
+		if (program.PreShow.FillerClip) {
+			var cAbsolutePath = path.resolve(media_dir, program.PreShow.Clips[i].Path);
+			if (clipAbsolutePath == cAbsolutePath) {
+				return program.PreShow.Clips[i];
+			}			
+		}
+
 	}
 	for (var i = 0; i < program.Show.Clips.length; i++) {
 		var cAbsolutePath = path.resolve(media_dir, program.Show.Clips[i].Path);
@@ -67,7 +75,6 @@ if (fs.existsSync(lineupFilePath)) {
 		status = {};
 		status.isCurrentlyPlaying = false;
 		status.currentProgram = "BLANK";
-		status.now = moment().format();
 
 		if (lineup.Programs[currentProgramIdx + 1]) {
 			
