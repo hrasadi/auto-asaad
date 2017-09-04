@@ -72,9 +72,9 @@ Raa1.prototype.reset = function(currentDate, callback_fn) {
         this.events.readEvent(d.toDate(), function(d, eventsDict) {
             dateString = moment(d).format("YYYYMMDD");
             self.dataProvider[dateString] = {};
-            self.dataProvider[dateString].fajrTime = events[self.events.EventType.FAJR];
-            self.dataProvider[dateString].dhuhrTime = events[self.events.EventType.DHUHR];
-            self.dataProvider[dateString].maghribTime = events[self.events.EventType.MAGHRIB];
+            self.dataProvider[dateString].fajrTime = eventsDict[self.events.EventType.FAJR];
+            self.dataProvider[dateString].dhuhrTime = eventsDict[self.events.EventType.DHUHR];
+            self.dataProvider[dateString].maghribTime = eventsDict[self.events.EventType.MAGHRIB];
 
             if (Object.keys(self.dataProvider).length > self.lineupManager.options.futureLineupsCount) {
                 onAllEventsCollection();
@@ -85,11 +85,11 @@ Raa1.prototype.reset = function(currentDate, callback_fn) {
 }
 
 Raa1.prototype.calculateProgramStartTime = function(targetDateMoment, id) {
-    if (id == 'FajrProgram') {
+    if (id == 'اذان صبح') {
         return this.dataProvider[targetDateMoment.format("YYYYMMDD")].fajrTime;
-    } else if (id == 'DhuhrProgram') {
+    } else if (id == 'اذان ظهر') {
         return this.dataProvider[targetDateMoment.format("YYYYMMDD")].dhuhrTime;
-    } else if (id == 'MaghribProgram') {
+    } else if (id == 'اذان مغرب') {
         return this.dataProvider[targetDateMoment.format("YYYYMMDD")].maghribTime;
     }
 }
