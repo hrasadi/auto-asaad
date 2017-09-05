@@ -23,9 +23,9 @@ var findClip = function(programIdx, clipAbsolutePath) {
 		}
 		// it might be the filler clip
 		if (program.PreShow.FillerClip) {
-			var cAbsolutePath = path.resolve(media_dir, program.PreShow.Clips[i].Path);
+			var cAbsolutePath = path.resolve(media_dir, program.PreShow.FillerClip.Path);
 			if (clipAbsolutePath == cAbsolutePath) {
-				return program.PreShow.Clips[i];
+				return program.PreShow.FillerClip;
 			}			
 		}
 
@@ -48,16 +48,18 @@ if (fs.existsSync(lineupFilePath)) {
 
 	// might be 
 	if (!clip) {
-		upcomingClipAbsolutePath = path.resolve(media_dir, lineup.Programs[currentProgramIdx + 1].Show.Clips[0].Path)
-		if (lineup.Programs[currentProgramIdx + 1] && 
-			currentClipFilePath == upcomingClipAbsolutePath) {
-			// In case of back-to-back programs, we need to move program iter when the first 
-			// media of the next program begins to play.
-			// Lets shift the current program iterator
-			currentProgramIdx++;
-			clip = findClip(currentProgramIdx, currentClipFilePath);
-			// TODO
-			// fs.writeFileSync(lineupFilePath + ".program.iter", currentProgramIdx);
+		if (lineup.Programs[currentProgramIdx + 1]) {			
+			upcomingClipAbsolutePath = path.resolve(media_dir, lineup.Programs[currentProgramIdx + 1].Show.Clips[0].Path);
+
+			if (currentClipFilePath == upcomingClipAbsolutePath) {
+				// In case of back-to-back programs, we need to move program iter when the first 
+				// media of the next program begins to play.
+				// Lets shift the current program iterator
+				currentProgramIdx++;
+				clip = findClip(currentProgramIdx, currentClipFilePath);
+				// TODO
+				// fs.writeFileSync(lineupFilePath + ".program.iter", currentProgramIdx);
+			}
 		}
 	}
 
