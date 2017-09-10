@@ -14,27 +14,29 @@ var lineup = null;
 var findClip = function(programIdx, clipAbsolutePath) {
 	var program = lineup.Programs[programIdx];	
 	
-	if (program.PreShow) {
-		for (var i = 0; i < program.PreShow.Clips.length; i++) {
-			var cAbsolutePath = path.resolve(media_dir, program.PreShow.Clips[i].Path);
-			if (clipAbsolutePath == cAbsolutePath) {
-				return program.PreShow.Clips[i];
+	if (program) {
+		if (program.PreShow) {
+			for (var i = 0; i < program.PreShow.Clips.length; i++) {
+				var cAbsolutePath = path.resolve(media_dir, program.PreShow.Clips[i].Path);
+				if (clipAbsolutePath == cAbsolutePath) {
+					return program.PreShow.Clips[i];
+				}
 			}
-		}
-		// it might be the filler clip
-		if (program.PreShow.FillerClip) {
-			var cAbsolutePath = path.resolve(media_dir, program.PreShow.FillerClip.Path);
-			if (clipAbsolutePath == cAbsolutePath) {
-				return program.PreShow.FillerClip;
-			}			
-		}
+			// it might be the filler clip
+			if (program.PreShow.FillerClip) {
+				var cAbsolutePath = path.resolve(media_dir, program.PreShow.FillerClip.Path);
+				if (clipAbsolutePath == cAbsolutePath) {
+					return program.PreShow.FillerClip;
+				}			
+			}
 
-	}
-	for (var i = 0; i < program.Show.Clips.length; i++) {
-		var cAbsolutePath = path.resolve(media_dir, program.Show.Clips[i].Path);
-		if (clipAbsolutePath == cAbsolutePath) {
-			return program.Show.Clips[i];
-		}		
+		}
+		for (var i = 0; i < program.Show.Clips.length; i++) {
+			var cAbsolutePath = path.resolve(media_dir, program.Show.Clips[i].Path);
+			if (clipAbsolutePath == cAbsolutePath) {
+				return program.Show.Clips[i];
+			}		
+		}
 	}
 
 	return null;
@@ -57,6 +59,7 @@ if (fs.existsSync(lineupFilePath)) {
 				// Lets shift the current program iterator
 				currentProgramIdx++;
 				clip = findClip(currentProgramIdx, currentClipFilePath);
+
 				// TODO
 				// fs.writeFileSync(lineupFilePath + ".program.iter", currentProgramIdx);
 			}
@@ -67,6 +70,7 @@ if (fs.existsSync(lineupFilePath)) {
 		// We have program playing
 		status = {};
 		status.isCurrentlyPlaying = true;
+		status.currentBox = lineup.Programs[currentProgramIdx].BoxId;
 		status.currentProgram = lineup.Programs[currentProgramIdx].Title;
 		status.currentClip = clip.Description ? clip.Description : "";
 
