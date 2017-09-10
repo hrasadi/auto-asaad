@@ -14,7 +14,7 @@ if (fs.existsSync(lineupFilePath)) {
 		var currentProgramIdx = parseInt(fs.readFileSync(lineupFilePath + ".program.iter", 'utf8'));
 
 		// Program does not have a preshow
-		if (lineup.Programs[currentProgramIdx].PreShow) {
+		if (lineup.Programs[currentProgramIdx] && lineup.Programs[currentProgramIdx].PreShow) {
 			if (lineup.Programs[currentProgramIdx].PreShow.FillerClip) {
 			    console.log(lineup.Programs[currentProgramIdx].PreShow.FillerClip.Path);
 			}
