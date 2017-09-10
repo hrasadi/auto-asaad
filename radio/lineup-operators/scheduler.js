@@ -25,7 +25,9 @@ Scheduler.prototype.perform = function(compiledLineup) {
 
 Scheduler.prototype.scheduleLineupPlayback = function(targetDateMoment) {
 
-    this.compiledLineup.PlaylistStartIdx = 0;
+    // The persisted value of PlaylistStartIdx should point to the index of previous program 
+    // (-1 for first). This is to make sure the UI gets correct feeling about the next program
+    this.compiledLineup.PlaylistStartIdx = -1;
 
     var compiledLineupFilePath = this.generateCompilerLineupFilePath(targetDateMoment);
 
@@ -42,7 +44,7 @@ Scheduler.prototype.scheduleLineupPlayback = function(targetDateMoment) {
                 // the implementation is responsible to handling the mode
                 this.schedulePlayback(compiledLineupFilePath, currentProgram, i);
             } else {
-                this.compiledLineup.PlaylistStartIdx = i + 1;
+                this.compiledLineup.PlaylistStartIdx = i;
                 this.context.logger().warn("   WARN: Program " + currentProgram.Id + " start time is already passed. I do not schedule it.");
             }
         }
