@@ -9,6 +9,13 @@ var path = require('path');
 
 var dot = require('dot');
 
+/* WEB APP REQUIREMENTS */
+// Expressjs for devices to register for push notifications
+var express = require('express');
+var sqlite3 = require('sqlite3').verbose();
+var apn = require('apn');
+/*----*/
+
 var Events = require('../../../events');
 var Utils = require('../../../utils');
 var RSSFeedGenerator = require('../../rss-feed-generator');
@@ -28,6 +35,8 @@ var Raa1 = function(program) {
     this.options = program;
 
     this.dataProvider = {};
+
+    this.registerWebApp();
 
     Radio.call(this, "Raa1", "Radio Auto-asaad");
 }
@@ -94,7 +103,7 @@ Raa1.prototype.calculateProgramStartTime = function(targetDateMoment, id) {
     }
 }
 
-// For raa1, we should generate the lineup HTML
+// For raa1, we should generate the basic lineup HTML
 Radio.prototype.onLineupPlanned = function(targetDateMoment, lineup) {
     // TODO
 }
@@ -246,6 +255,70 @@ Radio.prototype.createFeedGenerator = function() {
             }}
           ]}
         ]
+    });
+}
+
+Raa1.prototype.registerWebApp = function() {
+    var self = this;
+
+    self.db = new sqlite3.Database(this.cwd + '/run/ios-device-list.db', sqlite3.OPEN_READWRITE, function(err) {
+      if (err) {
+        console.error('Error connecting to database: ' + err.message);        
+      }
+      console.log('Connected to the database.');
+    });
+
+    self.db.serialize(function() {
+        self.db.run("CREATE TABLE if not exists devices (deviceId TEXT PRIMARY_KEY, unique(deviceId))");
+    });
+
+    var apnProviderOptions = {
+        production: false
+    }
+    apnProviderOptions['cert'] = this.cwd + '/cert.pem'
+
+    self.apnProvider = new apn.Provider(apnProviderOptions);
+
+    self.webApp = express()
+    self.webApp.get('/registerDevice/ios/:deviceId', function(req, res) {
+        var deviceId = req.params['deviceId'];
+        if (deviceId) {
+            // Persist deviceId in our local database
+            self.db.serialize(function() {
+                var stmt = self.db.prepare("INSERT INTO devices VALUES (?)");
+                stmt.run(deviceId, function(err) {
+                    // Insertion can fail because of duplicate rows coming in. Ignore them
+                    // TODO better exception handling
+                });
+            });
+        }
+        res.send("Success");
+    });
+
+    self.webApp.get('/ios/send', function(req, res) {
+        self.db.all("SELECT deviceId FROM devices", function(err, rows) {
+            var notification = new apn.Notification({
+              alert: "در حال پخش: " + "یک برنامه‌ی خفن",
+              mutableContent: 1,
+              category: "media.raa.general",
+              payload: {
+                "sender": "raa1",
+              },
+            });
+
+            ids = rows.map(function(row) { return row.deviceId })
+            self.apnProvider.send(notification, ids).then( (response) => {
+                console.log(response.sent)
+                console.log(response.failed)
+                    // response.sent: Array of device tokens to which the notification was sent succesfully
+                    // response.failed: Array of objects containing the device token (`device`) and either an `error`, or a `status` and `response` from the API
+            });
+        });
+        res.send("Success");
+    });
+
+    self.webApp.listen(7799, function () {
+        console.log('Raa device registration endpoint activated on port 7799');
     });
 }
 
