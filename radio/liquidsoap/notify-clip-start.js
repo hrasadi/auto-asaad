@@ -48,6 +48,13 @@ var findClip = function(programIdx, clipAbsolutePath) {
 }
 
 if (fs.existsSync(lineupFilePath)) {
+	var status = {};
+	var oldStatus = {};
+
+	if (fs.existsSync(running_dir + "/web/status.json")) {
+		oldStatus = JSON.parse(fs.readFileSync(running_dir + "/web/status.json"));
+	}
+
 	lineup = JSON.parse(fs.readFileSync(lineupFilePath, 'utf8'));
 	var currentProgramIdx = parseInt(fs.readFileSync(lineupFilePath + ".program.iter", 'utf8'));
 
@@ -71,7 +78,6 @@ if (fs.existsSync(lineupFilePath)) {
 		}
 	}
 
-	var status = {};
 	if (clip) {
 		// We have program playing
 		status.isCurrentlyPlaying = true;
@@ -102,6 +108,8 @@ if (fs.existsSync(lineupFilePath)) {
 	}
 
 	if (customApplicationHandler) {
-		customApplicationHandler.perform(status.currentProgram);
+		if (status.currentProgram != oldStatus.currentProgram) {
+			customApplicationHandler.perform(status.currentProgram);
+		}
 	}
 } 
