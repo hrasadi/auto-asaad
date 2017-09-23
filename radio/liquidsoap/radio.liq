@@ -24,15 +24,15 @@ end
 
 def update_metadata(m) =
 	filename = m["filename"]
-	ignore(get_process_lines("cd "^script_dir^"; node ./notify-clip-start.js "^running_dir^" "^media_dir^" "^filename))
+	print("Obtaining title for #{filename}.")
+	description = list.hd(get_process_lines("cd "^script_dir^"; node ./notify-clip-start.js "^running_dir^" "^media_dir^" "^filename))
+	[("title","#{description}"), ("artist", "")]	
 end
-
 
 pre_show_playlist = switch(track_sensitive=false, [
 		(start_pre_show, fallback(track_sensitive=false, [
 			request.equeue(id = "pre_show_q"),
 			request.dynamic(id = "pre_show_filler", read_pre_show_filler)]))])
-
 
 show_playlist = request.equeue(id = "show_q")
 
@@ -46,4 +46,4 @@ main = mksafe(lineup)
 main = map_metadata(strip=true, update_metadata, main)
 main = audio_to_stereo(main)
 
-output.icecast(%mp3(bitrate=128), host="localhost", port=8000, password=icecast_password, mount="raa1.ogg", icy_metadata="true", description="Radio Auto-asaad", url="http://raa.media", main)
+output.icecast(%mp3, host="localhost", port=8000, password=icecast_password, mount="raa1.ogg", icy_metadata="true", description="Radio Auto-asaad", url="http://raa.media", main)

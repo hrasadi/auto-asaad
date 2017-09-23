@@ -11,8 +11,6 @@ var currentClipFilePath = process.argv[4];
 
 var lineup = null;
 
-var customApplicationHandler = null;
-console.log(running_dir + "/liquidsoap-handlers/notify-clip-start.js")
 if (fs.existsSync(running_dir + "/liquidsoap-handlers/notify-clip-start.js")) {
 	var CustomHandler = require(running_dir + "/liquidsoap-handlers/notify-clip-start");
 	customApplicationHandler = new CustomHandler(running_dir);
@@ -85,7 +83,6 @@ if (fs.existsSync(lineupFilePath)) {
 
 	} else {
 		// No programs right now (this is propapbly the blank clip playing)!  Instead publish the countdown
-		console.log("calling custom")
 		status.isCurrentlyPlaying = false;
 		status.currentProgram = "BLANK";
 
@@ -101,12 +98,10 @@ if (fs.existsSync(lineupFilePath)) {
 			// Todays programs is over, we should check the next days lineup 
 		}
 
-		console.log("calling custom")
 		fs.writeFileSync(running_dir + "/web/status.json", JSON.stringify(status));
 	}
 
 	if (customApplicationHandler) {
-		console.log("calling custom with " + status)
 		customApplicationHandler.perform('مثنوی')
 	}
 } 
