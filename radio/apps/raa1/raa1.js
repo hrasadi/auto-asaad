@@ -13,7 +13,6 @@ var dot = require('dot');
 // Expressjs for devices to register for push notifications
 var express = require('express');
 var sqlite3 = require('sqlite3').verbose();
-var apn = require('apn');
 /*----*/
 
 var Events = require('../../../events');
@@ -36,8 +35,6 @@ var Raa1 = function(program) {
 
     this.dataProvider = {};
 
-    this.registerWebApp();
-
     Radio.call(this, "Raa1", "Radio Auto-asaad");
 }
 Utils.inheritsFrom(Raa1, Radio);
@@ -49,6 +46,8 @@ Raa1.prototype.initialize = function() {
         console.log("FATAL ERROR: Error reading config file");
         process.exit(1);
     }
+
+    this.registerWebApp();
 
     this.events = new Events(this.config.Events);
 
@@ -272,13 +271,6 @@ Raa1.prototype.registerWebApp = function() {
         self.db.run("CREATE TABLE if not exists devices (deviceId TEXT PRIMARY_KEY, unique(deviceId))");
     });
 
-    var apnProviderOptions = {
-        production: false
-    }
-    apnProviderOptions['cert'] = this.cwd + '/cert.pem'
-
-    self.apnProvider = new apn.Provider(apnProviderOptions);
-
     self.webApp = express()
     self.webApp.get('/registerDevice/ios/:deviceId', function(req, res) {
         var deviceId = req.params['deviceId'];
@@ -292,28 +284,6 @@ Raa1.prototype.registerWebApp = function() {
                 });
             });
         }
-        res.send("Success");
-    });
-
-    self.webApp.get('/ios/send', function(req, res) {
-        self.db.all("SELECT deviceId FROM devices", function(err, rows) {
-            var notification = new apn.Notification({
-              alert: "در حال پخش: " + "یک برنامه‌ی خفن",
-              mutableContent: 1,
-              category: "media.raa.general",
-              payload: {
-                "sender": "raa1",
-              },
-            });
-
-            ids = rows.map(function(row) { return row.deviceId })
-            self.apnProvider.send(notification, ids).then( (response) => {
-                console.log(response.sent)
-                console.log(response.failed)
-                    // response.sent: Array of device tokens to which the notification was sent succesfully
-                    // response.failed: Array of objects containing the device token (`device`) and either an `error`, or a `status` and `response` from the API
-            });
-        });
         res.send("Success");
     });
 

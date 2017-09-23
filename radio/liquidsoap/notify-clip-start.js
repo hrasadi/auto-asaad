@@ -11,6 +11,13 @@ var currentClipFilePath = process.argv[4];
 
 var lineup = null;
 
+var customApplicationHandler = null;
+console.log(running_dir + "/liquidsoap-handlers/notify-clip-start.js")
+if (fs.existsSync(running_dir + "/liquidsoap-handlers/notify-clip-start.js")) {
+	var CustomHandler = require(running_dir + "/liquidsoap-handlers/notify-clip-start");
+	customApplicationHandler = new CustomHandler(running_dir);
+}
+
 var findClip = function(programIdx, clipAbsolutePath) {
 	var program = lineup.Programs[programIdx];	
 	
@@ -48,7 +55,7 @@ if (fs.existsSync(lineupFilePath)) {
 
 	clip = findClip(currentProgramIdx, currentClipFilePath);
 
-	// might be 
+	// might be the first clip of the next program
 	if (!clip) {
 		if (lineup.Programs[currentProgramIdx + 1]) {			
 			upcomingClipAbsolutePath = path.resolve(media_dir, lineup.Programs[currentProgramIdx + 1].Show.Clips[0].Path);
@@ -60,15 +67,15 @@ if (fs.existsSync(lineupFilePath)) {
 				currentProgramIdx++;
 				clip = findClip(currentProgramIdx, currentClipFilePath);
 
-				// TODO
-				// fs.writeFileSync(lineupFilePath + ".program.iter", currentProgramIdx);
+				// update the current program
+				fs.writeFileSync(lineupFilePath + ".program.iter", currentProgramIdx);
 			}
 		}
 	}
 
+	var status = {};
 	if (clip) {
 		// We have program playing
-		status = {};
 		status.isCurrentlyPlaying = true;
 		status.currentBox = lineup.Programs[currentProgramIdx].BoxId;
 		status.currentProgram = lineup.Programs[currentProgramIdx].Title;
@@ -77,8 +84,8 @@ if (fs.existsSync(lineupFilePath)) {
 		fs.writeFileSync(running_dir + "/web/status.json", JSON.stringify(status));
 
 	} else {
-		// No programs right now! Instead publish the countdown
-		status = {};
+		// No programs right now (this is propapbly the blank clip playing)!  Instead publish the countdown
+		console.log("calling custom")
 		status.isCurrentlyPlaying = false;
 		status.currentProgram = "BLANK";
 
@@ -94,6 +101,12 @@ if (fs.existsSync(lineupFilePath)) {
 			// Todays programs is over, we should check the next days lineup 
 		}
 
+		console.log("calling custom")
 		fs.writeFileSync(running_dir + "/web/status.json", JSON.stringify(status));
 	}
-}
+
+	if (customApplicationHandler) {
+		console.log("calling custom with " + status)
+		customApplicationHandler.perform('مثنوی')
+	}
+} 

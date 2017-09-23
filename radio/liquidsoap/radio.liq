@@ -25,14 +25,6 @@ end
 def update_metadata(m) =
 	filename = m["filename"]
 	ignore(get_process_lines("cd "^script_dir^"; node ./notify-clip-start.js "^running_dir^" "^media_dir^" "^filename))
-	if filename == "" or filename == media_dir^"/no-program.mp3" or filename == media_dir^"/blank.mp3" then
-		print("Blank program. Remove title!")
-		[("title","BLANK"), ("artist", "")]
-	else 
-		print("Obtaining title for #{filename}.")
-		description = list.hd(get_process_lines("cd "^script_dir^"; node ./get-item-description.js "^running_dir^" "^filename))
-		[("title","#{description}"), ("artist", "")]	
-	end
 end
 
 
@@ -54,4 +46,4 @@ main = mksafe(lineup)
 main = map_metadata(strip=true, update_metadata, main)
 main = audio_to_stereo(main)
 
-output.icecast(%mp3, host="localhost", port=8000, password=icecast_password, mount="raa1.ogg", icy_metadata="true", description="Radio Auto-asaad", url="http://raa.media", main)
+output.icecast(%mp3(bitrate=128), host="localhost", port=8000, password=icecast_password, mount="raa1.ogg", icy_metadata="true", description="Radio Auto-asaad", url="http://raa.media", main)
