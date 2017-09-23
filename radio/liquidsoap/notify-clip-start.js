@@ -102,6 +102,6 @@ if (fs.existsSync(lineupFilePath)) {
 	}
 
 	if (customApplicationHandler) {
-		customApplicationHandler.perform('مثنوی')
+		customApplicationHandler.perform(status.currentProgram);
 	}
 } 
