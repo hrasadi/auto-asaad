@@ -107,11 +107,12 @@ if (fs.existsSync(lineupFilePath)) {
 		fs.writeFileSync(running_dir + "/web/status.json", JSON.stringify(status));
 	}
 
+	console.log(status.currentProgram);
+
 	if (customApplicationHandler) {
 		if (status.currentProgram != oldStatus.currentProgram) {
 			customApplicationHandler.perform(status.currentProgram);
 		}
 	}
 
-	console.log(status.currentProgram);
 } 
