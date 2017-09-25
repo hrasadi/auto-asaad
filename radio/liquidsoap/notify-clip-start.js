@@ -112,4 +112,6 @@ if (fs.existsSync(lineupFilePath)) {
 			customApplicationHandler.perform(status.currentProgram);
 		}
 	}
+
+	console.log(status.currentProgram);
 } 

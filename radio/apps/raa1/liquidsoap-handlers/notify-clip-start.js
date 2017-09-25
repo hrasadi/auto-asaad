@@ -11,7 +11,6 @@ var Raa1ClipStartHandler = function(cwd) {
         if (err) {
         console.error('Error connecting to database: ' + err.message);        
         }
-        console.log('Connected to the database.');
     });
 
     this.db.serialize(function() {
