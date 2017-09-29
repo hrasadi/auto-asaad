@@ -45,7 +45,7 @@ Raa1ClipStartHandler.prototype.perform = function(newProgramName, newClipName) {
         if (newProgramName != 'BLANK') {
             notification.alert = 'در حال پخش: ' + newProgramName;
             notification.payload.currentProgram = newProgramName;
-            notification.payload.currentClip = newProgramClip;
+            notification.payload.currentClip = newClipName;
             notification.sound = "ProgramStart.caf";
         } // otherwise deliver empty alert which indicates playback end
 
