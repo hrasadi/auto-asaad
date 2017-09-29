@@ -28,7 +28,7 @@ var Raa1ClipStartHandler = function(cwd) {
     this.apnProvider = new apn.Provider(apnProviderOptions);    
 }
 
-Raa1ClipStartHandler.prototype.perform = function(newProgramName) {
+Raa1ClipStartHandler.prototype.perform = function(newProgramName, newClipName) {
     self = this
 
     this.db.all("SELECT deviceId FROM devices", function(err, rows) {
@@ -43,7 +43,10 @@ Raa1ClipStartHandler.prototype.perform = function(newProgramName) {
         });
 
         if (newProgramName != 'BLANK') {
-            notification.alert = 'در حال پخش: ' + newProgramName;        
+            notification.alert = 'در حال پخش: ' + newProgramName;
+            notification.payload.currentProgram = newProgramName;
+            notification.payload.currentClip = newProgramClip;
+            notification.sound = "ProgramStart.caf";
         } // otherwise deliver empty alert which indicates playback end
 
         ids = rows.map(function(row) { return row.deviceId })

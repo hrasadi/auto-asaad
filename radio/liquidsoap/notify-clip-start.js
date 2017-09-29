@@ -111,7 +111,7 @@ if (fs.existsSync(lineupFilePath)) {
 
 	if (customApplicationHandler) {
 		if (status.currentProgram != oldStatus.currentProgram) {
-			customApplicationHandler.perform(status.currentProgram);
+			customApplicationHandler.perform(status.currentProgram, status.currentClip);
 		}
 	}
 
