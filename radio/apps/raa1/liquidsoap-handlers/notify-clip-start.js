@@ -19,7 +19,7 @@ var Raa1ClipStartHandler = function(cwd) {
 
     // Configure APN endpoint
     var apnProviderOptions = {
-        production: false
+        production: true
     }
 
     apnProviderOptions['cert'] = this.cwd + '/conf/cert.pem'
