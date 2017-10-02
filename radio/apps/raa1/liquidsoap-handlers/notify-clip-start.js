@@ -36,6 +36,7 @@ Raa1ClipStartHandler.prototype.perform = function(newProgramName, newClipName) {
             mutableContent: 1,
             expiry: Math.floor(Date.now() / 1000) + 3600,
             category: "media.raa.general",
+            topic: "raa.raa-ios-player",
             contentAvailable: 1,
             payload: {
                 "sender": "raa1"
