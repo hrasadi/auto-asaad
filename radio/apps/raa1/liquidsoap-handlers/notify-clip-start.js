@@ -45,10 +45,14 @@ Raa1ClipStartHandler.prototype.perform = function(newProgramName, newClipName) {
 
         if (newProgramName != 'BLANK') {
             notification.alert = 'در حال پخش: ' + newProgramName;
+            notification.badge = 1;
             notification.payload.currentProgram = newProgramName;
             notification.payload.currentClip = newClipName;
             notification.sound = "ProgramStart.caf";
-        } // otherwise deliver empty alert which indicates playback end
+        } else {
+            // otherwise deliver empty alert which indicates playback end and clears all previous alerts
+            notification.badge = 0;
+        }
 
         ids = rows.map(function(row) { return row.deviceId })
         self.apnProvider.send(notification, ids).then( (response) => {
