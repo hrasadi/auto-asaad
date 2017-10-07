@@ -260,15 +260,26 @@ Radio.prototype.createFeedGenerator = function() {
 Raa1.prototype.registerWebApp = function() {
     var self = this;
 
-    self.db = new sqlite3.Database(this.cwd + '/run/ios-device-list.db', sqlite3.OPEN_READWRITE, function(err) {
+    self.iosDB = new sqlite3.Database(this.cwd + '/run/ios-device-list.db', sqlite3.OPEN_READWRITE, function(err) {
       if (err) {
-        console.error('Error connecting to database: ' + err.message);        
+        console.error('Error connecting to iOS database: ' + err.message);        
       }
-      console.log('Connected to the database.');
+      console.log('Connected to the iOS database.');
+    });
+    
+    self.fcmDB = new sqlite3.Database(this.cwd + '/run/fcm-device-list.db', sqlite3.OPEN_READWRITE, function(err) {
+      if (err) {
+        console.error('Error connecting to FCM database: ' + err.message);        
+      }
+      console.log('Connected to the FCM database.');
     });
 
-    self.db.serialize(function() {
-        self.db.run("CREATE TABLE if not exists devices (deviceId TEXT PRIMARY_KEY, unique(deviceId))");
+    self.iosDB.serialize(function() {
+        self.iosDB.run("CREATE TABLE if not exists devices (deviceId TEXT PRIMARY_KEY, unique(deviceId))");
+    });
+
+    self.fcmDB.serialize(function() {
+        self.fcmDB.run("CREATE TABLE if not exists devices (deviceId TEXT PRIMARY_KEY, unique(deviceId))");
     });
 
     self.webApp = express()
@@ -276,8 +287,23 @@ Raa1.prototype.registerWebApp = function() {
         var deviceId = req.params['deviceId'];
         if (deviceId) {
             // Persist deviceId in our local database
-            self.db.serialize(function() {
-                var stmt = self.db.prepare("INSERT INTO devices VALUES (?)");
+            self.iosDB.serialize(function() {
+                var stmt = self.iosDB.prepare("INSERT INTO devices VALUES (?)");
+                stmt.run(deviceId, function(err) {
+                    // Insertion can fail because of duplicate rows coming in. Ignore them
+                    // TODO better exception handling
+                });
+            });
+        }
+        res.send("Success");
+    });
+
+    self.webApp.get('/registerDevice/fcm/:deviceId', function(req, res) {
+        var deviceId = req.params['deviceId'];
+        if (deviceId) {
+            // Persist deviceId in our local database
+            self.fcmDB.serialize(function() {
+                var stmt = self.fcmDB.prepare("INSERT INTO devices VALUES (?)");
                 stmt.run(deviceId, function(err) {
                     // Insertion can fail because of duplicate rows coming in. Ignore them
                     // TODO better exception handling
