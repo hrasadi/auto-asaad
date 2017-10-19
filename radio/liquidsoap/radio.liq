@@ -34,6 +34,7 @@ pre_show_playlist = switch(track_sensitive=false, [
 			request.equeue(id = "pre_show_q"),
 			request.dynamic(id = "pre_show_filler", read_pre_show_filler)]))])
 
+
 show_playlist = request.equeue(id = "show_q")
 
 lineup = fallback(track_sensitive=false, [
@@ -46,4 +47,21 @@ main = mksafe(lineup)
 main = map_metadata(strip=true, update_metadata, main)
 main = audio_to_stereo(main)
 
-output.icecast(%mp3, host="localhost", port=8000, password=icecast_password, mount="raa1.ogg", icy_metadata="true", description="Radio Auto-asaad", url="http://raa.media", main)
+output.icecast(%mp3(bitrate=96), host="localhost", port=8000, password=icecast_password, mount="raa1.ogg", icy_metadata="true", description="Radio Auto-asaad", url="http://raa.media", main)
+
+def add_skip_command(s) =
+ # A command to skip
+ def skip(_) =
+   source.skip(s)
+   "Done!"
+ end
+ # Register the command:
+ server.register(namespace="#{source.id(s)}",
+                 usage="skip",
+                 description="Skip the current song.",
+                 "skip",skip)
+end
+
+pre_show_queue = request.queue(id = "pre_show_q")
+# Attach a skip command to the source s:
+add_skip_command(pre_show_queue)
