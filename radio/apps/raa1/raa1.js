@@ -166,7 +166,7 @@ Radio.prototype.onLineupCompiled = function(targetDateMoment, compiledLineup) {
                         rssFeedItem.date = Date().toString();
                         
                         rssFeedItem.enclosure = {};
-                        var podcastEncodedUrl = 'https://api.raa.media/' + Buffer.from(vodUrl.toString()).toString('base64');
+                        var podcastEncodedUrl = 'https://api.raa.media/linkgenerator/podcast' + Buffer.from(vodUrl.toString()).toString('base64');
                         // This is to convince podcast players that this is an audio file!! It will be ignored by base64 decoder later
                         podcastEncodedUrl = podcastEncodedUrl + ".mp3"; 
                         rssFeedItem.enclosure.url = podcastEncodedUrl;
