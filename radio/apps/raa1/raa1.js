@@ -205,7 +205,7 @@ Radio.prototype.onLineupCompiled = function(targetDateMoment, compiledLineup) {
     fs.writeFileSync(this.cwd + "/web/lineup-" + today + ".json", JSON.stringify(data, null, 4));
 
     // Publish the RSS feed (but publish yesterday items not today's)
-    feedGen.publishFeed(targetDateMoment, this.cwd + "/rss/rss.xml", true);
+    feedGen.publishFeed(targetDateMoment, this.cwd + "/rss/rss.xml", false);
 }
 
 Radio.prototype.createRSSItemTemplate = function() {
