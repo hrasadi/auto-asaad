@@ -38,20 +38,21 @@ RSSFeedGenerator.prototype.publishFeed = function(targetDateMoment, feedPath, pu
         currentItems = JSON.parse(fs.readFileSync(feedJSONPath, "utf-8"));
     }
 
-    var newItems = currentItems;
+    newItemList = currentItems.concat(this.items);
+    
+    fs.writeFileSync(feedJSONPath, JSON.stringify(newItemList, null, 2));
 
-    
+    // Decide which edition of the data we want to publish
+    var itemsToPublish = currentItems;
     if (publishNewItems) {
-        newItem = newItems.concat(this.items);
+        itemsToPublish = newItemList;
     }
-    
-    fs.writeFileSync(feedJSONPath, JSON.stringify(newItems, null, 2));
 
     var feed = new RSS(this.options)
 
-    if (newItems) {
-        for (var i = 0; i < newItems.length; i++) {
-            feed.item(newItems[i]);
+    if (itemsToPublish) {
+        for (var i = 0; i < itemsToPublish.length; i++) {
+            feed.item(itemsToPublish[i]);
         }
     }
 
