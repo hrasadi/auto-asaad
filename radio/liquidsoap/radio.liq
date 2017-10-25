@@ -65,3 +65,14 @@ end
 pre_show_queue = request.queue(id = "pre_show_q")
 # Attach a skip command to the source s:
 add_skip_command(pre_show_queue)
+
+# TODO use this code snippet to also clear the pre-show queue in addition to skipping the current song
+# for better fault tolerance (although it is very rare to happen)
+#def clear_queue(s) =
+#        ret = server.execute("req.queue")
+#        ret = list.hd(ret)
+#        ret = string.split(separator=" ",ret)
+#        list.iter(fun(x) -> begin foo = server.execute("req.ignore
+#{x}") end,ret)
+#        source.skip(s)
+#end

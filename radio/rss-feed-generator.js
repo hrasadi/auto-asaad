@@ -14,7 +14,7 @@ RSSFeedGenerator.prototype.addAllItems = function(items) {
     this.items = this.items.concat(items);  
 }
 
-RSSFeedGenerator.prototype.publishFeed = function(targetDateMoment, feedPath) {
+RSSFeedGenerator.prototype.publishFeed = function(targetDateMoment, feedPath, publishNewItems = true) {
          
     var feedJSONPath = this.generateFeedJSONPath(targetDateMoment, feedPath);
 
@@ -38,7 +38,13 @@ RSSFeedGenerator.prototype.publishFeed = function(targetDateMoment, feedPath) {
         currentItems = JSON.parse(fs.readFileSync(feedJSONPath, "utf-8"));
     }
 
-    var newItems = currentItems.concat(this.items);
+    var newItems = currentItems;
+
+    
+    if (publishNewItems) {
+        newItems.concat(this.items);
+    }
+    
     fs.writeFileSync(feedJSONPath, JSON.stringify(newItems, null, 2));
 
     var feed = new RSS(this.options)
