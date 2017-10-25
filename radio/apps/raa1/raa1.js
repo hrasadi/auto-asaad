@@ -164,8 +164,13 @@ Radio.prototype.onLineupCompiled = function(targetDateMoment, compiledLineup) {
                         rssFeedItem.description = compiledLineup.Programs[i].Show.Clips[j].Description;
                         rssFeedItem.url = vodUrl.toString();
                         rssFeedItem.date = Date().toString();
+                        
                         rssFeedItem.enclosure = {};
-                        rssFeedItem.enclosure.url = vodUrl.toString();
+                        var podcastEncodedUrl = 'https://api.raa.media/' + Buffer.from(vodUrl.toString()).toString('base64');
+                        // This is to convince podcast players that this is an audio file!! It will be ignored by base64 decoder later
+                        podcastEncodedUrl = podcastEncodedUrl + ".mp3"; 
+                        rssFeedItem.enclosure.url = podcastEncodedUrl;
+                        
                         itunesSubtitleElement = {};
                         itunesSubtitleElement["itunes:subtitle"] = compiledLineup.Programs[i].Show.Clips[j].Description;;
                         rssFeedItem.custom_elements.push(itunesSubtitleElement);
@@ -199,8 +204,8 @@ Radio.prototype.onLineupCompiled = function(targetDateMoment, compiledLineup) {
     fs.writeFileSync(this.cwd + "/web/lineup-" + today + ".html", resultText);
     fs.writeFileSync(this.cwd + "/web/lineup-" + today + ".json", JSON.stringify(data, null, 4));
 
-    // Publish the RSS feed
-    feedGen.publishFeed(targetDateMoment, this.cwd + "/rss/rss.xml");
+    // Publish the RSS feed (but publish yesterday items not today's)
+    feedGen.publishFeed(targetDateMoment, this.cwd + "/rss/rss.xml", true);
 }
 
 Radio.prototype.createRSSItemTemplate = function() {
