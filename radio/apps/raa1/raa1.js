@@ -329,12 +329,12 @@ Raa1.prototype.registerWebApp = function() {
                 'tid': 'UA-103579661-1',
                 'cid': '555',
                 't': 'event',
-                'ec': 'audio',
                 'ea': 'play',
             };
             gaParams.el = reqUrl;
             gaParams.uip = ip;
             gaParams.ua = userAgent;
+            gaParams.ec = medium;
             gaParams.ca = medium;
             gaParams.cn = medium;
             gaParams.cm = medium;
