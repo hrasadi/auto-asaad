@@ -12,6 +12,7 @@ var dot = require('dot');
 /* WEB APP REQUIREMENTS */
 // Expressjs for devices to register for push notifications
 var express = require('express');
+var querystring = require('querystring');
 var sqlite3 = require('sqlite3').verbose();
 /*----*/
 
@@ -161,10 +162,10 @@ Radio.prototype.onLineupCompiled = function(targetDateMoment, compiledLineup) {
                         rssFeedItem = this.createRSSItemTemplate();
                         rssFeedItem.title = compiledLineup.Programs[i].Title;
                         rssFeedItem.description = compiledLineup.Programs[i].Show.Clips[j].Description;
-                        rssFeedItem.url = vodUrl;
+                        rssFeedItem.url = vodUrl.toString();
                         rssFeedItem.date = Date().toString();
                         rssFeedItem.enclosure = {};
-                        rssFeedItem.enclosure.url = vodUrl;
+                        rssFeedItem.enclosure.url = vodUrl.toString();
                         itunesSubtitleElement = {};
                         itunesSubtitleElement["itunes:subtitle"] = compiledLineup.Programs[i].Show.Clips[j].Description;;
                         rssFeedItem.custom_elements.push(itunesSubtitleElement);
@@ -311,6 +312,47 @@ Raa1.prototype.registerWebApp = function() {
             });
         }
         res.send("Success");
+    });
+
+    self.webApp.get('/linkgenerator/:medium/:urlEncoded', function(req, res) {
+        console.log("called");
+        var medium = req.params['medium'];
+        var urlEncoded = req.params['urlEncoded'];
+        var reqUrl = Buffer.from(urlEncoded, 'base64');
+
+        if (reqUrl) {
+            var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+            var userAgent = req.headers['user-agent'];
+            
+            // Report to GA server
+            var gaParams = {
+                'v': '1',
+                'tid': 'UA-103579661-1',
+                'cid': '555',
+                't': 'event',
+                'ec': 'audio',
+                'ea': 'play',
+                'el': 'url'
+            };
+            gaParams.ev = reqUrl;
+            gaParams.uip = ip;
+            gaParams.ua = userAgent;
+            gaParams.ca = medium;
+            gaParams.cn = medium;
+            gaParams.cm = medium;
+
+            Utils.httpPost("http://www.google-analytics.com", "/collect", 
+                querystring.stringify(gaParams), 
+                function(error, response, body) {
+                    if (error) {
+                        console.log("Error while sending GA request: " + error);
+                    }
+                });
+
+            return res.redirect(reqUrl);
+        }
+
+        return res.status(400).send("The query url is missing or not valid");
     });
 
     self.webApp.listen(7799, function () {
