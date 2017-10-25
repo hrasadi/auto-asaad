@@ -12,7 +12,7 @@ var dot = require('dot');
 /* WEB APP REQUIREMENTS */
 // Expressjs for devices to register for push notifications
 var express = require('express');
-var querystring = require('querystring');
+var request = require('request');
 var sqlite3 = require('sqlite3').verbose();
 /*----*/
 
@@ -315,7 +315,6 @@ Raa1.prototype.registerWebApp = function() {
     });
 
     self.webApp.get('/linkgenerator/:medium/:urlEncoded', function(req, res) {
-        console.log("called");
         var medium = req.params['medium'];
         var urlEncoded = req.params['urlEncoded'];
         var reqUrl = Buffer.from(urlEncoded, 'base64');
@@ -332,17 +331,22 @@ Raa1.prototype.registerWebApp = function() {
                 't': 'event',
                 'ec': 'audio',
                 'ea': 'play',
-                'el': 'url'
             };
-            gaParams.ev = reqUrl;
+            gaParams.el = reqUrl;
             gaParams.uip = ip;
             gaParams.ua = userAgent;
             gaParams.ca = medium;
             gaParams.cn = medium;
             gaParams.cm = medium;
 
-            Utils.httpPost("http://www.google-analytics.com", "/collect", 
-                querystring.stringify(gaParams), 
+            var requestOptions = {
+                url: "https://www.google-analytics.com/collect",
+                method: "POST",
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                form: gaParams                
+            }
+
+            request.post(requestOptions, 
                 function(error, response, body) {
                     if (error) {
                         console.log("Error while sending GA request: " + error);
