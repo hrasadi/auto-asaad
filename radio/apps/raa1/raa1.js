@@ -317,7 +317,7 @@ Raa1.prototype.registerWebApp = function() {
     self.webApp.get('/linkgenerator/:medium/:urlEncoded', function(req, res) {
         var medium = req.params['medium'];
         var urlEncoded = req.params['urlEncoded'];
-        var reqUrl = Buffer.from(urlEncoded, 'base64');
+        var reqUrl = Buffer.from(urlEncoded, 'base64').toString('ascii');
 
         if (reqUrl) {
             var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
