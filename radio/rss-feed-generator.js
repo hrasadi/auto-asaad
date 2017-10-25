@@ -42,7 +42,7 @@ RSSFeedGenerator.prototype.publishFeed = function(targetDateMoment, feedPath, pu
 
     
     if (publishNewItems) {
-        newItems.concat(this.items);
+        newItem = newItems.concat(this.items);
     }
     
     fs.writeFileSync(feedJSONPath, JSON.stringify(newItems, null, 2));
