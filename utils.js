@@ -31,8 +31,4 @@ Utils.prototype.httpGet = function(hostname, path, callback_fn) {
     });
 }
 
-Utils.prototype.httpsPost = function(hostname, path, post_body, callback_fn) {
-    this.request.post(hostname + path, post_body, callback_fn);
-}
-
 module.exports = new Utils();
