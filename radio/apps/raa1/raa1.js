@@ -166,9 +166,7 @@ Radio.prototype.onLineupCompiled = function(targetDateMoment, compiledLineup) {
                         rssFeedItem.date = Date().toString();
                         
                         rssFeedItem.enclosure = {};
-                        var podcastEncodedUrl = 'https://api.raa.media/linkgenerator/podcast/' + Buffer.from(vodUrl.toString()).toString('base64');
-                        // This is to convince podcast players that this is an audio file!! It will be ignored by base64 decoder later
-                        podcastEncodedUrl = podcastEncodedUrl + ".mp3"; 
+                        var podcastEncodedUrl = 'https://api.raa.media/linkgenerator/podcast.mp3?src=' + Buffer.from(vodUrl.toString()).toString('base64');
                         rssFeedItem.enclosure.url = podcastEncodedUrl;
                         
                         itunesSubtitleElement = {};
@@ -319,9 +317,9 @@ Raa1.prototype.registerWebApp = function() {
         res.send("Success");
     });
 
-    self.webApp.get('/linkgenerator/:medium/:urlEncoded', function(req, res) {
+    self.webApp.get('/linkgenerator/:medium', function(req, res) {
         var medium = req.params['medium'];
-        var urlEncoded = req.params['urlEncoded'];
+        var urlEncoded = req.query['src'];
         var reqUrl = Buffer.from(urlEncoded, 'base64').toString('ascii');
 
         if (reqUrl) {
