@@ -8,13 +8,13 @@ var express = require('express');
 var request = require('request');
 var sqlite3 = require('sqlite3').verbose();
 
-var Logger = require('../../logger2');
+var Logger = require('../../../logger');
 
 var RaaAPI = function(program) {	
     this.configFilePath = path.resolve(program.args[0]);
     this.cwd = path.resolve(path.dirname(program.args[0]) + '/..');
 
-    var logFilePath = this.cwd + "logs/api.log";
+    var logFilePath = this.cwd + "/logs/api.log";
     this.logger = new Logger(logFilePath);
 }
 

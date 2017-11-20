@@ -189,8 +189,8 @@ LineupPlanner.prototype.selectReplayProgram = function(programTemplate, targetDa
         originalAiringLineup = this.lineups[offset];
     }
 
-    if (!originalAiringLineup.Version || originalAiringLineup.Version == "1.0") {
-        // Not supported! Format too old
+    if (!originalAiringLineup || !originalAiringLineup.Version || originalAiringLineup.Version == "1.0") {
+        // Not supported! Format too old or original lineup does not exist at all
         return null;
     }
 
@@ -249,7 +249,7 @@ LineupPlanner.prototype.copyProgramForReplay = function(program) {
     // Only add the main clips in replay boxes
     replayProgram.Show = {};
     replayProgram.Show.Clips = [];
-    originalShow = JSON.parse(JSON.stringify(program.Show));
+    originalShow = JSON.parse(JSON.stringify(program.Show)); // This odd expression simply copies the object!
 
     for (var i = 0; i < originalShow.Clips.length; i++) {
         var clip = originalShow.Clips[i];
@@ -261,7 +261,7 @@ LineupPlanner.prototype.copyProgramForReplay = function(program) {
     if (replayProgram.Show.Clips.length > 0) {
         return replayProgram;
     } else {
-        // If there is no clips to this program, do not include it at all
+        // If there is no clips for this program, do not include it at all
         return null;
     }
 }
