@@ -1,4 +1,5 @@
 const SerializableObject = require('./SerializableObject');
+
 const Clip = require('./Clip');
 
 class BaseShow extends SerializableObject {
@@ -14,7 +15,7 @@ class BaseShow extends SerializableObject {
         if (typeof values !== 'undefined' && values) {
             this._clips = [];
             for (let value of values) {
-                let clip = new Clip(value);
+                let clip = Clip.create(value);
                 this._clips.push(clip);
             }
         }
@@ -24,14 +25,6 @@ class BaseShow extends SerializableObject {
 class Show extends BaseShow {
     constructor(jsonOrOther) {
         super(jsonOrOther);
-    }
-
-    get Scheduling() {
-        return this.getOrNull(this._scheduling);
-    }
-
-    set Scheduling(value) {
-        this._scheduling = new Scheduling(value);
     }
 }
 

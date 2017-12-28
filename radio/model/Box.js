@@ -1,4 +1,5 @@
 const SerializableObject = require('./SerializableObject');
+
 const Scheduling = require('./Scheduling');
 
 const P = require('./Program');
@@ -66,7 +67,6 @@ class Box extends SerializableObject {
             this._programs.push(program);
         }
     }
-
 }
 
 module.exports = {

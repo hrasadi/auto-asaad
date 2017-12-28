@@ -1,6 +1,6 @@
 const SerializableObject = require('./SerializableObject');
 
-const Context = require('./Context');
+const Publishing = require('./Publishing');
 
 class ProgramTemplate extends SerializableObject {
     static createTemplate(json) {
@@ -29,27 +29,6 @@ class ProgramTemplate extends SerializableObject {
 
     set Title(value) {
         this._title = value;
-    }
-
-    get SocialListeningProps() {
-        return this.getOrElse(this._socialListeningProps, 
-            Object.assign({}, Context.Defaults.SocialListeningProps));
-    }
-
-    set SocialListeningProps(value) {
-        if (!value) {
-            value = {};
-        }
-
-        value.DefaultLife = value.DefaultLife ?
-            Context.Defaults.SocialListeningProps.DefaultLife :
-            value.DefaultLife;
-        value.MaxLife = value.MaxLife ?
-            Context.Defaults.SocialListeningProps.MaxLife : value.MaxLife;
-        value.VoteEffect = value.VoteEffect ?
-            Context.Defaults.SocialListeningProps.VoteEffect : value.VoteEffect;
-
-        this._value = value;
     }
 
     get WeeklySchedule() {
@@ -90,12 +69,14 @@ class PremiereProgramTemplate extends ProgramTemplate {
         this._show = value;
     }
 
-    get PublishPodcast() {
-        return this.getOrNull(this._publishPodcast);
+    get Publishing() {
+        this.getOrNull(this._publishing);
     }
 
-    set PublishPodcast(value) {
-        this._publishPodcast = value;
+    set Publishing(value) {
+        if (value) {
+            this._publishing = new Publishing(value);
+        }
     }
 }
 

@@ -1,32 +1,37 @@
-const ProgramTemplate = require('./Program');
 const SerializableObject = require('./SerializableObject');
+
+const B = require('./Box');
+const BoxTemplate = B.BoxTemplate;
 
 class LineupTemplate extends SerializableObject {
     constructor(jsonOrOther) {
         super(jsonOrOther);
     }
 
-    plan() {
-        let lineupPlan = null;
-        return lineupPlan;
+    get BoxTemplates() {
+        return this.getOrNull(this._boxTemplates);
+    }
+
+    set BoxTemplates(values) {
+        if (typeof values !== 'undefined' && values) {
+            this._boxTemplates = [];
+            for (let value of values) {
+                let boxTemplate = new BoxTemplate(value);
+                this._boxTemplates.push(boxTemplate);
+            }
+        }
     }
 }
 
-class LineupPlan extends LineupTemplate {
-    constructor() {
-        super();
-        this._id = null;
-    }
-
-    get Id() {
-        return this._id;
+class LineupPlan extends SerializableObject {
+    constructor(jsonOrOther) {
+        super(jsonOrOther);
     }
 }
 
-class Lineup extends LineupPlan {
-    constructor() {
-        super();
-        this._id = null;
+class Lineup extends SerializableObject {
+    constructor(jsonOrOther) {
+        super(jsonOrOther);
     }
 }
 
