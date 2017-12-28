@@ -1,75 +1,50 @@
-var winston = require('winston')
+const {createLogger, format, transports} = require('winston');
 
-module.exports = function(logFilePath) {
-  // set default log level.
-  var logLevel = 'debug'
+let Logger = function(logFilePath) {
+  let logger = createLogger({
+    level: 'verbose',
+    format: format.combine(
+      format.json(),
+      format.timestamp(),
+      format.align(),
+      format.printf((info) => {
+        // info
+        const {
+          timestamp, level, message, args,
+        } = info;
+        const ts = timestamp.slice(0, 19).replace('T', ' ');
+        return `${ts} [${level}]:
+          ${message} ${(args && Object.keys(args).length) ?
+          JSON.stringify(args, null, 2) : ''}`;
+      })
+    ),
+    transports: [
+        new transports.File({filename: logFilePath, level: 'info'}),
+    ],
+  });
 
-  // Set up logger
-  var customColors = {
-    trace: 'white',
-    debug: 'green',
-    info: 'blue',
-    warn: 'yellow',
-    crit: 'red',
-    fatal: 'red'
-  }
-
-  if (logFilePath) {
-    var logger = new (winston.Logger)({
-      colors: customColors,
-      level: logLevel,
-      levels: {
-        fatal: 0,
-        crit: 1,
-        warn: 2,
-        info: 3,
-        debug: 4,
-        trace: 5
-      },
-      transports: [
-        new (winston.transports.Console)({
-          colorize: true,
-          timestamp: true
-        }),
-        new (winston.transports.File)({ filename: logFilePath })
-      ]
-    })    
-  } else {
-    var logger = new (winston.Logger)({
-      colors: customColors,
-      level: logLevel,
-      levels: {
-        fatal: 0,
-        crit: 1,
-        warn: 2,
-        info: 3,
-        debug: 4,
-        trace: 5
-      },
-      transports: [
-        new (winston.transports.Console)({
-          colorize: true,
-          timestamp: true
+  if (process.env.NODE_ENV !== 'production') {
+    logger.add(new transports.Console({
+      level: 'verbose',
+      format: format.combine(
+        format.colorize(),
+        format.printf((info) => {
+          // info
+          const {
+            timestamp, level, message, args,
+          } = info;
+          const ts = timestamp.slice(0, 19).replace('T', ' ');
+          return `${ts} [${level}]: 
+            ${message} ${(args && Object.keys(args).length) ?
+            JSON.stringify(args, null, 2) : ''}`;
         })
-      ]
-    })
+      ),
+    }));
   }
 
-  winston.addColors(customColors)
-
-  // Extend logger object to properly log 'Error' types
-  var origLog = logger.log
-
-  logger.log = function (level, msg) {
-    if (msg instanceof Error) {
-      var args = Array.prototype.slice.call(arguments)
-      args[1] = msg.stack
-      origLog.apply(logger, args)
-    } else {
-      origLog.apply(logger, arguments)
-    }
-  }
+//  winston.addColors(customColors);
 
   return logger;
-}
+};
 
+module.exports = Logger;

@@ -1,7 +1,7 @@
 var Utils = function() {
     this.http = require('http');
     this.request = require('request');
-}
+};
 
 Utils.prototype.inheritsFrom = function(child, parent) {
     child.prototype = Object.create(parent.prototype);

@@ -2,3 +2,7 @@
 lineups/**
 logs/**
 pm2-home/**
+run/**
+web/**
+rss/**
+
