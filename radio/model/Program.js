@@ -1,23 +1,14 @@
 const SerializableObject = require('./SerializableObject');
 
 const Publishing = require('./Publishing');
-const Schedule = require('./Schedule');
 
 const S = require('./Show');
-const Show = S.Show;
-const PreShow = S.PreShow;
+const ShowTemplate = S.Show;
+const PreShowTemplate = S.PreShow;
 
 const moment = require('moment');
 
-class ProgramTemplate extends SerializableObject {
-    static createTemplate(json) {
-        if (json.ProgramType === 'Premiere') {
-            return new PremiereProgramTemplate(json);
-        } else if (json.ProgramType === 'Replay') {
-            return new ReplayProgramTemplate(json);
-        }
-    }
-
+class BaseProgram extends SerializableObject {
     constructor(jsonOrOther) {
         super(jsonOrOther);
     }
@@ -36,6 +27,32 @@ class ProgramTemplate extends SerializableObject {
 
     set Title(value) {
         this._title = value;
+    }
+
+    get Publishing() {
+        this.getOrElse(this._publishing, new Publishing());
+    }
+
+    set Publishing(value) {
+        if (value) {
+            this._publishing = new Publishing(value);
+        }
+    }
+}
+
+class ProgramTemplate extends SerializableObject {
+    static createTemplate(json, parent) {
+        if (json.ProgramType === 'Premiere') {
+            return new PremiereProgramTemplate(json, parent);
+        } else if (json.ProgramType === 'Replay') {
+            return new ReplayProgramTemplate(json, parent);
+        }
+    }
+
+    constructor(jsonOrOther, parent = null) {
+        super(jsonOrOther);
+
+        this._parentBoxTemplate = parent;
     }
 
     get ProgramType() {
@@ -57,68 +74,6 @@ class ProgramTemplate extends SerializableObject {
     set PremiereDate(value) {
         this._premiereDate = value;
     }
-}
-
-class PremiereProgramTemplate extends ProgramTemplate {
-    constructor(jsonOrOther) {
-        super(jsonOrOther);
-    }
-
-    plan(targetDateMoment) {
-        // Plan a new episode
-
-        let plannedPreShow = null;
-        let plannedShow = null;
-
-        if (this.PreShow) {
-            plannedPreShow = this.PreShow.plan();
-        }
-        if (this.Show) {
-            plannedShow = this.Show.plan();
-        }
-
-        this.PreShow = plannedPreShow;
-        
-        if (!plannedShow) {
-            return null;
-        }
-
-        let plannedProgram = new ProgramPlan(this);
-        plannedProgram.PreShow = plannedPreShow;
-        plannedProgram.Show = plannedShow;
-
-        return plannedProgram;
-    }
-
-    get PreShow() {
-        return this.getOrNull(this._preShow);
-    }
-
-    set PreShow(value) {
-        if (value) {
-            this._preShow = new PreShow(value);
-        }
-    }
-
-    get Show() {
-        return this.getOrNull(this._show);
-    }
-
-    set Show(value) {
-        if (value) {
-            this._show = new Show(value);
-        }
-    }
-
-    get Publishing() {
-        this.getOrNull(this._publishing);
-    }
-
-    set Publishing(value) {
-        if (value) {
-            this._publishing = new Publishing(value);
-        }
-    }
 
     /**
      * Path to program cover image (used in feed cards and podcasts)
@@ -132,9 +87,58 @@ class PremiereProgramTemplate extends ProgramTemplate {
     }
 }
 
+class PremiereProgramTemplate extends ProgramTemplate {
+    constructor(jsonOrOther, parent) {
+        super(jsonOrOther, parent);
+    }
+
+    plan(targetDateMoment) {
+        // Plan a new episode
+        let plannedPreShow = null;
+        let plannedShow = null;
+
+        if (this.PreShowTemplate) {
+            plannedPreShow = this.PreShowTemplate.plan();
+        }
+        if (this.ShowTemplate) {
+            plannedShow = this.ShowTemplate.plan();
+        }
+
+        if (!plannedShow) {
+            return null;
+        }
+
+        let plannedProgram = new ProgramPlan(this);
+        plannedProgram.PreShowPlan = plannedPreShow;
+        plannedProgram.ShowPlan = plannedShow;
+
+        return plannedProgram;
+    }
+
+    get PreShowTemplate() {
+        return this.getOrNull(this._preShowTemplate);
+    }
+
+    set PreShowTemplate(value) {
+        if (value) {
+            this._preShowTemplate = new PreShowTemplate(value, this);
+        }
+    }
+
+    get ShowTemplate() {
+        return this.getOrNull(this._showTemplate);
+    }
+
+    set ShowTemplate(value) {
+        if (value) {
+            this._showTemplate = new ShowTemplate(value, this);
+        }
+    }
+}
+
 class ReplayProgramTemplate extends ProgramTemplate {
-    constructor(jsonOrOther) {
-        super(jsonOrOther);
+    constructor(jsonOrOther, parent) {
+        super(jsonOrOther, parent);
     }
 
     plan() {
@@ -174,7 +178,7 @@ class ReplayProgramTemplate extends ProgramTemplate {
     }
 }
 
-class ProgramPlan extends PremiereProgramTemplate {
+class ProgramPlan extends BaseProgram {
     constructor(jsonOrOther) {
         super(jsonOrOther);
     }
@@ -182,9 +186,29 @@ class ProgramPlan extends PremiereProgramTemplate {
     compile() {
 
     }
+
+    get PreShowPlan() {
+        return this.getOrNull(this._preShowPlan);
+    }
+
+    set PreShowPlan(value) {
+        if (value) {
+            this._preShowPlan = value;
+        }
+    }
+
+    get ShowPlan() {
+        return this.getOrNull(this._showTemplate);
+    }
+
+    set ShowPlan(value) {
+        if (value) {
+            this._showPlan = value;
+        }
+    }
 }
 
-class Program extends ProgramPlan {
+class Program extends BaseProgram {
     constructor(jsonOrOther) {
         super(jsonOrOther);
     }
@@ -193,19 +217,24 @@ class Program extends ProgramPlan {
 
     }
 
-    // For 'floating boxes', the program will hold the start
-    // time upon compilation, as the box will be removed.
-    // This program is played back in 'breaking' queue of liquidsoap
-    get IsBreaking() {
-        return this.StartTime ? true : false;
+    get PreShow() {
+        return this.getOrNull(this._preShow);
     }
 
-    get StartTime() {
-        return this.getOrNull(this._startTime);
+    set PreShow(value) {
+        if (value) {
+            this._preShow = value;
+        }
     }
 
-    set StartTime(value) {
-        this._startTime = value;
+    get Show() {
+        return this.getOrNull(this._show);
+    }
+
+    set Show(value) {
+        if (value) {
+            this._show = value;
+        }
     }
 
     get Metadata() {

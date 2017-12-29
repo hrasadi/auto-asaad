@@ -17,7 +17,7 @@ class BaseBox extends SerializableObject {
     // Floating boxes can cut and break other boxes and have priority over other
     // programs. It comes with some limitations:
     // 1- It can only contain one program
-    // 2- If not completely wrapped in another box, it will shown as a single 
+    // 2- If not completely wrapped in another box, it will shown as a single
     // program in the lineup
     get IsFloating() {
         return this.getOrElse(this._isFloating, false);
@@ -25,14 +25,6 @@ class BaseBox extends SerializableObject {
 
     set IsFloating(value) {
         this._isFloating = value;
-    }
-
-    get Schedule() {
-        return this.getOrNull(this._schedule);
-    }
-
-    set Schedule(value) {
-        this._scheduling = new Schedule(value);
     }
 }
 
@@ -49,9 +41,9 @@ class BoxTemplate extends BaseBox {
 
     plan(targetDateMoment) {
         if (this.Schedule.isOnSchedule(targetDateMoment)) {
-            if (this.BoxProgramTemplates) {
+            if (this.ProgramTemplates) {
                 let programPlans = [];
-                for (let programTemplate of this.BoxProgramTemplates) {
+                for (let programTemplate of this.ProgramTemplates) {
                     let programPlan = programTemplate.plan(targetDateMoment);
                     programPlans.append(programPlan);
                 }
@@ -61,51 +53,60 @@ class BoxTemplate extends BaseBox {
                     return null;
                 }
 
-                let box = new Box(this);
-                box.Programs = programPlans;
-                box.StartTime = this.Schedule
+                let boxPlan = new BoxPlan(this);
+                boxPlan.ProgramPlans = programPlans;
+                boxPlan.StartTime = this.Schedule
                     .calculateStartTime(targetDateMoment, this.BoxId);
-                return box;
+                return boxPlan;
             }
         }
         return null;
     }
 
-    get BoxProgramTemplates() {
-        return this.getOrNull(this._boxProgramTemplates);
+    get ProgramTemplates() {
+        return this.getOrNull(this._programTemplates);
     }
 
-    set BoxProgramTemplates(values) {
+    set ProgramTemplates(values) {
         if (typeof values !== 'undefined' && values) {
             if (this.IsFloating && values.length > 1) {
                 throw Error('Box is marked as floating but' +
                  'it contains more than one program.');
             }
 
-            this._boxProgramTemplates = [];
+            this._programTemplates = [];
             for (let value of values) {
-                let programTemplate = ProgramTemplate.createTemplate(value);
-                this._boxProgramTemplates.push(programTemplate);
+                let programTemplate = ProgramTemplate.createTemplate(value, this);
+                this._programTemplates.push(programTemplate);
             }
         }
     }
+
+    get Schedule() {
+        return this.getOrNull(this._schedule);
+    }
+
+    set Schedule(value) {
+        this._scheduling = new Schedule(value);
+    }
 }
 
-class Box extends SerializableObject {
+class BoxPlan extends BaseBox {
     constructor(jsonOrOther) {
         super(jsonOrOther);
     }
 
-    get Programs() {
-        return this._programs;
+    get ProgramPlans() {
+        return this.getOrNull(this._programPlans);
     }
 
-    set Programs(values) {
-        this._programs = [];
-        for (let value of values) {
-            let program = new ProgramTemplate(value);
-            this._programs.push(program);
-        }
+    /**
+     * Programs for this class should be assigned during plan.
+     * We do not parse JSON to prevent multiple object copying
+     * @param {ProgramPlan[]} values of ProgramPlan objects
+     */
+    set ProgramPlans(values) {
+        this._programPlans = values;
     }
 
     get StartTime() {
@@ -117,7 +118,36 @@ class Box extends SerializableObject {
     }
 }
 
+class Box extends BaseBox {
+    constructor(jsonOrOther) {
+        super(jsonOrOther);
+    }
+
+    get Programs() {
+        return this.getOrNull(this._programs);
+    }
+
+    /**
+     * Programs for this class should be assigned during plan.
+     * We do not parse JSON to prevent multiple object copying
+     * @param {Program[]} values of ProgramPlan objects
+     */
+    set Programs(values) {
+        this._programs = values;
+    }
+
+    get StartTime() {
+        return this.getOrNull(this._startTime);
+    }
+
+    set StartTime(value) {
+        this._startTime = value;
+    }
+}
+
+
 module.exports = {
     'BoxTemplate': BoxTemplate,
+    'BoxPlan': BoxPlan,
     'Box': Box,
 };

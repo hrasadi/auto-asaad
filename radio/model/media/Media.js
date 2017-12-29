@@ -1,6 +1,36 @@
 const SerializableObject = require('../SerializableObject');
 
-class MediaGroup extends SerializableObject {
+class MediaTemplate extends SerializableObject {
+    constructor(jsonOrOther) {
+        super(jsonOrOther);
+    }
+
+    get MediaGroupName() {
+        return this.getOrNull(this._mediaGroupName);
+    }
+
+    set MediaGroupName(value) {
+        this._mediaGroupName = value;
+    }
+
+    get Iterator() {
+        return this.getOrNull(this._iterator);
+    }
+
+    set Iterator(value) {
+        this._iterator = value;
+    }
+
+    get Offset() {
+        return this.getOrNull(this._offset);
+    }
+
+    set Offset(value) {
+        this._offset = value;
+    }
+}
+
+class Media extends SerializableObject {
     constructor(jsonOrOther) {
         super(jsonOrOther);
     }
@@ -27,6 +57,16 @@ class MediaGroup extends SerializableObject {
         this._description = value;
     }
 
+    get Duration() {
+        this.getOrNull(this._duration);
+    }
+
+    set Duration(value) {
+        this._duration = value;
+    }
 }
 
-module.exports = MediaGroup;
+module.exports = {
+    'MediaTemplate': MediaTemplate,
+    'Media': Media,
+};

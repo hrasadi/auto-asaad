@@ -41,7 +41,7 @@ class Publishing extends SerializableObject {
     }
 
     get SocialListeningMode() {
-        return this.getOrElse(this._socialListeningMode, 'Social');
+        return this.getOrElse(this._socialListeningMode, 'None');
     }
 
     set SocialListeningMode(value) {
