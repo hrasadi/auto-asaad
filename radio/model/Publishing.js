@@ -1,6 +1,6 @@
 const SerializableObject = require('./SerializableObject');
 
-const Context = require('./Context');
+const Context = require('../Context');
 
 class Publishing extends SerializableObject {
     constructor(jsonOrOther) {

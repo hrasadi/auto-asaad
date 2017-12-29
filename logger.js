@@ -42,8 +42,6 @@ let Logger = function(logFilePath) {
     }));
   }
 
-//  winston.addColors(customColors);
-
   return logger;
 };
 

@@ -11,7 +11,7 @@ class SerializableObject {
         }
     }
 
-    validate() {};
+    validate() {}
 
     getOrNull(prop) {
         if (typeof prop !== 'undefined' && prop) {

@@ -1,17 +1,11 @@
 const SerializableObject = require('./SerializableObject');
 
-const Scheduling = require('./Scheduling');
+const Schedule = require('./Schedule');
 
 const P = require('./Program');
 const ProgramTemplate = P.ProgramTemplate;
 
-// const Context = require('./Context');
-
-class BoxTemplate extends SerializableObject {
-    constructor(jsonOrOther) {
-        super(jsonOrOther);
-    }
-
+class BaseBox extends SerializableObject {
     get BoxId() {
         return this.getOrNull(this._boxId);
     }
@@ -20,12 +14,61 @@ class BoxTemplate extends SerializableObject {
         this._id = value;
     }
 
-    get Scheduling() {
-        return this.getOrNull(this._scheduling);
+    // Floating boxes can cut and break other boxes and have priority over other
+    // programs. It comes with some limitations:
+    // 1- It can only contain one program
+    // 2- If not completely wrapped in another box, it will shown as a single 
+    // program in the lineup
+    get IsFloating() {
+        return this.getOrElse(this._isFloating, false);
     }
 
-    set Scheduling(value) {
-        this._scheduling = new Scheduling(value);
+    set IsFloating(value) {
+        this._isFloating = value;
+    }
+
+    get Schedule() {
+        return this.getOrNull(this._schedule);
+    }
+
+    set Schedule(value) {
+        this._scheduling = new Schedule(value);
+    }
+}
+
+class BoxTemplate extends BaseBox {
+    constructor(jsonOrOther) {
+        super(jsonOrOther);
+    }
+
+    validate() {
+        if (!this.Schedule) {
+            throw Error('Box should have Schedule property set.');
+        }
+    }
+
+    plan(targetDateMoment) {
+        if (this.Schedule.isOnSchedule(targetDateMoment)) {
+            if (this.BoxProgramTemplates) {
+                let programPlans = [];
+                for (let programTemplate of this.BoxProgramTemplates) {
+                    let programPlan = programTemplate.plan(targetDateMoment);
+                    programPlans.append(programPlan);
+                }
+
+                // No programs planned for this box
+                if (!programPlans) {
+                    return null;
+                }
+
+                let box = new Box(this);
+                box.Programs = programPlans;
+                box.StartTime = this.Schedule
+                    .calculateStartTime(targetDateMoment, this.BoxId);
+                return box;
+            }
+        }
+        return null;
     }
 
     get BoxProgramTemplates() {
@@ -34,6 +77,11 @@ class BoxTemplate extends SerializableObject {
 
     set BoxProgramTemplates(values) {
         if (typeof values !== 'undefined' && values) {
+            if (this.IsFloating && values.length > 1) {
+                throw Error('Box is marked as floating but' +
+                 'it contains more than one program.');
+            }
+
             this._boxProgramTemplates = [];
             for (let value of values) {
                 let programTemplate = ProgramTemplate.createTemplate(value);
@@ -48,14 +96,6 @@ class Box extends SerializableObject {
         super(jsonOrOther);
     }
 
-    get BoxId() {
-        return this.getOrNull(this._boxId);
-    }
-
-    set BoxId(value) {
-        this._id = value;
-    }
-
     get Programs() {
         return this._programs;
     }
@@ -66,6 +106,14 @@ class Box extends SerializableObject {
             let program = new ProgramTemplate(value);
             this._programs.push(program);
         }
+    }
+
+    get StartTime() {
+        return this.getOrNull(this._startTime);
+    }
+
+    set StartTime(value) {
+        this._startTime = value;
     }
 }
 

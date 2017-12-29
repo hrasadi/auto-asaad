@@ -1,4 +1,9 @@
+const Logger = require('../logger');
+
+const logger = new Logger('./log');
+
 const Context = {
+    CWD: '.',
     Defaults: {
         Publishing: {
             SocialListeningProps: {
@@ -7,7 +12,10 @@ const Context = {
                 VoteBonus: 0.5,
             },
         },
+        Version: '3.0',
     },
+    Logger: logger,
+    LineupManager: null,
 };
 
 module.exports = Context;
