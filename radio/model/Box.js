@@ -6,12 +6,16 @@ const P = require('./Program');
 const ProgramTemplate = P.ProgramTemplate;
 
 class BaseBox extends SerializableObject {
+    constructor(jsonOrOther) {
+        super(jsonOrOther);
+    }
+
     get BoxId() {
         return this.getOrNull(this._boxId);
     }
 
     set BoxId(value) {
-        this._id = value;
+        this._boxId = value;
     }
 
     // Floating boxes can cut and break other boxes and have priority over other
@@ -29,13 +33,15 @@ class BaseBox extends SerializableObject {
 }
 
 class BoxTemplate extends BaseBox {
-    constructor(jsonOrOther) {
+    constructor(jsonOrOther, parent) {
         super(jsonOrOther);
+
+        this._parentLineupTemplate = parent;
     }
 
     validate() {
         if (!this.Schedule) {
-            throw Error('Box should have Schedule property set.');
+            throw Error('BoxTemplate should have Schedule property set.');
         }
     }
 
@@ -45,11 +51,13 @@ class BoxTemplate extends BaseBox {
                 let programPlans = [];
                 for (let programTemplate of this.ProgramTemplates) {
                     let programPlan = programTemplate.plan(targetDateMoment);
-                    programPlans.append(programPlan);
+                    if (programPlan) {
+                        programPlans.push(programPlan);
+                    }
                 }
 
                 // No programs planned for this box
-                if (!programPlans) {
+                if (programPlans.length == 0) {
                     return null;
                 }
 
@@ -57,6 +65,7 @@ class BoxTemplate extends BaseBox {
                 boxPlan.ProgramPlans = programPlans;
                 boxPlan.StartTime = this.Schedule
                     .calculateStartTime(targetDateMoment, this.BoxId);
+                
                 return boxPlan;
             }
         }
@@ -76,7 +85,8 @@ class BoxTemplate extends BaseBox {
 
             this._programTemplates = [];
             for (let value of values) {
-                let programTemplate = ProgramTemplate.createTemplate(value, this);
+                let programTemplate =
+                    ProgramTemplate.createTemplate(value, this);
                 this._programTemplates.push(programTemplate);
             }
         }
@@ -87,7 +97,7 @@ class BoxTemplate extends BaseBox {
     }
 
     set Schedule(value) {
-        this._scheduling = new Schedule(value);
+        this._schedule = new Schedule(value);
     }
 }
 

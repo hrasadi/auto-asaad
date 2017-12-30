@@ -2,28 +2,32 @@ const SerializableObject = require('../SerializableObject');
 
 const Media = require('./Media');
 
-const Context = require('../Context');
+const Context = require('../../Context');
 
 const fs = require('fs');
 
 class MediaGroup extends SerializableObject {
-    constructor(jsonOrOther) {
+    constructor(jsonOrOther, parent) {
         super(jsonOrOther);
+
+        this._parentMediaDirectory = parent;
+
+        this.deflatePartial();
     }
 
     deflatePartial() {
-        let result = new MediaGroup(this);
-
-        if (result.PartialConfigFilePath) {
+        if (this.PartialConfigFilePath) {
             let partialConfigFilePrefix = Context.CWD + '/conf/partials/';
 
             let mediaInPartial = JSON.parse(
                 fs.readFileSync(partialConfigFilePrefix +
-                 result.PartialConfigPath, 'utf-8'));
+                 this.PartialConfigPath, 'utf-8'));
 
-            result.PartialConfigPath.append(mediaInPartial);
+            for (let mediaJson of mediaInPartial) {
+                let media = new Media(mediaJson);
+                this.Media.push(media);
+            }
         }
-        return result;
     }
 
     get Name() {
@@ -50,10 +54,10 @@ class MediaGroup extends SerializableObject {
         Each media value contains a (Path, Description) tuple.
     */
     set Media(values) {
+        this._media = [];
         if (values) {
-            this._media = [];
             for (let value of values) {
-                let media = new Media(value);
+                let media = new Media(value, this);
                 this._media.push(media);
             }
         }

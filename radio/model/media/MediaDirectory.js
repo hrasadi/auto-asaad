@@ -21,12 +21,19 @@ class MediaDirectory extends SerializableObject {
 
     set MediaGroups(values) {
         if (values) {
+            this._mediaGroupsMap = {};
             this._mediaGroups = [];
+
             for (let value of values) {
-                let mediaGroup = new MediaGroup(value);
+                let mediaGroup = new MediaGroup(value, this);
                 this._mediaGroups.push(mediaGroup);
+                this._mediaGroupsMap[mediaGroup.Name] = mediaGroup;
             }
         }
+    }
+
+    getMediaGroup(mediaGroupName) {
+        return this.getOrNull(this._mediaGroupsMap[mediaGroupName]);
     }
 }
 

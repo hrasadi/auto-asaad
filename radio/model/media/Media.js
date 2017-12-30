@@ -1,44 +1,29 @@
 const SerializableObject = require('../SerializableObject');
 
-class MediaTemplate extends SerializableObject {
-    constructor(jsonOrOther) {
-        super(jsonOrOther);
-    }
-
-    get MediaGroupName() {
-        return this.getOrNull(this._mediaGroupName);
-    }
-
-    set MediaGroupName(value) {
-        this._mediaGroupName = value;
-    }
-
-    get Iterator() {
-        return this.getOrNull(this._iterator);
-    }
-
-    set Iterator(value) {
-        this._iterator = value;
-    }
-
-    get Offset() {
-        return this.getOrNull(this._offset);
-    }
-
-    set Offset(value) {
-        this._offset = value;
-    }
-}
-
 class Media extends SerializableObject {
-    constructor(jsonOrOther) {
+    constructor(jsonOrOther, parent) {
         super(jsonOrOther);
+
+        // REFERENCES
+        this._parentMediaGroup = parent;
     }
 
     validate() {
         if (!this._path) {
             throw Error('Media must have Path property');
         }
+    }
+
+    plan() {
+        let plannedMedia = new Media(this);
+        plannedMedia.Path = this._parentMediaGroup
+                            ._parentMediaDirectory.BaseDir +
+                            '/' + this.Path;
+
+        return plannedMedia;
+    }
+
+    compile() {
     }
 
     get Path() {
@@ -66,7 +51,5 @@ class Media extends SerializableObject {
     }
 }
 
-module.exports = {
-    'MediaTemplate': MediaTemplate,
-    'Media': Media,
-};
+module.exports = Media;
+

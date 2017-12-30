@@ -1,7 +1,11 @@
 const SerializableObject = require('./SerializableObject');
 
-const M = require('./media/Media');
-const MediaTemplate = M.MediaTemplate;
+const Context = require('../Context');
+
+const C = require('./media/Counter');
+const Counter = C.Counter;
+
+const moment = require('moment');
 
 class BaseClip extends SerializableObject {
     constructor(jsonOrOther) {
@@ -13,34 +17,85 @@ class BaseClip extends SerializableObject {
     }
 
     set IsMainClip(value) {
-        if (!value) {
-            this._isMainClip = false;
+        if (typeof value === 'boolean') {
+            this._isMainClip = value;
         } else {
-            this._isMainClip = true;
+            if (value && value.toLowerCase() === 'true') {
+                this._isMainClip = true;
+            } else {
+                this._isMainClip = false;
+            }
         }
     }
 }
 
 class ClipTemplate extends BaseClip {
-    constructor(jsonOrOther) {
+    constructor(jsonOrOther, parent) {
         super(jsonOrOther);
+
+        // REFERENCES
+        this._parentShowTemplate = parent;
     }
 
-    plan(targetDateMoment) {
-        
-    }
+    plan(targetDateMoment, clipIndex) {
+        let counterId = this._parentShowTemplate._parentProgramTemplate
+                            ._parentBoxTemplate.BoxId + '-' +
+                            this._parentShowTemplate
+                            ._parentProgramTemplate.ProgramId + '-' +
+                            this._parentShowTemplate.constructor.name + '-' +
+                            clipIndex;
 
-    get MediaTemplate() {
-        return this.getOrNull(this._mediaTemplate);
-    }
+        // If the point is in future, the counter should be immutable
+        let isImmutable =
+            moment(targetDateMoment)
+                .isAfter(Context.LineupManager.BaseDate) ?
+            true : false;
 
-    set MediaTemplate(value) {
-        if (value) {
-            this._mediaTemplate = new MediaTemplate(value);
+        let counter = Counter.createCounter(this.IteratorPolicy,
+            counterId, this.MediaGroup.Media.length, isImmutable);
+
+        let mediaIdx = counter.next(targetDateMoment);
+        if (mediaIdx == null) {
+            return null;
         }
+
+        let clipPlan = new ClipPlan(this);
+        clipPlan.Media = this.MediaGroup.Media[mediaIdx].plan();
+
+        return clipPlan;
+    }
+
+    get MediaGroupName() {
+        return this.getOrNull(this._mediaGroupName);
+    }
+
+    set MediaGroupName(value) {
+        this._mediaGroupName = value;
+    }
+
+    get MediaGroup() {
+        return this._parentShowTemplate
+            ._parentProgramTemplate._parentBoxTemplate
+            ._parentLineupTemplate.MediaDirectory
+            .getMediaGroup(this.MediaGroupName);
+    }
+
+    get IteratorPolicy() {
+        return this.getOrNull(this._iteratorPolicy);
+    }
+
+    set IteratorPolicy(value) {
+        this._iteratorPolicy = value;
+    }
+
+    get Offset() {
+        return this.getOrNull(this._offset);
+    }
+
+    set Offset(value) {
+        this._offset = value;
     }
 }
-
 class ClipPlan extends BaseClip {
     constructor(jsonOrOther) {
         super(jsonOrOther);

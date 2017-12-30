@@ -23,10 +23,12 @@ class LineupManager {
     }
 
     planLineupRange(startDateMoment, numDaysToPlan = 1) {
-        for (let i = 0; i < numDaysToPlan; i++) {
-            let targetDateMoment = moment(startDateMoment).add(i, 'days');
+        this._baseDate = startDateMoment;
 
-            this._lineupPlansCache[targetDateMoment.format('YYYY-MM-DD')] =
+        for (let i = 0; i < numDaysToPlan; i++) {
+            let targetDateMoment = moment(startDateMoment).add(i, 'days').format('YYYY-MM-DD');
+
+            this._lineupPlansCache[targetDateMoment] =
                     this._lineupTemplate.plan(targetDateMoment);
         }
     }
@@ -45,6 +47,10 @@ class LineupManager {
         // If not found (date belongs to feature of latest planned lineup)
         throw Error('LineupPlan for specified date does not exist.' +
          'Perhaps this date is in future');
+    }
+
+    get BaseDate() {
+        return this._baseDate;
     }
 }
 

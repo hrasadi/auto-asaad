@@ -3,8 +3,8 @@ const SerializableObject = require('./SerializableObject');
 const Publishing = require('./Publishing');
 
 const S = require('./Show');
-const ShowTemplate = S.Show;
-const PreShowTemplate = S.PreShow;
+const ShowTemplate = S.ShowTemplate;
+const PreShowTemplate = S.PreShowTemplate;
 
 const moment = require('moment');
 
@@ -18,7 +18,7 @@ class BaseProgram extends SerializableObject {
     }
 
     set ProgramId(value) {
-        this._prograId = value;
+        this._programId = value;
     }
 
     get Title() {
@@ -39,7 +39,6 @@ class BaseProgram extends SerializableObject {
         }
     }
 }
-
 class ProgramTemplate extends SerializableObject {
     static createTemplate(json, parent) {
         if (json.ProgramType === 'Premiere') {
@@ -52,6 +51,7 @@ class ProgramTemplate extends SerializableObject {
     constructor(jsonOrOther, parent = null) {
         super(jsonOrOther);
 
+        // REFERENCES
         this._parentBoxTemplate = parent;
     }
 
@@ -86,7 +86,6 @@ class ProgramTemplate extends SerializableObject {
         this._coverArt = value;
     }
 }
-
 class PremiereProgramTemplate extends ProgramTemplate {
     constructor(jsonOrOther, parent) {
         super(jsonOrOther, parent);
@@ -98,10 +97,11 @@ class PremiereProgramTemplate extends ProgramTemplate {
         let plannedShow = null;
 
         if (this.PreShowTemplate) {
-            plannedPreShow = this.PreShowTemplate.plan();
+            plannedPreShow = this.PreShowTemplate.plan(targetDateMoment);
         }
+
         if (this.ShowTemplate) {
-            plannedShow = this.ShowTemplate.plan();
+            plannedShow = this.ShowTemplate.plan(targetDateMoment);
         }
 
         if (!plannedShow) {
@@ -198,7 +198,7 @@ class ProgramPlan extends BaseProgram {
     }
 
     get ShowPlan() {
-        return this.getOrNull(this._showTemplate);
+        return this.getOrNull(this._showPlan);
     }
 
     set ShowPlan(value) {

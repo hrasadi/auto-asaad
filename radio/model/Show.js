@@ -1,18 +1,11 @@
 const SerializableObject = require('./SerializableObject');
 
-const Context = require('../Context');
-
 const C = require('./Clip');
 const ClipTemplate = C.ClipTemplate;
-const ClipPlan = C.ClipPlan;
-const Clip = C.Clip;
 
 class ShowTemplate extends SerializableObject {
     constructor(jsonOrOther, parent) {
         super(jsonOrOther);
-
-        // Used to build iterator Id
-        this._type = 'Show';
 
         // REFERENCES
         this._parentProgramTemplate = parent;
@@ -23,63 +16,28 @@ class ShowTemplate extends SerializableObject {
             return null;
         }
 
+        let clipPlans = [];
+        let mainClipPlanned = false;
+        for (let i = 0; i < this.ClipTemplates.length; i++) {
+            let clipPlan = this.ClipTemplates[i].plan(targetDateMoment, i);
 
-        for (let clipTemplate of this.ClipTemplates) {
-            // resolve the media file path before writing down to lineup
-            var media = {};
-            Object.assign(media, this.getMedia(programTemplate, targetDateMoment, programOrBoxId, 'Show', i));
-            if (media.Path != undefined) {
-                media.Path = this.config.Media.BaseDir + "/" + media.Path;
-                if (programTemplate.Show.Clips[i].IsMainClip) {
-                    media.IsMainClip = true;
+            if (clipPlan) {
+                if (clipPlan.IsMainClip) {
+                    mainClipPlanned = true;
                 }
-                program.Show.Clips.push(media);
-                
-                this.context.logger().debug("   * From " + programTemplate.Show.Clips[i].MediaGroup + " I have selected: " + media.Path);
-            } else {
-                // If the main clip of a program is empty, the whole program should not be planned
-                if (programTemplate.Show.Clips[i].IsMainClip) {
-                    return false;
-                }
+                clipPlans.push(clipPlan);
             }
         }
-    
-        if (program.Show.Clips.length == 0) {
-            return false;
-        }
-        return true;
-    
-    }
 
-    getMedia(targetDateMoment, clipIndex) {
-        let iteratorId = this._parentProgramTemplate.ProgramId + '-' +
-            this._parentProgramTemplate._parentBoxTemplate.BoxId + '-' +
-            this._type + '-' + clipIndex;
-
-        let persistentIteratorFilePath = Context.CWD + '/run/iterator' + iteratorId + '.iterator';
-    
-        let iterator = null;
-        if (this.planningMode == 'current' && this.context.options.mode == 'deploy') { // no side-effect in test-mode
-            iterator = Utils.IteratorFactory.build(programTemplate[showType].Clips[clipIdx].Policy, 
-                                                           this.config.Media[programTemplate[showType].Clips[clipIdx].MediaGroup],
-                                                           true, persistentIteratorFilePath);            
-        } else {
-            // planning mode is 'future' (or test mode)
-            if (!this.iterators[iteratorId]) {
-                iterator = Utils.IteratorFactory.build(programTemplate[showType].Clips[clipIdx].Policy, 
-                                                               this.config.Media[programTemplate[showType].Clips[clipIdx].MediaGroup],
-                                                               false, persistentIteratorFilePath);
-                this.iterators[iteratorId] = iterator;
-            } else {
-                iterator = this.iterators[iteratorId];
-            }
+        if (clipPlans.length == 0 || !mainClipPlanned) {
+            return null;
         }
-        
-        offset = programTemplate[showType].Clips[clipIdx].Offset ? 
-                                        parseInt(programTemplate[showType].Clips[clipIdx].Offset) : undefined;
-        return iterator.next(this.tag(targetDateMoment), offset);
+
+        let showPlan = new ShowPlan(this);
+        showPlan.ClipPlans = clipPlans;
+
+        return showPlan;
     }
-    
 
     get ClipTemplates() {
         return this.getOrNull(this._clipTemplates);
@@ -89,8 +47,8 @@ class ShowTemplate extends SerializableObject {
         if (typeof values !== 'undefined' && values) {
             this._clipTemplates = [];
             for (let value of values) {
-                let clipTemplate = new ClipTemplate(value);
-                this._clips.push(clipTemplate);
+                let clipTemplate = new ClipTemplate(value, this);
+                this._clipTemplates.push(clipTemplate);
             }
         }
     }
@@ -99,9 +57,6 @@ class ShowTemplate extends SerializableObject {
 class PreShowTemplate extends ShowTemplate {
     constructor(jsonOrOther, parent) {
         super(jsonOrOther, parent);
-
-        // Used to build iterator Id
-        this._type = 'PreShow';
     }
 
     get FillerClipTemplate() {

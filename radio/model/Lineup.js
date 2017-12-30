@@ -2,9 +2,11 @@ const SerializableObject = require('./SerializableObject');
 
 const Context = require('../Context');
 
+const MediaDirectory = require('./media/MediaDirectory');
+
 const B = require('./Box');
 const BoxTemplate = B.BoxTemplate;
-const Box = B.Box;
+const BoxPlan = B.BoxPlan;
 
 class LineupTemplate extends SerializableObject {
     constructor(jsonOrOther) {
@@ -12,8 +14,7 @@ class LineupTemplate extends SerializableObject {
     }
 
     plan(targetDateMoment) {
-        Context.Logger.info('Planning lineup for ${date}',
-            targetDateMoment.format('YYYY-MM-DD'));
+        Context.Logger.info('Planning lineup for ' + targetDateMoment);
 
         let lineupPlan = new LineupPlan();
 
@@ -22,10 +23,10 @@ class LineupTemplate extends SerializableObject {
             for (let boxTemplate of this.BoxTemplates) {
                 let box = boxTemplate.plan(targetDateMoment);
                 if (box) {
-                    plannedBoxes.append(box);
+                    plannedBoxes.push(box);
                 }
             }
-            lineupPlan.Boxes = plannedBoxes;
+            lineupPlan.BoxPlans = plannedBoxes;
         }
         return lineupPlan;
     }
@@ -38,7 +39,7 @@ class LineupTemplate extends SerializableObject {
         if (typeof values !== 'undefined' && values) {
             this._boxTemplates = [];
             for (let value of values) {
-                let boxTemplate = new BoxTemplate(value);
+                let boxTemplate = new BoxTemplate(value, this);
                 this._boxTemplates.push(boxTemplate);
             }
         }
@@ -51,6 +52,17 @@ class LineupTemplate extends SerializableObject {
     set Version(value) {
         this._version = value;
     }
+
+    get MediaDirectory() {
+        return this.getOrNull(this._mediaDirectory);
+    }
+
+    set MediaDirectory(value) {
+        if (value) {
+            this._mediaDirectory = new MediaDirectory(value);
+        }
+    }
+
 }
 
 class LineupPlan extends SerializableObject {
@@ -62,16 +74,16 @@ class LineupPlan extends SerializableObject {
 
     }
 
-    get Boxes() {
-        return this.getOrNull(this._boxes);
+    get BoxPlans() {
+        return this.getOrNull(this._boxPlans);
     }
 
-    set Boxes(values) {
+    set BoxPlans(values) {
         if (typeof values !== 'undefined' && values) {
-            this._boxes = [];
+            this._boxPlans = [];
             for (let value of values) {
-                let box = new Box(value);
-                this._boxes.push(box);
+                let box = new BoxPlan(value);
+                this._boxPlans.push(box);
             }
         }
     }
