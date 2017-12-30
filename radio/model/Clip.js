@@ -37,7 +37,7 @@ class ClipTemplate extends BaseClip {
         this._parentShowTemplate = parent;
     }
 
-    plan(targetDateMoment, clipIndex) {
+    plan(targetDate, clipIndex) {
         let counterId = this._parentShowTemplate._parentProgramTemplate
                             ._parentBoxTemplate.BoxId + '-' +
                             this._parentShowTemplate
@@ -47,14 +47,14 @@ class ClipTemplate extends BaseClip {
 
         // If the point is in future, the counter should be immutable
         let isImmutable =
-            moment(targetDateMoment)
+            moment(targetDate)
                 .isAfter(Context.LineupManager.BaseDate) ?
             true : false;
 
         let counter = Counter.createCounter(this.IteratorPolicy,
             counterId, this.MediaGroup.Media.length, isImmutable);
 
-        let mediaIdx = counter.next(targetDateMoment);
+        let mediaIdx = counter.next(targetDate);
         if (mediaIdx == null) {
             return null;
         }

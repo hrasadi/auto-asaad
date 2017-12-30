@@ -16,6 +16,7 @@ const Context = {
     },
     Logger: logger,
     LineupManager: null,
+    LineupFileNamePrefix: 'raa1',
 };
 
 module.exports = Context;

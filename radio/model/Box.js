@@ -45,27 +45,26 @@ class BoxTemplate extends BaseBox {
         }
     }
 
-    plan(targetDateMoment) {
-        if (this.Schedule.isOnSchedule(targetDateMoment)) {
+    plan(targetDate, parent) {
+        if (this.Schedule.isOnSchedule(targetDate)) {
             if (this.ProgramTemplates) {
-                let programPlans = [];
+                let boxPlan = new BoxPlan(this, parent);
+                boxPlan.ProgramPlans = [];
                 for (let programTemplate of this.ProgramTemplates) {
-                    let programPlan = programTemplate.plan(targetDateMoment);
+                    let programPlan = programTemplate.plan(targetDate, boxPlan);
                     if (programPlan) {
-                        programPlans.push(programPlan);
+                        boxPlan.ProgramPlans.push(programPlan);
                     }
                 }
 
                 // No programs planned for this box
-                if (programPlans.length == 0) {
+                if (boxPlan.ProgramPlans.length == 0) {
                     return null;
                 }
 
-                let boxPlan = new BoxPlan(this);
-                boxPlan.ProgramPlans = programPlans;
                 boxPlan.StartTime = this.Schedule
-                    .calculateStartTime(targetDateMoment, this.BoxId);
-                
+                    .calculateStartTime(targetDate, this.BoxId);
+
                 return boxPlan;
             }
         }
@@ -102,8 +101,10 @@ class BoxTemplate extends BaseBox {
 }
 
 class BoxPlan extends BaseBox {
-    constructor(jsonOrOther) {
+    constructor(jsonOrOther, parent) {
         super(jsonOrOther);
+
+        this._parentLineupPlan = parent;
     }
 
     get ProgramPlans() {

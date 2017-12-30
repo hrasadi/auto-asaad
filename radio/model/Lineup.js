@@ -13,20 +13,19 @@ class LineupTemplate extends SerializableObject {
         super(jsonOrOther);
     }
 
-    plan(targetDateMoment) {
-        Context.Logger.info('Planning lineup for ' + targetDateMoment);
+    plan(targetDate) {
+        Context.Logger.info('Planning lineup for ' + targetDate);
 
         let lineupPlan = new LineupPlan();
 
         if (this.BoxTemplates) {
-            let plannedBoxes = [];
+            lineupPlan.BoxPlans = [];
             for (let boxTemplate of this.BoxTemplates) {
-                let box = boxTemplate.plan(targetDateMoment);
-                if (box) {
-                    plannedBoxes.push(box);
+                let boxPlan = boxTemplate.plan(targetDate, lineupPlan);
+                if (boxPlan) {
+                    lineupPlan.BoxPlans.push(boxPlan);
                 }
             }
-            lineupPlan.BoxPlans = plannedBoxes;
         }
         return lineupPlan;
     }
@@ -62,7 +61,6 @@ class LineupTemplate extends SerializableObject {
             this._mediaDirectory = new MediaDirectory(value);
         }
     }
-
 }
 
 class LineupPlan extends SerializableObject {
@@ -74,18 +72,32 @@ class LineupPlan extends SerializableObject {
 
     }
 
+    getBoxPlan(boxId) {
+        if (!this.BoxPlans || this.BoxPlans.length == 0) {
+            return null;
+        }
+        for (let boxPlan of this.BoxPlans) {
+            if (boxPlan.BoxId == boxId) {
+                return boxPlan;
+            }
+        }
+        return null;
+    }
+
     get BoxPlans() {
         return this.getOrNull(this._boxPlans);
     }
 
     set BoxPlans(values) {
-        if (typeof values !== 'undefined' && values) {
-            this._boxPlans = [];
-            for (let value of values) {
-                let box = new BoxPlan(value);
-                this._boxPlans.push(box);
-            }
-        }
+        this._boxPlans = values;
+    }
+
+    get Version() {
+        return this.getOrElse(this.value, Context.Defaults.Version);
+    }
+
+    set Version(value) {
+        this._version = value;
     }
 }
 
@@ -97,8 +109,6 @@ class Lineup extends SerializableObject {
     schedule() {
 
     }
-
-    
 }
 
 module.exports = {

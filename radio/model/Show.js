@@ -11,7 +11,18 @@ class ShowTemplate extends SerializableObject {
         this._parentProgramTemplate = parent;
     }
 
-    plan(targetDateMoment) {
+    plan(targetDate) {
+        let clipPlans = this.plan0(targetDate);
+
+        if (!clipPlans) {
+            return null;
+        }
+        let showPlan = new ShowPlan(this);
+        showPlan.ClipPlans = clipPlans;    
+        return showPlan;
+    }
+
+    plan0(targetDate) {
         if (!this.ClipTemplates) {
             return null;
         }
@@ -19,7 +30,7 @@ class ShowTemplate extends SerializableObject {
         let clipPlans = [];
         let mainClipPlanned = false;
         for (let i = 0; i < this.ClipTemplates.length; i++) {
-            let clipPlan = this.ClipTemplates[i].plan(targetDateMoment, i);
+            let clipPlan = this.ClipTemplates[i].plan(targetDate, i);
 
             if (clipPlan) {
                 if (clipPlan.IsMainClip) {
@@ -28,15 +39,10 @@ class ShowTemplate extends SerializableObject {
                 clipPlans.push(clipPlan);
             }
         }
-
         if (clipPlans.length == 0 || !mainClipPlanned) {
             return null;
         }
-
-        let showPlan = new ShowPlan(this);
-        showPlan.ClipPlans = clipPlans;
-
-        return showPlan;
+        return clipPlans;
     }
 
     get ClipTemplates() {
@@ -57,6 +63,26 @@ class ShowTemplate extends SerializableObject {
 class PreShowTemplate extends ShowTemplate {
     constructor(jsonOrOther, parent) {
         super(jsonOrOther, parent);
+    }
+
+    plan(targetDate) {
+        let clipPlans = this.plan0(targetDate);
+
+        if (!clipPlans) {
+            return null;
+        }
+
+        // FillerClip
+        let fillerClipPlan = null;
+        if (this.FillerClipTemplate) {
+            fillerClipPlan = this.FillerClipTemplate.plan(targetDate, 0);
+        }
+
+        let preShowPlan = new PreShowPlan(this);
+        preShowPlan.ClipPlans = clipPlans;
+        preShowPlan.FillerClipPlan = fillerClipPlan;
+
+        return preShowPlan;
     }
 
     get FillerClipTemplate() {

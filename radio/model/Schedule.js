@@ -28,24 +28,24 @@ class Schedule extends SerializableObject {
         }
     }
 
-    isOnSchedule(targetDateMoment) {
+    isOnSchedule(targetDate) {
         // Check the weekly schedule
         if (!this.WeeklySchedule) {
             return true;
         }
 
-        let targetDateDayOfWeek = targetDateMoment.day();
+        let targetDateDayOfWeek = moment(targetDate).day();
         if (this._weeklyScheduleBitmap[targetDateDayOfWeek]) {
             return true;
         }
         return false;
     }
 
-    calculateStartTime(targetDateMoment, id) {
+    calculateStartTime(targetDate, id) {
         let startTimeMoment = null;
         if (this.CalculationMethod == 'static') {
             let startTime = moment(this.At, ['h:m:s', 'H:m:s']);
-            startTimeMoment = moment(targetDateMoment)
+            startTimeMoment = moment(targetDate)
                 .hours(startTime.hours())
                 .minutes(startTime.minutes())
                 .seconds(startTime.seconds());

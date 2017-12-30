@@ -1,16 +1,13 @@
+const Context = require('./Context');
+
 const L = require('./model/Lineup');
 const LineupTemplate = L.LineupTemplate;
 const LineupPlan = L.LineupPlan;
-const Lineup = L.Lineup;
 
 const moment = require('moment');
+const fs = require('fs');
 
 class LineupManager {
-
-    static getLineupFileNameForDate(targetDateMoment) {
-        // TODO:
-    }
-
     constructor() {
         // Dictionary from date to LineupPlan objects.
         this._lineupPlansCache = {};
@@ -23,26 +20,55 @@ class LineupManager {
     }
 
     planLineupRange(startDateMoment, numDaysToPlan = 1) {
-        this._baseDate = startDateMoment;
+        this._baseDate = startDateMoment.format('YYYY-MM-DD');
 
         for (let i = 0; i < numDaysToPlan; i++) {
-            let targetDateMoment = moment(startDateMoment).add(i, 'days').format('YYYY-MM-DD');
+            let targetDate = moment(startDateMoment)
+                                    .add(i, 'days').format('YYYY-MM-DD');
 
-            this._lineupPlansCache[targetDateMoment] =
-                    this._lineupTemplate.plan(targetDateMoment);
+            this._lineupPlansCache[targetDate] =
+                    this._lineupTemplate.plan(targetDate);
+
+            fs.writeFileSync(this.getLineupPlanFilePath(targetDate),
+                    JSON.stringify(this._lineupPlansCache[targetDate],
+                        null, 2));
         }
     }
 
-    CompileLineupForDate(targetDateMoment) {
+    CompileLineupForDate(targetDate) {
     }
 
-    ScheduleLineupForDate(targetDateMoment) {
+    ScheduleLineupForDate(targetDate) {
     }
 
-    getLineupPlan(targetDateMoment) {
+    getLineupFileName(targetDate) {
+        return Context.LineupFileNamePrefix +
+                '-' + targetDate;
+    }
+
+    getLineupPlanFilePath(targetDate) {
+        return Context.CWD + '/lineups/' +
+            this.getLineupFileName(targetDate) + '.json';
+    }
+
+    getLineupPlan(targetDate) {
+        // plan asks for itself!
+        console.log(targetDate);
+        console.log(this.BaseDate);
+        if (targetDate == this.BaseDate) {
+            console.log(this.getLineupPlan.caller);
+        }
+
         // Load from memory if present
+        if (this._lineupPlansCache[targetDate]) {
+            return this._lineupPlansCache[targetDate];
+        }
 
         // Load from file if not in memory
+        let lineupFilePath = this.getLineupPlanFilePath(targetDate);
+        if (fs.existsSync(lineupFilePath)) {
+            return new LineupPlan(JSON.parse(fs.readFileSync(lineupFilePath)));
+        }
 
         // If not found (date belongs to feature of latest planned lineup)
         throw Error('LineupPlan for specified date does not exist.' +

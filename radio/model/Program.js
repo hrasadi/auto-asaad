@@ -2,6 +2,8 @@ const SerializableObject = require('./SerializableObject');
 
 const Publishing = require('./Publishing');
 
+const Context = require('../Context');
+
 const S = require('./Show');
 const ShowTemplate = S.ShowTemplate;
 const PreShowTemplate = S.PreShowTemplate;
@@ -39,7 +41,7 @@ class BaseProgram extends SerializableObject {
         }
     }
 }
-class ProgramTemplate extends SerializableObject {
+class ProgramTemplate extends BaseProgram {
     static createTemplate(json, parent) {
         if (json.ProgramType === 'Premiere') {
             return new PremiereProgramTemplate(json, parent);
@@ -91,24 +93,24 @@ class PremiereProgramTemplate extends ProgramTemplate {
         super(jsonOrOther, parent);
     }
 
-    plan(targetDateMoment) {
+    plan(targetDate, parent) {
         // Plan a new episode
         let plannedPreShow = null;
         let plannedShow = null;
 
         if (this.PreShowTemplate) {
-            plannedPreShow = this.PreShowTemplate.plan(targetDateMoment);
+            plannedPreShow = this.PreShowTemplate.plan(targetDate);
         }
 
         if (this.ShowTemplate) {
-            plannedShow = this.ShowTemplate.plan(targetDateMoment);
+            plannedShow = this.ShowTemplate.plan(targetDate);
         }
 
         if (!plannedShow) {
             return null;
         }
 
-        let plannedProgram = new ProgramPlan(this);
+        let plannedProgram = new ProgramPlan(this, parent);
         plannedProgram.PreShowPlan = plannedPreShow;
         plannedProgram.ShowPlan = plannedShow;
 
@@ -141,8 +143,65 @@ class ReplayProgramTemplate extends ProgramTemplate {
         super(jsonOrOther, parent);
     }
 
-    plan() {
+    plan(targetDate, parent) {
+        let originalAiringDate =
+                moment(targetDate)
+                .subtract(this.OriginalAiringOffset, 'days')
+                .format('YYYY-MM-DD');
 
+        // If offset == 0, we are replaying from today
+        let originalAiringLineupPlan =
+                !this.OriginalAiringOffset ? parent._parentLineupPlan :
+                Context.LineupManager
+                .getLineupPlan(originalAiringDate);
+
+        if (!originalAiringLineupPlan ||
+            !originalAiringLineupPlan.Version ||
+            originalAiringLineupPlan.Version !== '3.0') {
+            // Not supported! Format too old or
+            // original lineup does not exist at all
+            return null;
+        }
+
+        let originalBoxPlan =
+            originalAiringLineupPlan.getBoxPlan(this.OriginalBoxId);
+        if (!originalBoxPlan) {
+            return null;
+        }
+
+        // Now check for the programs in the original airing and
+        // find the target programs
+        // Apply include filter
+        let replayProgramPlans = [];
+        for (let programPlan of originalBoxPlan.ProgramPlans) {
+            let replayEligible = false;
+
+            // Apply the include filter (no include section means *)
+            if (!this.Include || this.Include.includes(programPlan.ProgramId)) {
+                replayEligible = true;
+            }
+
+            // Apply the exclude filter (no include section means null)
+            if (this.Exclude && this.Exclude.includes(programPlan.ProgramId)) {
+                replayEligible = false;
+            }
+
+            if (replayEligible) {
+                let replayProgram = new ProgramPlan(programPlan, parent);
+                if (replayProgram) {
+                    replayProgram.ProgramId =
+                                        programPlan.ProgramId + '_Replay';
+                    replayProgram.Title = programPlan.Title + ' - تکرار';
+                    replayProgramPlans.push(replayProgram);
+                }
+            }
+        }
+
+        if (replayProgramPlans.length == 0) {
+            return null;
+        }
+
+        return replayProgramPlans;
     }
 
     get OriginalAiringOffset() {
@@ -150,7 +209,7 @@ class ReplayProgramTemplate extends ProgramTemplate {
     }
 
     set OriginalAiringOffset(value) {
-        this._originalAiringOffset = value;
+        this._originalAiringOffset = parseInt(value);
     }
 
     get OriginalBoxId() {
@@ -179,8 +238,10 @@ class ReplayProgramTemplate extends ProgramTemplate {
 }
 
 class ProgramPlan extends BaseProgram {
-    constructor(jsonOrOther) {
+    constructor(jsonOrOther, parent) {
         super(jsonOrOther);
+
+        this._parentBoxPlan = parent;
     }
 
     compile() {
