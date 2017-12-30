@@ -46,15 +46,23 @@ class ClipTemplate extends BaseClip {
                             clipIndex;
 
         // If the point is in future, the counter should be immutable
-        let isImmutable =
+        let futureOffset =
             moment(targetDate)
-                .isAfter(Context.LineupManager.BaseDate) ?
-            true : false;
+                .diff(moment(Context.LineupManager.BaseDate), 'days');
 
+        // immutable if in future
         let counter = Counter.createCounter(this.IteratorPolicy,
-            counterId, this.MediaGroup.Media.length, isImmutable);
+            counterId, this.MediaGroup.Media.length,
+            futureOffset ? true : false);
 
-        let mediaIdx = counter.next(targetDate);
+        // When planning future, an extra offset should be applied
+        // However, since the counter already persisted next value
+        // when plannning the current date, we should decrease one
+        // from it
+        let extraFutureOffset = futureOffset ? futureOffset - 1 : 0;
+
+        let mediaIdx = counter.next(targetDate,
+                            this.Offset + extraFutureOffset);
         if (mediaIdx == null) {
             return null;
         }
@@ -89,11 +97,13 @@ class ClipTemplate extends BaseClip {
     }
 
     get Offset() {
-        return this.getOrNull(this._offset);
+        return this.getOrElse(this._offset, 0);
     }
 
     set Offset(value) {
-        this._offset = value;
+        if (value) {
+            this._offset = parseInt(value);
+        }
     }
 }
 class ClipPlan extends BaseClip {

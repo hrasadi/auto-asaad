@@ -21,10 +21,10 @@ class MediaGroup extends SerializableObject {
 
             let mediaInPartial = JSON.parse(
                 fs.readFileSync(partialConfigFilePrefix +
-                 this.PartialConfigPath, 'utf-8'));
+                 this.PartialConfigFilePath, 'utf-8'));
 
             for (let mediaJson of mediaInPartial) {
-                let media = new Media(mediaJson);
+                let media = new Media(mediaJson, this);
                 this.Media.push(media);
             }
         }
@@ -39,7 +39,7 @@ class MediaGroup extends SerializableObject {
     }
 
     get PartialConfigFilePath() {
-        this.getOrNull(this._partialConfigFilePath);
+        return this.getOrNull(this._partialConfigFilePath);
     }
 
     set PartialConfigFilePath(value) {

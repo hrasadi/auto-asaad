@@ -34,7 +34,7 @@ class Counter {
     * The tag helps us repeat the generation for the
     * same day (in case of a problem), without risking the iterator move forward
     */
-    next(requesterTag) {
+    next(requesterTag, offset) {
         if (requesterTag == undefined) {
             throw Error('Tag should be provided for all counter requests');
         }
@@ -47,24 +47,33 @@ class Counter {
         }
 
         if (requesterTag == this._tag) {
-            return this._counterValue - 1;
-        } else if (this.hasNext()) {
+            return this.adjustCounterByOffset(this._counterValue - 1, offset);
+        } else if (this.hasNext(offset)) {
             this._counterValue++;
             this._tag = requesterTag;
 
             this.persist();
 
-            return this._counterValue - 1;
+            return this.adjustCounterByOffset(this._counterValue - 1, offset);
         }
 
         return null;
     }
 
-    hasNext() {
-        if (this._counterValue == this._maxValue) {
+    hasNext(offset) {
+        offset = offset ? offset : 0;
+        if (this._counterValue + offset >= this._maxValue) {
             return false;
         }
         return true;
+    }
+
+    adjustCounterByOffset(base, offset) {
+        if (offset) {
+            return base + offset;
+        } else {
+            return base;
+        }
     }
 
     reset() {
@@ -116,9 +125,10 @@ class CyclicCounter extends Counter {
             result = this.adjustCounterByOffset(this._counterValue - 1,
                     offset);
         } else if (this.linearCounterHasNext()) {
-            result = this.adjustCounterByOffset(this._counterValue, offset);
             this._counterValue++;
             this._tag = requesterTag;
+
+            result = this.adjustCounterByOffset(this._counterValue - 1, offset);
 
             this.persist();
         } else {
@@ -133,7 +143,7 @@ class CyclicCounter extends Counter {
 
     adjustCounterByOffset(base, offset) {
         if (offset) {
-            return (base + offset) % this.list.length;
+            return (base + offset) % this._maxValue;
         } else {
             return base;
         }
