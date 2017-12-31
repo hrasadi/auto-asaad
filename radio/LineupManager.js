@@ -14,9 +14,10 @@ class LineupManager {
         this._lineupTemplate = null;
     }
 
-    initiate(config) {
+    initiate(config, mediaClass) {
         // Read the template
         this._lineupTemplate = new LineupTemplate(config);
+        this._mediaClass = mediaClass;
     }
 
     planLineupRange(startDateMoment, numDaysToPlan = 1) {
@@ -35,10 +36,10 @@ class LineupManager {
         }
     }
 
-    CompileLineupForDate(targetDate) {
+    CompileLineup(targetDate) {
     }
 
-    ScheduleLineupForDate(targetDate) {
+    ScheduleLineup(targetDate) {
     }
 
     getLineupFileName(targetDate) {
@@ -77,6 +78,10 @@ class LineupManager {
 
     get BaseDate() {
         return this._baseDate;
+    }
+
+    get MediaClass() {
+        return this._mediaClass;
     }
 }
 

@@ -244,8 +244,30 @@ class ProgramPlan extends BaseProgram {
         this._parentBoxPlan = parent;
     }
 
-    compile() {
+    compile(startTimeMoment, parent) {
+        let compiledProgram = new Program(this, parent);
 
+        let compiledPreShow = this.PreShowPlan.compile(this, compiledProgram);
+        let compiledShow = this.ShowPlan.compile(this, compiledProgram);
+
+        if (!compiledShow) {
+            return null;
+        }
+
+        compiledProgram.PreShow = compiledPreShow;
+        compiledProgram.Show = compiledShow;
+
+        let compiledProgramMetadata = new Metadata(compiledProgram);
+        compiledProgramMetadata.Duration =
+                compiledPreShow ? compiledPreShow.Duration : 0 +
+                compiledShow.Duration;
+        compiledProgramMetadata.StartTime = moment(startTimeMoment);
+        compiledProgramMetadata.EndTime =
+                             moment(startTimeMoment)
+                            .add(compiledProgramMetadata.Duration, 'seconds');
+
+        compiledProgram.Metadata = compiledProgramMetadata;
+        return compiledProgram;
     }
 
     get PreShowPlan() {
@@ -302,9 +324,12 @@ class Program extends BaseProgram {
         return this.getOrNull(this._metadata);
     }
 
+    /**
+     * @param {Metadata} value Program metadata (including calculated start and end time)
+     */
     set Metadata(value) {
         if (value) {
-            this._metadata = new Metadata(value);
+            this._metadata = value;
         }
     }
 }
@@ -314,20 +339,20 @@ class Metadata extends SerializableObject {
         super(jsonOrOther);
     }
 
-    get EstimatedStartTime() {
-        return this.getOrNull(this._estimatedStartTime);
+    get StartTime() {
+        return this.getOrNull(this._startTime);
     }
 
-    set EstimatedStartTime(value) {
-        this._estimatedStartTime = value;
+    set StartTime(value) {
+        this._startTime = value;
     }
 
-    get EstimatedEndTime() {
-        return this.getOrNull(this._estimatedEndTime);
+    get EndTime() {
+        return this.getOrNull(this._endTime);
     }
 
-    set EstimatedEndTime(value) {
-        this._estimatedEndTime = value;
+    set EndTime(value) {
+        this._endTime = value;
     }
 
     get Duration() {

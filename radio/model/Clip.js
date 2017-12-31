@@ -111,10 +111,22 @@ class ClipPlan extends BaseClip {
         super(jsonOrOther);
     }
 
+    compile(parent) {
+        let compiledClip = new Clip(this);
+
+        if (this.Media) {
+            compiledClip.Media = this.Media.compile();
+        }
+        return compiledClip;
+    }
+
     get Media() {
         return this.getOrNull(this._media);
     }
 
+    /**
+     * @param {Media} value Clip's media
+     */
     set Media(value) {
         this._media = value;
     }
@@ -131,6 +143,13 @@ class Clip extends ClipPlan {
 
     set Media(value) {
         this._media = value;
+    }
+
+    get Duration() {
+        if (this.Media) {
+            return this.Media.Duration;
+        }
+        return 0;
     }
 }
 

@@ -101,6 +101,25 @@ class ShowPlan extends SerializableObject {
         super(jsonOrOther);
     }
 
+    compile(parent) {
+        let compiledShow = new Show(this, parent);
+        return this.compile0(compiledShow);
+    }
+
+    compile0(compiledObject) {
+        if (this.ClipPlans) {
+            compiledObject.Clips = [];
+            for (let clipPlan of this.ClipPlans) {
+                let clip = clipPlan.compile(compiledObject);
+                if (clip) {
+                    compiledObject.Duration =
+                        compiledObject.Duration + clip.Duration;
+                    compiledObject.Clips.push(clip);
+                }
+            }
+        }
+    }
+
     get ClipPlans() {
         return this.getOrNull(this._clipPlans);
     }
@@ -119,6 +138,17 @@ class ShowPlan extends SerializableObject {
 class PreShowPlan extends ShowPlan {
     constructor(jsonOrOther) {
         super(jsonOrOther);
+    }
+
+    compile(parent) {
+        let compiledPreShow = new PreShow(this, parent);
+
+        if (this.FillerClipPlan) {
+            compiledPreShow.FillerClip =
+                this.FillerClipPlan.compile(compiledPreShow);
+        }
+
+        return this.compile0(compiledPreShow);
     }
 
     get FillerClipPlan() {
@@ -147,6 +177,14 @@ class Show extends SerializableObject {
         if (value) {
             this._clips = value;
         }
+    }
+
+    get Duration() {
+        return this.getOrElse(this._duration, 0);
+    }
+
+    set Duration(value) {
+        this._duration = value;
     }
 }
 
