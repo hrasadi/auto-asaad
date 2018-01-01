@@ -20,11 +20,11 @@ class LineupManager {
         this._mediaClass = mediaClass;
     }
 
-    planLineupRange(startDateMoment, numDaysToPlan = 1) {
-        this._baseDate = startDateMoment.format('YYYY-MM-DD');
+    planLineupRange(startDate, numDaysToPlan = 1) {
+        this._baseDate = startDate;
 
         for (let i = 0; i < numDaysToPlan; i++) {
-            let targetDate = moment(startDateMoment)
+            let targetDate = moment(startDate)
                                     .add(i, 'days').format('YYYY-MM-DD');
 
             this._lineupPlansCache[targetDate] =
@@ -36,7 +36,11 @@ class LineupManager {
         }
     }
 
-    CompileLineup(targetDate) {
+    compileLineup(targetDate) {
+        let lineup = this.getLineupPlan(targetDate).compile();
+
+        fs.writeFileSync(this.getLineupFilePath(targetDate),
+                JSON.stringify(lineup, null, 2));
     }
 
     ScheduleLineup(targetDate) {
@@ -49,17 +53,15 @@ class LineupManager {
 
     getLineupPlanFilePath(targetDate) {
         return Context.CWD + '/lineups/' +
+            this.getLineupFileName(targetDate) + '.planned.json';
+    }
+
+    getLineupFilePath(targetDate) {
+        return Context.CWD + '/lineups/' +
             this.getLineupFileName(targetDate) + '.json';
     }
 
     getLineupPlan(targetDate) {
-        // plan asks for itself!
-        console.log(targetDate);
-        console.log(this.BaseDate);
-        if (targetDate == this.BaseDate) {
-            console.log(this.getLineupPlan.caller);
-        }
-
         // Load from memory if present
         if (this._lineupPlansCache[targetDate]) {
             return this._lineupPlansCache[targetDate];

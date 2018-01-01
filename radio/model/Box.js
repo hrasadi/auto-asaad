@@ -5,6 +5,8 @@ const Schedule = require('./Schedule');
 const P = require('./Program');
 const ProgramTemplate = P.ProgramTemplate;
 
+const moment = require('moment');
+
 class BaseBox extends SerializableObject {
     constructor(jsonOrOther) {
         super(jsonOrOther);
@@ -53,7 +55,7 @@ class BoxTemplate extends BaseBox {
                 for (let programTemplate of this.ProgramTemplates) {
                     let programPlan = programTemplate.plan(targetDate, boxPlan);
                     if (programPlan) {
-                        boxPlan.ProgramPlans.push(programPlan);
+                        boxPlan.ProgramPlans = boxPlan.ProgramPlans.concat(programPlan);
                     }
                 }
 
@@ -107,6 +109,32 @@ class BoxPlan extends BaseBox {
         this._parentLineupPlan = parent;
     }
 
+    compile(parent) {
+        let box = new Box(this, parent);
+        box.Programs = [];
+
+        if (!this.ProgramPlans || this.ProgramPlans.length == 0) {
+            return null;
+        }
+
+        // first program starts when the box starts
+        let nextProgramStartTime = this.StartTime;
+        let boxDuration = 0;
+        for (let programPlan of this.ProgramPlans) {
+            let program = programPlan.compile(nextProgramStartTime, box);
+
+            if (program) {
+                nextProgramStartTime = program.EndTime;
+                boxDuration += program.Metadata.Duration;
+                box.Programs.push(program);
+            }
+        }
+
+        box.EndTime = moment(box.StartTime).add(boxDuration, 'seconds');
+
+        return box;
+    }
+
     get ProgramPlans() {
         return this.getOrNull(this._programPlans);
     }
@@ -130,8 +158,10 @@ class BoxPlan extends BaseBox {
 }
 
 class Box extends BaseBox {
-    constructor(jsonOrOther) {
+    constructor(jsonOrOther, parent) {
         super(jsonOrOther);
+
+        this._parentLineup = parent;
     }
 
     get Programs() {
@@ -154,8 +184,15 @@ class Box extends BaseBox {
     set StartTime(value) {
         this._startTime = value;
     }
-}
 
+    get EndTime() {
+        return this.getOrNull(this._endTime);
+    }
+
+    set EndTime(value) {
+        this._endTime = value;
+    }
+}
 
 module.exports = {
     'BoxTemplate': BoxTemplate,

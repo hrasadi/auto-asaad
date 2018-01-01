@@ -13,8 +13,8 @@ class StandaloneMedia extends Media {
         let cmd = 'afinfo ' + this.Path +
                     ' | awk \'/estimated duration/ { print $3 }\'';
         compiledMedia.Duration = parseFloat(execSync(cmd, {
-            encoding: 'utf-8',
-        }));
+                    encoding: 'utf-8',
+                }));
 
         return compiledMedia;
     }

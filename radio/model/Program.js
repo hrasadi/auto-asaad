@@ -7,6 +7,8 @@ const Context = require('../Context');
 const S = require('./Show');
 const ShowTemplate = S.ShowTemplate;
 const PreShowTemplate = S.PreShowTemplate;
+const PreShowPlan = S.PreShowPlan;
+const ShowPlan = S.ShowPlan;
 
 const moment = require('moment');
 
@@ -99,11 +101,11 @@ class PremiereProgramTemplate extends ProgramTemplate {
         let plannedShow = null;
 
         if (this.PreShowTemplate) {
-            plannedPreShow = this.PreShowTemplate.plan(targetDate);
+            plannedPreShow = this.PreShowTemplate.plan(targetDate, parent);
         }
 
         if (this.ShowTemplate) {
-            plannedShow = this.ShowTemplate.plan(targetDate);
+            plannedShow = this.ShowTemplate.plan(targetDate, parent);
         }
 
         if (!plannedShow) {
@@ -247,7 +249,10 @@ class ProgramPlan extends BaseProgram {
     compile(startTimeMoment, parent) {
         let compiledProgram = new Program(this, parent);
 
-        let compiledPreShow = this.PreShowPlan.compile(this, compiledProgram);
+        let compiledPreShow = null;
+        if (this.PreShowPlan) {
+            compiledPreShow = this.PreShowPlan.compile(this, compiledProgram);
+        }
         let compiledShow = this.ShowPlan.compile(this, compiledProgram);
 
         if (!compiledShow) {
@@ -276,7 +281,7 @@ class ProgramPlan extends BaseProgram {
 
     set PreShowPlan(value) {
         if (value) {
-            this._preShowPlan = value;
+            this._preShowPlan = new PreShowPlan(value);
         }
     }
 
@@ -286,7 +291,7 @@ class ProgramPlan extends BaseProgram {
 
     set ShowPlan(value) {
         if (value) {
-            this._showPlan = value;
+            this._showPlan = new ShowPlan(value);
         }
     }
 }
@@ -325,7 +330,8 @@ class Program extends BaseProgram {
     }
 
     /**
-     * @param {Metadata} value Program metadata (including calculated start and end time)
+     * @param {Metadata} value Program metadata \
+     * (including calculated start and end time)
      */
     set Metadata(value) {
         if (value) {

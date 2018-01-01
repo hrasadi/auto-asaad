@@ -5,6 +5,8 @@ const Context = require('../Context');
 const C = require('./media/Counter');
 const Counter = C.Counter;
 
+const Media = require('./media/Media');
+
 const moment = require('moment');
 
 class BaseClip extends SerializableObject {
@@ -117,6 +119,7 @@ class ClipPlan extends BaseClip {
         if (this.Media) {
             compiledClip.Media = this.Media.compile();
         }
+        //console.log(compiledClip.Duration)
         return compiledClip;
     }
 
@@ -128,11 +131,13 @@ class ClipPlan extends BaseClip {
      * @param {Media} value Clip's media
      */
     set Media(value) {
-        this._media = value;
+        if (value) {
+            this._media = new Context.LineupManager.MediaClass(value);
+        }
     }
 }
 
-class Clip extends ClipPlan {
+class Clip extends BaseClip {
     constructor(jsonOrOther) {
         super(jsonOrOther);
     }
@@ -142,7 +147,9 @@ class Clip extends ClipPlan {
     }
 
     set Media(value) {
-        this._media = value;
+        if (value) {
+            this._media = new Context.LineupManager.MediaClass(value);
+        }
     }
 
     get Duration() {

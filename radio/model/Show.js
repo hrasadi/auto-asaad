@@ -2,6 +2,7 @@ const SerializableObject = require('./SerializableObject');
 
 const C = require('./Clip');
 const ClipTemplate = C.ClipTemplate;
+const ClipPlan = C.ClipPlan;
 
 class ShowTemplate extends SerializableObject {
     constructor(jsonOrOther, parent) {
@@ -18,7 +19,7 @@ class ShowTemplate extends SerializableObject {
             return null;
         }
         let showPlan = new ShowPlan(this);
-        showPlan.ClipPlans = clipPlans;    
+        showPlan.ClipPlans = clipPlans;
         return showPlan;
     }
 
@@ -118,6 +119,11 @@ class ShowPlan extends SerializableObject {
                 }
             }
         }
+
+        if (compiledObject.ClipPlans && compiledObject.ClipPlans.length > 0) {
+            return compiledObject;
+        }
+        return null;
     }
 
     get ClipPlans() {
@@ -126,11 +132,14 @@ class ShowPlan extends SerializableObject {
 
     /**
      * This value should be set during planning
-     * @param {ClipPlan[]} value Array of clip plans
+     * @param {ClipPlan[]} values Array of clip plans
      */
-    set ClipPlans(value) {
-        if (value) {
-            this._clipPlans = value;
+    set ClipPlans(values) {
+        if (values) {
+            this._clipPlans = [];
+            for (let value of values) {
+                this._clipPlans.push(new ClipPlan(value));
+            }
         }
     }
 }

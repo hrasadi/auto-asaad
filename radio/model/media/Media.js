@@ -50,11 +50,11 @@ class Media extends SerializableObject {
     }
 
     get Duration() {
-        this.getOrElse(this._duration, 0);
+        return this.getOrElse(this._duration, 0.0);
     }
 
     set Duration(value) {
-        this._duration = value;
+        this._duration = parseFloat(value);
     }
 }
 
