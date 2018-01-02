@@ -263,14 +263,17 @@ class ProgramPlan extends BaseProgram {
         compiledProgram.Show = compiledShow;
 
         let compiledProgramMetadata = new Metadata(compiledProgram);
-        compiledProgramMetadata.Duration =
+        let duration =
                 compiledPreShow ? compiledPreShow.Duration : 0 +
                 compiledShow.Duration;
         compiledProgramMetadata.StartTime = moment(startTimeMoment);
         compiledProgramMetadata.EndTime =
                              moment(startTimeMoment)
-                            .add(compiledProgramMetadata.Duration, 'seconds');
+                            .add(duration, 'seconds');
 
+        if (this._parentBoxPlan.IsFloating) {
+            compiledProgram.Prirority = 'High';
+        }
         compiledProgram.Metadata = compiledProgramMetadata;
         return compiledProgram;
     }
@@ -301,8 +304,18 @@ class Program extends BaseProgram {
         super(jsonOrOther);
     }
 
-    schedule() {
+    split(breakAtTime, continueAtTime, breakDuration) {
+        let p1 = new Program(this);
+        let p2 = new Program(this);
 
+        p1.Metadata.EndTime = moment(breakAtTime);
+        p2.Metadata.StartTime = moment(continueAtTime);
+        p2.Metadata.EndTime = moment(p2.Metadata.EndTime)
+                                        .add(breakDuration, 'seconds');
+        p2.ProgramId = p2.ProgramId + '_continue';
+        p2.Title = 'ادامه‌ی ' + p2.Title;
+
+        return [p1, p2];
     }
 
     get PreShow() {
@@ -335,8 +348,26 @@ class Program extends BaseProgram {
      */
     set Metadata(value) {
         if (value) {
-            this._metadata = value;
+            if (value.constructor.name == 'Metadata') {
+                this._metadata = value;
+            } else {
+                this._metadata = new Metadata(value);
+            }
         }
+    }
+
+    /**
+     * Priority property specifies the queue program will be played back in.
+     * One obvious use for this property is the interrupting programs.
+     * These programs will be queued in another Liquidsoap queue and will
+     * pause playback for the normal programs until they are finished
+     */
+    get Prirority() {
+        return this.getOrElse(this._priority, 'Normal');
+    }
+
+    set Prirority(value) {
+        this._priority = value;
     }
 }
 
@@ -362,11 +393,12 @@ class Metadata extends SerializableObject {
     }
 
     get Duration() {
-        return this.getOrNull(this._duration);
+        return moment(this.EndTime)
+            .diff(this.StartTime, 'seconds');
     }
 
     set Duration(value) {
-        this._duration = value;
+        // Do nothing!
     }
 }
 

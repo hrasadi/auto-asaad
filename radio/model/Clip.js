@@ -119,7 +119,6 @@ class ClipPlan extends BaseClip {
         if (this.Media) {
             compiledClip.Media = this.Media.compile();
         }
-        //console.log(compiledClip.Duration)
         return compiledClip;
     }
 

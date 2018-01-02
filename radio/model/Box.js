@@ -4,6 +4,7 @@ const Schedule = require('./Schedule');
 
 const P = require('./Program');
 const ProgramTemplate = P.ProgramTemplate;
+const Program = P.Program;
 
 const moment = require('moment');
 
@@ -45,6 +46,10 @@ class BoxTemplate extends BaseBox {
         if (!this.Schedule) {
             throw Error('BoxTemplate should have Schedule property set.');
         }
+
+        if (this.IsFloating && this.ProgramTemplates.length > 1) {
+            throw Error('Floating boxes can only have one program');
+        }
     }
 
     plan(targetDate, parent) {
@@ -55,7 +60,8 @@ class BoxTemplate extends BaseBox {
                 for (let programTemplate of this.ProgramTemplates) {
                     let programPlan = programTemplate.plan(targetDate, boxPlan);
                     if (programPlan) {
-                        boxPlan.ProgramPlans = boxPlan.ProgramPlans.concat(programPlan);
+                        boxPlan.ProgramPlans =
+                                boxPlan.ProgramPlans.concat(programPlan);
                     }
                 }
 
@@ -111,7 +117,7 @@ class BoxPlan extends BaseBox {
 
     compile(parent) {
         let box = new Box(this, parent);
-        box.Programs = [];
+        let programs = [];
 
         if (!this.ProgramPlans || this.ProgramPlans.length == 0) {
             return null;
@@ -126,12 +132,11 @@ class BoxPlan extends BaseBox {
             if (program) {
                 nextProgramStartTime = program.EndTime;
                 boxDuration += program.Metadata.Duration;
-                box.Programs.push(program);
+                programs.push(program);
             }
         }
-
+        box.Programs = programs;
         box.EndTime = moment(box.StartTime).add(boxDuration, 'seconds');
-
         return box;
     }
 
@@ -164,6 +169,64 @@ class Box extends BaseBox {
         this._parentLineup = parent;
     }
 
+    validate() {
+        if (this.IsFloating &&
+                this.Programs && this.Programs.length > 1) {
+            throw Error('Floating box can only contain one program');
+        }
+    }
+
+    injectProgram(interruptingProgram) {
+        let newBox = new Box(this, this._parentLineup);
+        // find the program that should be interrupted
+        // This program starts sooner that interrupting but
+        // does not end before the interrupt.
+        // In other words, interrupt crosses its boundaries.
+        for (let i = 0; i < this.Programs.length; i++) {
+            if (moment(this.Programs[i].Metadata.StartTime)
+                .isBefore(interruptingProgram.Metadata.StartTime) &&
+                moment(this.Programs[i].Metadata.EndTime)
+                .isAfter(interruptingProgram.Metadata.EndTime)) {
+                    let shiftAmount =
+                                moment(interruptingProgram.Metadata.EndTime)
+                                .diff(interruptingProgram.Metadata.StartTime,
+                                'seconds');
+                    // We will have three programs resulting:
+                    // Original before the interrupt
+                    // The interrupting
+                    // The result of program
+                    let splittedProgs =
+                        this.Programs[i]
+                            .split(interruptingProgram.Metadata.StartTime,
+                                    interruptingProgram.Metadata.EndTime,
+                                    shiftAmount);
+                    newBox.Programs[i] = splittedProgs[0];
+                    newBox.Programs.splice(i + 1, 0,
+                        [interruptingProgram, splittedProgs[1]]);
+
+                    // shift all the programs down as well
+                    // starting from the next program
+                    newBox.shiftProgramsDown(i + 3, shiftAmount);
+
+                return newBox;
+            }
+        }
+
+        throw Error('Logic error: We should have been able to find a program' +
+                    ' to interrupt, but we could\'t. This is a bug');
+    }
+
+    shiftProgramsDown(startingProgramIdx, shiftAmount) {
+        for (let i = startingProgramIdx; i < this.Programs.length; i++) {
+            this.Programs[i].Metadata.StartTime =
+                moment(this.Programs[i].Metadata.StartTime)
+                .add(shiftAmount, 'seconds');
+            this.Programs[i].EndTime =
+                moment(this.Programs[i].Metadata.EndTime)
+                .add(shiftAmount, 'seconds');
+        }
+    }
+
     get Programs() {
         return this.getOrNull(this._programs);
     }
@@ -174,7 +237,16 @@ class Box extends BaseBox {
      * @param {Program[]} values of ProgramPlan objects
      */
     set Programs(values) {
-        this._programs = values;
+        if (values) {
+            this._programs = [];
+            for (let value of values) {
+                if (value.constructor.name == 'Program') {
+                    this._programs.push(value);
+                } else {
+                    this._programs.push(new Program(value));
+                }
+            }
+        }
     }
 
     get StartTime() {
@@ -191,6 +263,14 @@ class Box extends BaseBox {
 
     set EndTime(value) {
         this._endTime = value;
+    }
+
+    get Duration() {
+        return moment(this.EndTime).diff(this.StartTime, 'seconds');
+    }
+
+    set Duration(value) {
+        // do nothing!
     }
 }
 

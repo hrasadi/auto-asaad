@@ -14,10 +14,11 @@ class LineupManager {
         this._lineupTemplate = null;
     }
 
-    initiate(config, mediaClass) {
+    initiate(config, mediaClass, lineupClass) {
         // Read the template
         this._lineupTemplate = new LineupTemplate(config);
         this._mediaClass = mediaClass;
+        this._lineupClass = lineupClass;
     }
 
     planLineupRange(startDate, numDaysToPlan = 1) {
@@ -43,7 +44,16 @@ class LineupManager {
                 JSON.stringify(lineup, null, 2));
     }
 
-    ScheduleLineup(targetDate) {
+    scheduleLineup(targetDate) {
+        let lineup = this.getLineup(targetDate);
+        if (lineup) {
+            lineup.schedule();
+
+            fs.writeFileSync(this.getScheduledLineupFilePath(targetDate),
+                    JSON.stringify(lineup, null, 2));
+        } else {
+            throw Error('Lineup not found for date ' + targetDate);
+        }
     }
 
     getLineupFileName(targetDate) {
@@ -61,6 +71,11 @@ class LineupManager {
             this.getLineupFileName(targetDate) + '.json';
     }
 
+    getScheduledLineupFilePath(targetDate) {
+        return Context.CWD + '/lineups/' +
+            this.getLineupFileName(targetDate) + '.json.scheduled';
+    }
+
     getLineupPlan(targetDate) {
         // Load from memory if present
         if (this._lineupPlansCache[targetDate]) {
@@ -68,14 +83,25 @@ class LineupManager {
         }
 
         // Load from file if not in memory
-        let lineupFilePath = this.getLineupPlanFilePath(targetDate);
-        if (fs.existsSync(lineupFilePath)) {
-            return new LineupPlan(JSON.parse(fs.readFileSync(lineupFilePath)));
+        let lineupPlanFilePath = this.getLineupPlanFilePath(targetDate);
+        if (fs.existsSync(lineupPlanFilePath)) {
+            return new LineupPlan(
+                    JSON.parse(fs.readFileSync(lineupPlanFilePath)));
         }
 
         // If not found (date belongs to feature of latest planned lineup)
         throw Error('LineupPlan for specified date does not exist.' +
          'Perhaps this date is in future');
+    }
+
+    getLineup(targetDate) {
+        // Load from file if not in memory
+        let lineupFilePath = this.getLineupFilePath(targetDate);
+        if (fs.existsSync(lineupFilePath)) {
+            return new (this.LineupClass)(JSON.parse(
+                                fs.readFileSync(lineupFilePath)));
+        }
+        return null;
     }
 
     get BaseDate() {
@@ -84,6 +110,10 @@ class LineupManager {
 
     get MediaClass() {
         return this._mediaClass;
+    }
+
+    get LineupClass() {
+        return this._lineupClass;
     }
 }
 
