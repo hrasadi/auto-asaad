@@ -1,4 +1,4 @@
-const SerializableObject = require('./SerializableObject');
+const Entity = require('./Entity');
 
 const moment = require('moment');
 
@@ -12,7 +12,7 @@ const WeekDayIndexMap = {
     'Sat': 6,
 };
 
-class Schedule extends SerializableObject {
+class Schedule extends Entity {
     constructor(jsonOrOther) {
         super(jsonOrOther);
     }

@@ -1,10 +1,10 @@
-const SerializableObject = require('./SerializableObject');
+const Entity = require('./Entity');
 
 const C = require('./Clip');
 const ClipTemplate = C.ClipTemplate;
 const ClipPlan = C.ClipPlan;
 
-class ShowTemplate extends SerializableObject {
+class ShowTemplate extends Entity {
     constructor(jsonOrOther, parent) {
         super(jsonOrOther);
 
@@ -126,6 +126,17 @@ class ShowPlan extends SerializableObject {
         return null;
     }
 
+    /**
+     * Remove clips from the show and keep only the main clip
+     */
+    pruneClipPlans() {
+        for (let i = 0; i < this.ClipPlans.length; i++) {
+            if (!this.ClipPlans[i].IsMainClip) {
+                this.ClipPlans.splice(i, 1);
+            }
+        }
+    }
+
     get ClipPlans() {
         return this.getOrNull(this._clipPlans);
     }
@@ -169,7 +180,7 @@ class PreShowPlan extends ShowPlan {
     }
 }
 
-class Show extends SerializableObject {
+class Show extends Entity {
     constructor(jsonOrOther) {
         super(jsonOrOther);
     }

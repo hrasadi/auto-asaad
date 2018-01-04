@@ -1,4 +1,4 @@
-const SerializableObject = require('../SerializableObject');
+const Entity = require('../Entity');
 
 const Media = require('./Media');
 
@@ -6,7 +6,7 @@ const Context = require('../../Context');
 
 const fs = require('fs');
 
-class MediaGroup extends SerializableObject {
+class MediaGroup extends Entity {
     constructor(jsonOrOther, parent) {
         super(jsonOrOther);
 

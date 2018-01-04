@@ -1,8 +1,8 @@
-const SerializableObject = require('../SerializableObject');
+const Entity = require('../Entity');
 
 const Context = require('../../Context');
 
-class Media extends SerializableObject {
+class Media extends Entity {
     constructor(jsonOrOther, parent) {
         super(jsonOrOther);
 
@@ -20,8 +20,9 @@ class Media extends SerializableObject {
         // (Object.getPrototypeOf(this)) returns
         // a new object of the same child type
         // i.e. Standalone or LiquidSoap
-        let plannedMedia =
-            new Context.LineupManager.MediaClass(this, this._parentMediaGroup);
+        let plannedMedia = Context.LineupManager
+                            .ObjectBuilder
+                            .buildMedia(this, this._parentMediaGroup);
         plannedMedia.Path = this._parentMediaGroup
                             ._parentMediaDirectory.BaseDir +
                             '/' + this.Path;

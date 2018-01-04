@@ -1,4 +1,4 @@
-const SerializableObject = require('./SerializableObject');
+const Entity = require('./Entity');
 
 const Context = require('../Context');
 
@@ -10,7 +10,7 @@ const Box = B.Box;
 
 const moment = require('moment');
 
-class LineupTemplate extends SerializableObject {
+class LineupTemplate extends Entity {
     constructor(jsonOrOther) {
         super(jsonOrOther);
     }
@@ -65,7 +65,7 @@ class LineupTemplate extends SerializableObject {
     }
 }
 
-class LineupPlan extends SerializableObject {
+class LineupPlan extends Entity {
     constructor(jsonOrOther) {
         super(jsonOrOther);
     }
@@ -122,7 +122,7 @@ class LineupPlan extends SerializableObject {
     }
 }
 
-class Lineup extends SerializableObject {
+class Lineup extends Entity {
     constructor(jsonOrOther) {
         super(jsonOrOther);
     }
@@ -155,6 +155,16 @@ class Lineup extends SerializableObject {
                                 moment(this.Boxes[i].StartTime).toString());
                     }
             }
+        }
+    }
+
+    /**
+     * The compiled program is ready to be published. We publish
+     * our content before populating the live stream.
+     */
+    publish() {
+        for (let box of this.Boxes) {
+            box.publish();
         }
     }
 

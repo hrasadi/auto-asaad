@@ -1,24 +1,38 @@
 const Context = require('./Context');
+const ObjectBuilder = require('./model/ObjectBuilder');
 
 const L = require('./model/Lineup');
 const LineupTemplate = L.LineupTemplate;
 const LineupPlan = L.LineupPlan;
 
+const ActionManager = require('./model/lineupaction/ActionManager');
+
 const moment = require('moment');
 const fs = require('fs');
+
+const StandaloneLineup = require('./standalone/StandaloneLineup');
+const StandaloneMedia = require('./standalone/StandaloneMedia');
 
 class LineupManager {
     constructor() {
         // Dictionary from date to LineupPlan objects.
         this._lineupPlansCache = {};
         this._lineupTemplate = null;
+        this._actionManager = new ActionManager();
     }
 
-    initiate(config, mediaClass, lineupClass) {
+    initiate(config, deploymentMode) {
+        if (deploymentMode == 'liquidsoap') {
+        }
+        else if (deploymentMode == 'standalone') {
+            this._objectBuilder = new ObjectBuilder({
+                'Lineup': StandaloneLineup,
+                'Media': StandaloneMedia,
+            });
+        }
+
         // Read the template
         this._lineupTemplate = new LineupTemplate(config);
-        this._mediaClass = mediaClass;
-        this._lineupClass = lineupClass;
     }
 
     planLineupRange(startDate, numDaysToPlan = 1) {
@@ -42,6 +56,15 @@ class LineupManager {
 
         fs.writeFileSync(this.getLineupFilePath(targetDate),
                 JSON.stringify(lineup, null, 2));
+    }
+
+    publishLineup(targetDate) {
+        let lineup = this.getLineup(targetDate);
+        if (lineup) {
+            lineup.publish();
+        } else {
+            throw Error('Lineup not found for date ' + targetDate);
+        }
     }
 
     scheduleLineup(targetDate) {
@@ -98,7 +121,7 @@ class LineupManager {
         // Load from file if not in memory
         let lineupFilePath = this.getLineupFilePath(targetDate);
         if (fs.existsSync(lineupFilePath)) {
-            return new (this.LineupClass)(JSON.parse(
+            return this.ObjectBuilder.buildLineup(JSON.parse(
                                 fs.readFileSync(lineupFilePath)));
         }
         return null;
@@ -108,12 +131,12 @@ class LineupManager {
         return this._baseDate;
     }
 
-    get MediaClass() {
-        return this._mediaClass;
+    get ObjectBuilder() {
+        return this._objectBuilder;
     }
 
-    get LineupClass() {
-        return this._lineupClass;
+    get ActionManager() {
+        return this._actionManager;
     }
 }
 

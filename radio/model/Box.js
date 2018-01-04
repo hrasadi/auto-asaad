@@ -1,4 +1,4 @@
-const SerializableObject = require('./SerializableObject');
+const Entity = require('./Entity');
 
 const Schedule = require('./Schedule');
 
@@ -8,7 +8,7 @@ const Program = P.Program;
 
 const moment = require('moment');
 
-class BaseBox extends SerializableObject {
+class BaseBox extends Entity {
     constructor(jsonOrOther) {
         super(jsonOrOther);
     }
@@ -173,6 +173,12 @@ class Box extends BaseBox {
         if (this.IsFloating &&
                 this.Programs && this.Programs.length > 1) {
             throw Error('Floating box can only contain one program');
+        }
+    }
+
+    publish() {
+        for (let program of this.Programs) {
+            program.publish();
         }
     }
 

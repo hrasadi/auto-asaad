@@ -1,4 +1,4 @@
-const SerializableObject = require('./SerializableObject');
+const Entity = require('./Entity');
 
 const Publishing = require('./Publishing');
 
@@ -12,7 +12,7 @@ const ShowPlan = S.ShowPlan;
 
 const moment = require('moment');
 
-class BaseProgram extends SerializableObject {
+class BaseProgram extends Entity {
     constructor(jsonOrOther) {
         super(jsonOrOther);
     }
@@ -191,6 +191,8 @@ class ReplayProgramTemplate extends ProgramTemplate {
             if (replayEligible) {
                 let replayProgram = new ProgramPlan(programPlan, parent);
                 if (replayProgram) {
+                    replayProgram.pruneProgramPlan();
+
                     replayProgram.ProgramId =
                                         programPlan.ProgramId + '_Replay';
                     replayProgram.Title = programPlan.Title + ' - تکرار';
@@ -278,6 +280,15 @@ class ProgramPlan extends BaseProgram {
         return compiledProgram;
     }
 
+    /**
+     * Removes all clips except the main clip.
+     * Also removes the preshow if any.
+     */
+    pruneProgramPlan() {
+        this.PreShowPlan = null;
+        this.ShowPlan.pruneClipPlans();
+    }
+
     get PreShowPlan() {
         return this.getOrNull(this._preShowPlan);
     }
@@ -302,6 +313,24 @@ class ProgramPlan extends BaseProgram {
 class Program extends BaseProgram {
     constructor(jsonOrOther) {
         super(jsonOrOther);
+    }
+
+    publish() {
+        // Publish in podcast
+        if (this.Publishing.Podcast) {
+            
+        }
+        // Publish in Archive
+        if (this.Publishing.Archive) {
+
+        }
+        // Publish social feed
+        if (this.Publishing.SocialListeningMode === 'Social') {
+
+        } else if (this.Publishing.SocialListeningMode === 'Social') {
+            // Schedule for personal feed
+
+        }
     }
 
     split(breakAtTime, continueAtTime, breakDuration) {
@@ -371,7 +400,7 @@ class Program extends BaseProgram {
     }
 }
 
-class Metadata extends SerializableObject {
+class Metadata extends Entity {
     constructor(jsonOrOther) {
         super(jsonOrOther);
     }
