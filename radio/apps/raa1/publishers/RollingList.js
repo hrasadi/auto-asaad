@@ -44,6 +44,10 @@ class RollingList {
 
         fs.writeFileSync(listFilePath, JSON.stringify(this._items, null, 2));
     }
+
+    get Items() {
+        return this._items;
+    }
 }
 
 module.exports = RollingList;
