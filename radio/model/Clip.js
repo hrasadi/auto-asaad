@@ -129,7 +129,7 @@ class ClipPlan extends BaseClip {
      */
     set Media(value) {
         if (value) {
-            this._media = Context.LineupManager.ObjectBuilder.buildMedia(value);
+            this._media = Context.LineupManager.RadioApp.ObjectBuilder.buildMedia(value);
         }
     }
 }
@@ -145,7 +145,7 @@ class Clip extends BaseClip {
 
     set Media(value) {
         if (value) {
-            this._media = Context.LineupManager
+            this._media = Context.LineupManager.RadioApp
                             .ObjectBuilder.buildMedia(value);
         }
     }

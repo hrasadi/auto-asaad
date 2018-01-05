@@ -161,11 +161,15 @@ class Lineup extends Entity {
     /**
      * The compiled program is ready to be published. We publish
      * our content before populating the live stream.
+     * @param {String} targetDate the date for which we publish
      */
-    publish() {
+    publish(targetDate) {
         for (let box of this.Boxes) {
-            box.publish();
+            box.publish(targetDate);
         }
+
+        // commit the publishing
+        Context.LineupManager.RadioApp.Publishers.PodcastPublisher.commit();
     }
 
     // implemented in the subclass

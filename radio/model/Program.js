@@ -1,8 +1,8 @@
 const Entity = require('./Entity');
 
-const Publishing = require('./Publishing');
-
 const Context = require('../Context');
+
+const Publishing = require('./Publishing');
 
 const S = require('./Show');
 const ShowTemplate = S.ShowTemplate;
@@ -34,7 +34,7 @@ class BaseProgram extends Entity {
     }
 
     get Publishing() {
-        this.getOrElse(this._publishing, new Publishing());
+        return this.getOrElse(this._publishing, new Publishing());
     }
 
     set Publishing(value) {
@@ -196,6 +196,9 @@ class ReplayProgramTemplate extends ProgramTemplate {
                     replayProgram.ProgramId =
                                         programPlan.ProgramId + '_Replay';
                     replayProgram.Title = programPlan.Title + ' - تکرار';
+                    // Replat program should not inherit properties
+                    // from original program
+                    replayProgram.Publishing = this.Publishing;
                     replayProgramPlans.push(replayProgram);
                 }
             }
@@ -315,10 +318,11 @@ class Program extends BaseProgram {
         super(jsonOrOther);
     }
 
-    publish() {
+    publish(targetDate) {
         // Publish in podcast
         if (this.Publishing.Podcast) {
-            
+            Context.LineupManager.RadioApp.Publishers
+                    .PodcastPublisher.publish(this, targetDate);
         }
         // Publish in Archive
         if (this.Publishing.Archive) {
@@ -334,8 +338,8 @@ class Program extends BaseProgram {
     }
 
     split(breakAtTime, continueAtTime, breakDuration) {
-        let p1 = new Program(this);
-        let p2 = new Program(this);
+        let p1 = new Program(this, this._parentBoxPlan);
+        let p2 = new Program(this, this._parentBoxPlan);
 
         p1.Metadata.EndTime = moment(breakAtTime);
         p2.Metadata.StartTime = moment(continueAtTime);

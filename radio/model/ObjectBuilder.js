@@ -10,20 +10,20 @@ class ObjectBuilder {
 
     buildLineup(jsonOrOther) {
         let Type =
-            this._types.LineupClass ? this._types.LineupClass : Lineup;
+            this._types.Lineup ? this._types.Lineup : Lineup;
 
         return this.createNew(Type, jsonOrOther);
     }
 
-    buildMedia(jsonOrOther) {
+    buildMedia(jsonOrOther, parent) {
         let Type =
-        this._types.MediaClass ? this._types.MediaClass : Media;
+            this._types.Media ? this._types.Media : Media;
 
-        return this.createNew(Type, jsonOrOther);
+        return this.createNew(Type, jsonOrOther, parent);
     }
 
-    createNew(Type, jsonOrOther) {
-        return new (Type)(jsonOrOther);
+    createNew(Type, jsonOrOther, parent) {
+        return new (Type)(jsonOrOther, parent);
     }
 }
 

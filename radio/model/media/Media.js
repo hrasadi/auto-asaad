@@ -20,7 +20,7 @@ class Media extends Entity {
         // (Object.getPrototypeOf(this)) returns
         // a new object of the same child type
         // i.e. Standalone or LiquidSoap
-        let plannedMedia = Context.LineupManager
+        let plannedMedia = Context.LineupManager.RadioApp
                             .ObjectBuilder
                             .buildMedia(this, this._parentMediaGroup);
         plannedMedia.Path = this._parentMediaGroup

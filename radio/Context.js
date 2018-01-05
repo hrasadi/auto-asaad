@@ -14,6 +14,7 @@ const Context = {
         },
         Version: '3.0',
     },
+    MaxPodcastEntries: 50,
     Logger: logger,
     LineupManager: null,
     LineupFileNamePrefix: 'raa1',

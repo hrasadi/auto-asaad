@@ -32,7 +32,7 @@ class Publishing extends Entity {
     }
 
     get PodcastFeed() {
-        this.getOrElse(this._podcastFeedm,
+        return this.getOrElse(this._podcastFeed,
          Object.assign({}, Context.Defaults.Publishing.PodcastFeed));
     }
 
@@ -45,7 +45,7 @@ class Publishing extends Entity {
     }
 
     set SocialListeningMode(value) {
-        if (value && !['Social', 'Personal', 'None'].contains(value)) {
+        if (value && !['Social', 'Personal', 'None'].includes(value)) {
             throw Error('Invalid Social Listening mode.' +
                 'Acceptable values are "Social", "Personal" and "None"');
         }

@@ -176,23 +176,24 @@ class Box extends BaseBox {
         }
     }
 
-    publish() {
+    publish(targetDate) {
         for (let program of this.Programs) {
-            program.publish();
+            program.publish(targetDate);
         }
     }
 
     injectProgram(interruptingProgram) {
         let newBox = new Box(this, this._parentLineup);
         // find the program that should be interrupted
-        // This program starts sooner that interrupting but
-        // does not end before the interrupt.
+        // This is the closest program that starts
+        // sooner than interrupting.
         // In other words, interrupt crosses its boundaries.
         for (let i = 0; i < this.Programs.length; i++) {
             if (moment(this.Programs[i].Metadata.StartTime)
                 .isBefore(interruptingProgram.Metadata.StartTime) &&
-                moment(this.Programs[i].Metadata.EndTime)
-                .isAfter(interruptingProgram.Metadata.EndTime)) {
+                ((i + 1) == this.Programs.length ||
+                moment(this.Programs[i + 1].Metadata.StartTime)
+                .isAfter(interruptingProgram.Metadata.StartTime))) {
                     let shiftAmount =
                                 moment(interruptingProgram.Metadata.EndTime)
                                 .diff(interruptingProgram.Metadata.StartTime,

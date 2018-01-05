@@ -97,7 +97,7 @@ class PreShowTemplate extends ShowTemplate {
     }
 }
 
-class ShowPlan extends SerializableObject {
+class ShowPlan extends Entity {
     constructor(jsonOrOther) {
         super(jsonOrOther);
     }

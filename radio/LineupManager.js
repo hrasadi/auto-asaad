@@ -1,35 +1,21 @@
 const Context = require('./Context');
-const ObjectBuilder = require('./model/ObjectBuilder');
 
 const L = require('./model/Lineup');
 const LineupTemplate = L.LineupTemplate;
 const LineupPlan = L.LineupPlan;
 
-const ActionManager = require('./model/lineupaction/ActionManager');
-
 const moment = require('moment');
 const fs = require('fs');
-
-const StandaloneLineup = require('./standalone/StandaloneLineup');
-const StandaloneMedia = require('./standalone/StandaloneMedia');
 
 class LineupManager {
     constructor() {
         // Dictionary from date to LineupPlan objects.
         this._lineupPlansCache = {};
         this._lineupTemplate = null;
-        this._actionManager = new ActionManager();
     }
 
-    initiate(config, deploymentMode) {
-        if (deploymentMode == 'liquidsoap') {
-        }
-        else if (deploymentMode == 'standalone') {
-            this._objectBuilder = new ObjectBuilder({
-                'Lineup': StandaloneLineup,
-                'Media': StandaloneMedia,
-            });
-        }
+    initiate(config, radioApp) {
+        this._radioApp = radioApp;
 
         // Read the template
         this._lineupTemplate = new LineupTemplate(config);
@@ -61,7 +47,7 @@ class LineupManager {
     publishLineup(targetDate) {
         let lineup = this.getLineup(targetDate);
         if (lineup) {
-            lineup.publish();
+            lineup.publish(targetDate);
         } else {
             throw Error('Lineup not found for date ' + targetDate);
         }
@@ -85,17 +71,17 @@ class LineupManager {
     }
 
     getLineupPlanFilePath(targetDate) {
-        return Context.CWD + '/lineups/' +
+        return Context.CWD + '/run/lineup/' +
             this.getLineupFileName(targetDate) + '.planned.json';
     }
 
     getLineupFilePath(targetDate) {
-        return Context.CWD + '/lineups/' +
+        return Context.CWD + '/run/lineup/' +
             this.getLineupFileName(targetDate) + '.json';
     }
 
     getScheduledLineupFilePath(targetDate) {
-        return Context.CWD + '/lineups/' +
+        return Context.CWD + '/run/lineup/' +
             this.getLineupFileName(targetDate) + '.json.scheduled';
     }
 
@@ -121,7 +107,7 @@ class LineupManager {
         // Load from file if not in memory
         let lineupFilePath = this.getLineupFilePath(targetDate);
         if (fs.existsSync(lineupFilePath)) {
-            return this.ObjectBuilder.buildLineup(JSON.parse(
+            return this.RadioApp.ObjectBuilder.buildLineup(JSON.parse(
                                 fs.readFileSync(lineupFilePath)));
         }
         return null;
@@ -131,12 +117,8 @@ class LineupManager {
         return this._baseDate;
     }
 
-    get ObjectBuilder() {
-        return this._objectBuilder;
-    }
-
-    get ActionManager() {
-        return this._actionManager;
+    get RadioApp() {
+        return this._radioApp;
     }
 }
 
