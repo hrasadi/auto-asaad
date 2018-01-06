@@ -320,13 +320,20 @@ class Program extends BaseProgram {
 
     publish(targetDate) {
         // Publish in podcast
+        let mergedClip = Context.LineupManager.RadioApp
+                                .Utils.mergeClips(this.Show.Clips);
+        let programToPublish = new Program(this, this._parentBoxPlan);
+        programToPublish.Show.Clips = [mergedClip];
+        programToPublish.Metadata.Duration = programToPublish.Show.Duration;
+
         if (this.Publishing.Podcast) {
             Context.LineupManager.RadioApp.Publishers
-                    .PodcastPublisher.publish(this, targetDate);
+                    .PodcastPublisher.publish(programToPublish, targetDate);
         }
         // Publish in Archive
         if (this.Publishing.Archive) {
-
+            Context.LineupManager.RadioApp.Publishers
+                    .ArchivePublisher.publish(programToPublish, targetDate);
         }
         // Publish social feed
         if (this.Publishing.SocialListeningMode === 'Social') {

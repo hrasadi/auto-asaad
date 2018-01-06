@@ -1,6 +1,6 @@
 const Publisher = require('./Publisher');
 
-class PodcastPubliser extends Publisher {
+class ArchivePubliser extends Publisher {
     publish(program, targetDate) {
         // publish
         this.doPublish(program, targetDate);
@@ -11,4 +11,4 @@ class PodcastPubliser extends Publisher {
     }
 }
 
-module.exports = PodcastPubliser;
+module.exports = ArchivePubliser;

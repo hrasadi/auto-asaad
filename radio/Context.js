@@ -3,7 +3,7 @@ const Logger = require('../logger');
 const logger = new Logger('./log');
 
 const Context = {
-    CWD: '.',
+    CWD: './',
     Defaults: {
         Publishing: {
             SocialListeningProps: {

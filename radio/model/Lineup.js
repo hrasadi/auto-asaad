@@ -168,8 +168,14 @@ class Lineup extends Entity {
             box.publish(targetDate);
         }
 
-        // commit the publishing
-        Context.LineupManager.RadioApp.Publishers.PodcastPublisher.commit();
+        // commit all publishers
+        for (let publisherName in Context.LineupManager.RadioApp.Publishers) {
+            if (Context.LineupManager.RadioApp.Publishers
+                                    .hasOwnProperty(publisherName)) {
+                Context.LineupManager.RadioApp
+                            .Publishers[publisherName].commit();
+            }
+        }
     }
 
     // implemented in the subclass
