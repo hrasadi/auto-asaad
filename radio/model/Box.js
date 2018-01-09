@@ -1,11 +1,14 @@
 const Entity = require('./Entity');
 
+const Context = require('../Context');
+
 const Schedule = require('./Schedule');
 
+const LivePlaybackSchedulerMeta = require('./LivePlaybackSchedulerMeta');
 const P = require('./Program');
 const ProgramTemplate = P.ProgramTemplate;
-const Program = P.Program;
 
+const fs = require('fs');
 const moment = require('moment');
 
 class BaseBox extends Entity {
@@ -116,7 +119,8 @@ class BoxPlan extends BaseBox {
     }
 
     compile(parent) {
-        let box = new Box(this, parent);
+        let box = Context.LineupManager
+                        .RadioApp.ObjectBuilder.buildBox(this, parent);
         let programs = [];
 
         if (!this.ProgramPlans || this.ProgramPlans.length == 0) {
@@ -125,18 +129,19 @@ class BoxPlan extends BaseBox {
 
         // first program starts when the box starts
         let nextProgramStartTime = this.StartTime;
-        let boxDuration = 0;
         for (let programPlan of this.ProgramPlans) {
             let program = programPlan.compile(nextProgramStartTime, box);
 
             if (program) {
                 nextProgramStartTime = program.EndTime;
-                boxDuration += program.Metadata.Duration;
                 programs.push(program);
             }
         }
         box.Programs = programs;
-        box.EndTime = moment(box.StartTime).add(boxDuration, 'seconds');
+        // In case there is a shift up due to a preshow
+        box.StartTime = moment(box.Programs[0].Metadata.StartTime);
+        box.EndTime = moment(box.Programs[box.Programs.length - 1]
+                                                        .Metadata.EndTime);
         return box;
     }
 
@@ -182,8 +187,61 @@ class Box extends BaseBox {
         }
     }
 
+    schedule(targetDate, boxIdx) {
+        let oldLineupFilePath = Context.LineupManager
+                            .getScheduledLineupFilePath(targetDate);
+
+        if (fs.existsSync(oldLineupFilePath)) {
+            let oldLineup = JSON.parse(fs.readFileSync(oldLineupFilePath));
+            for (let oldBox of oldLineup.Boxes) {
+                if (oldBox.BoxId == this.BoxId) {
+                    this.unscheduleBox(Context.LineupManager.RadioApp
+                                            .ObjectBuilder.buildBox(oldBox));
+                }
+            }
+        }
+
+        if (!this.IsFloating) {
+            this.doScheduleBox(targetDate, boxIdx);
+        }
+        // Also schedule any program with high priority
+        // Note that if the box is floating, we expect it
+        // only to have high priority programs
+        for (let i = 0; i < this.Programs.length; i++) {
+            if (this.Programs[i].Priority == 'High') {
+                console.log(boxIdx + ' ' + i);
+                this.Programs[i].schedule(targetDate, boxIdx, i);
+            }
+        }
+    }
+
+    // Implemneted in subclasses
+    doScheduleBox(targetDate) {
+    }
+
+    // Implemented in subclasses
+    unscheduleBox(oldBox) {
+        // If box is floating, only the box has scheduling
+        if (oldBox.IsFloating) {
+            oldBox.Programs[0].unschedule();
+        } else {
+            oldBox.doUnscheduleBox();
+            // In case there is a floating program inside the box
+            for (let p of oldBox.Programs) {
+                if (p.Priority == 'High') {
+                    p.unschedule();
+                }
+            }
+        }
+    }
+
+    // Implemneted in subclasses
+    doUnscheduleBox(oldBox) {
+    }
+
     injectProgram(interruptingProgram) {
-        let newBox = new Box(this, this._parentLineup);
+        let newBox = Context.LineupManager.RadioApp
+                        .ObjectBuilder.buildBox(this, this._parentLineup);
         // find the program that should be interrupted
         // This is the closest program that starts
         // sooner than interrupting.
@@ -250,7 +308,8 @@ class Box extends BaseBox {
                 if (value.constructor.name == 'Program') {
                     this._programs.push(value);
                 } else {
-                    this._programs.push(new Program(value));
+                    this._programs.push(Context.LineupManager.RadioApp
+                                        .ObjectBuilder.buildProgram(value));
                 }
             }
         }
@@ -278,6 +337,14 @@ class Box extends BaseBox {
 
     set Duration(value) {
         // do nothing!
+    }
+
+    get LivePlaybackSchedulerMeta() {
+        return this.getOrNull(this._livePlaybackSchedulerMeta);
+    }
+
+    set LivePlaybackSchedulerMeta(value) {
+        this._livePlaybackSchedulerMeta = new LivePlaybackSchedulerMeta(value);
     }
 }
 

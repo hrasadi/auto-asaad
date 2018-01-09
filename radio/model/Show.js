@@ -176,7 +176,7 @@ class PreShowPlan extends ShowPlan {
     }
 
     set FillerClipPlan(value) {
-        this._fillerClipPlan = value;
+        this._fillerClipPlan = new ClipPlan(value);
     }
 }
 
@@ -218,7 +218,7 @@ class PreShow extends Show {
     }
 
     set FillerClip(value) {
-        this._fillerClip = value;
+        this._fillerClip = new ClipPlan(value);
     }
 }
 

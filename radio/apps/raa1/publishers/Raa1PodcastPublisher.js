@@ -131,9 +131,10 @@ class Raa1PodcastPublisher extends PodcastPublisher {
         rssFeedItem.custom_elements.push(itunesSubtitleElement);
 
         let itunesDurationElement = {};
+        let pduration = moment.duration(program.Metadata.Duration, 'seconds');
         itunesDurationElement['itunes:duration'] =
-                        moment(program.Metadata.Duration, 'seconds')
-                        .format('HH:ss');
+                                Math.floor(pduration.asMinutes()) +
+                                ':' + pduration.seconds();
         rssFeedItem.custom_elements.push(itunesDurationElement);
 
         return rssFeedItem;

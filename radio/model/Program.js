@@ -4,6 +4,8 @@ const Context = require('../Context');
 
 const Publishing = require('./Publishing');
 
+const LivePlaybackSchedulerMeta = require('./LivePlaybackSchedulerMeta');
+
 const S = require('./Show');
 const ShowTemplate = S.ShowTemplate;
 const PreShowTemplate = S.PreShowTemplate;
@@ -252,7 +254,9 @@ class ProgramPlan extends BaseProgram {
     }
 
     compile(startTimeMoment, parent) {
-        let compiledProgram = new Program(this, parent);
+        let compiledProgram = Context.LineupManager
+                                .RadioApp.ObjectBuilder
+                                .buildProgram(this, parent);
 
         let compiledPreShow = null;
         if (this.PreShowPlan) {
@@ -267,17 +271,21 @@ class ProgramPlan extends BaseProgram {
         compiledProgram.PreShow = compiledPreShow;
         compiledProgram.Show = compiledShow;
 
-        let compiledProgramMetadata = new Metadata(compiledProgram);
-        let duration =
-                compiledPreShow ? compiledPreShow.Duration : 0 +
-                compiledShow.Duration;
-        compiledProgramMetadata.StartTime = moment(startTimeMoment);
+        let compiledProgramMetadata = new Metadata();
+
+        if (compiledPreShow) {
+            compiledProgramMetadata.PreShowStartTime =
+                                moment(startTimeMoment)
+                                .subtract(compiledPreShow.Duration, 'seconds');
+        }
+        compiledProgramMetadata.ShowStartTime = moment(startTimeMoment);
+        // End time is only dependent to show
         compiledProgramMetadata.EndTime =
                              moment(startTimeMoment)
-                            .add(duration, 'seconds');
+                            .add(compiledShow.Duration, 'seconds');
 
         if (this._parentBoxPlan.IsFloating) {
-            compiledProgram.Prirority = 'High';
+            compiledProgram.Priority = 'High';
         }
         compiledProgram.Metadata = compiledProgramMetadata;
         return compiledProgram;
@@ -314,15 +322,18 @@ class ProgramPlan extends BaseProgram {
 }
 
 class Program extends BaseProgram {
-    constructor(jsonOrOther) {
+    constructor(jsonOrOther, parent) {
         super(jsonOrOther);
+
+        this._parentBox = parent;
     }
 
     publish(targetDate) {
         // Publish in podcast
         let mergedClip = Context.LineupManager.RadioApp
                                 .Utils.mergeClips(this.Show.Clips);
-        let programToPublish = new Program(this, this._parentBoxPlan);
+        let programToPublish = Context.LineupManager
+                                .RadioApp.ObjectBuilder.buildProgram(this);
         programToPublish.Show.Clips = [mergedClip];
         programToPublish.Metadata.Duration = programToPublish.Show.Duration;
 
@@ -344,9 +355,33 @@ class Program extends BaseProgram {
         }
     }
 
+    schedule(targetDate, boxIdx, programIdx) {
+        if (this.Priority != 'High') {
+            throw Error('Logic error: scheduling on programs is only valid' +
+                        'when program is interrrupting');
+        }
+        this.doScheduleProgram(targetDate, boxIdx, programIdx);
+    }
+
+    // Implemented in subclasses
+    doScheduleProgram(targetDate, boxIdx, programIdx) {
+    }
+
+    unschedule() {
+        if (this.LivePlaybackSchedulerMeta) {
+            this.doUnscheduleProgram();
+        }
+    }
+
+    // Implemented in subclasses
+    doUnscheduleProgram() {
+    }
+
     split(breakAtTime, continueAtTime, breakDuration) {
-        let p1 = new Program(this, this._parentBoxPlan);
-        let p2 = new Program(this, this._parentBoxPlan);
+        let p1 = Context.LineupManager.RadioApp
+                            .ObjectBuilder.buildProgram(this, this._parentBox);
+        let p2 = Context.LineupManager.RadioApp
+                            .ObjectBuilder.buildProgram(this, this._parentBox);
 
         p1.Metadata.EndTime = moment(breakAtTime);
         p2.Metadata.StartTime = moment(continueAtTime);
@@ -402,26 +437,32 @@ class Program extends BaseProgram {
      * These programs will be queued in another Liquidsoap queue and will
      * pause playback for the normal programs until they are finished
      */
-    get Prirority() {
+    get Priority() {
         return this.getOrElse(this._priority, 'Normal');
     }
 
-    set Prirority(value) {
+    set Priority(value) {
         this._priority = value;
+    }
+
+    // Only set for floating programs inside a non-floating box
+    get LivePlaybackSchedulerMeta() {
+        return this.getOrNull(this._livePlaybackSchedulerMeta);
+    }
+
+    set LivePlaybackSchedulerMeta(value) {
+        this._livePlaybackSchedulerMeta = new LivePlaybackSchedulerMeta(value);
     }
 }
 
 class Metadata extends Entity {
-    constructor(jsonOrOther) {
-        super(jsonOrOther);
-    }
-
     get StartTime() {
-        return this.getOrNull(this._startTime);
+        return this.getOrNull(this.PreShowStartTime ?
+                                this.PreShowStartTime : this.ShowStartTime);
     }
 
     set StartTime(value) {
-        this._startTime = value;
+        // Do nothing. This value should be derived from show and preshow metas
     }
 
     get EndTime() {
@@ -432,13 +473,37 @@ class Metadata extends Entity {
         this._endTime = value;
     }
 
+    get PreShowStartTime() {
+        return this.getOrNull(this._preShowStartTime);
+    }
+
+    set PreShowStartTime(value) {
+        this._preShowStartTime = value;
+    }
+
+    get ShowStartTime() {
+        return this.getOrNull(this._showStartTime);
+    }
+
+    set ShowStartTime(value) {
+        this._showStartTime = value;
+    }
+
     get Duration() {
         return moment(this.EndTime)
             .diff(this.StartTime, 'seconds');
     }
 
     set Duration(value) {
-        // Do nothing!
+        // Do nothing! This value should be dervied from start and end time
+    }
+
+    get LivePlaybackSchedulerMeta() {
+        return this.getOrNull(this._livePlaybackSchedulerMeta);
+    }
+
+    set LivePlaybackSchedulerMeta(value) {
+        this._livePlaybackSchedulerMeta = new LivePlaybackSchedulerMeta(value);
     }
 }
 

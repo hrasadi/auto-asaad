@@ -18,6 +18,7 @@ const Context = {
     Logger: logger,
     LineupManager: null,
     LineupFileNamePrefix: 'raa1',
+    NoScheduling: false,
 };
 
 module.exports = Context;

@@ -6,7 +6,6 @@ const MediaDirectory = require('./media/MediaDirectory');
 
 const B = require('./Box');
 const BoxTemplate = B.BoxTemplate;
-const Box = B.Box;
 
 const moment = require('moment');
 
@@ -178,14 +177,18 @@ class Lineup extends Entity {
         }
     }
 
-    // implemented in the subclass
-    schedule() {
-    }
-
-    // shared scheduling logic
-    schedule0() {
+    /**
+     * Platform-specific lineup scheduling logic
+     * @param {String} targetDate The date for which we are scheduling lineup
+     */
+    schedule(targetDate) {
         this.fixFloatingBoxes();
         this.validate();
+
+        // Schedule boxes
+        for (let i = 0; i < this.Boxes.length; i++) {
+            this.Boxes[i].schedule(targetDate, i);
+        }
     }
 
     /**
@@ -206,7 +209,6 @@ class Lineup extends Entity {
                         if (moment(this.Boxes[i].StartTime)
                                 .isSameOrBefore(
                                 moment(this.Boxes[i + 1].StartTime))) {
-
                             let shiftAmount =
                                 moment(this.Boxes[i + 1].StartTime)
                                 .diff(moment(this.Boxes[i].EndTime), 'seconds');
@@ -263,7 +265,8 @@ class Lineup extends Entity {
                 if (value.constructor.name === 'Box') {
                     this._boxes.push(value);
                 } else {
-                    this._boxes.push(new Box(value));
+                    this._boxes.push(Context.LineupManager.RadioApp
+                                        .ObjectBuilder.buildBox(value));
                 }
             }
         }

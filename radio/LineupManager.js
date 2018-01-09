@@ -3,6 +3,7 @@ const Context = require('./Context');
 const L = require('./model/Lineup');
 const LineupTemplate = L.LineupTemplate;
 const LineupPlan = L.LineupPlan;
+const Lineup = L.Lineup;
 
 const moment = require('moment');
 const fs = require('fs');
@@ -56,10 +57,10 @@ class LineupManager {
     scheduleLineup(targetDate) {
         let lineup = this.getLineup(targetDate);
         if (lineup) {
-            lineup.schedule();
+            lineup.schedule(targetDate);
 
             fs.writeFileSync(this.getScheduledLineupFilePath(targetDate),
-                    JSON.stringify(lineup, null, 2));
+                                            JSON.stringify(lineup, null, 2));
         } else {
             throw Error('Lineup not found for date ' + targetDate);
         }
@@ -107,8 +108,7 @@ class LineupManager {
         // Load from file if not in memory
         let lineupFilePath = this.getLineupFilePath(targetDate);
         if (fs.existsSync(lineupFilePath)) {
-            return this.RadioApp.ObjectBuilder.buildLineup(JSON.parse(
-                                fs.readFileSync(lineupFilePath)));
+            return new Lineup(JSON.parse(fs.readFileSync(lineupFilePath)));
         }
         return null;
     }
