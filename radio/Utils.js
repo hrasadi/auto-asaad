@@ -2,7 +2,7 @@
  * Abstract class. Implemented by radio app
  */
 class Utils {
-    mergeClips(clips) {
+    getPublicClip(clips) {
     }
 }
 

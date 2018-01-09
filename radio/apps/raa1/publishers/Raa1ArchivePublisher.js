@@ -36,13 +36,6 @@ class Raa1ArchivePublisher extends ArchivePublisher {
                                         'unlimited');
         }
 
-        let vodRelativeURI = program.Show.Clips[0].Media.Path
-                                            .replace(Context.CWD, '');
-        let vodUrl = new URL(vodRelativeURI, 'http://vod.raa.media/');
-        vodUrl = 'https://api.raa.media/linkgenerator/podcast.mp3?src=' + Buffer.from(vodUrl.toString()).toString('base64');
-
-        program.Show.Clips[0].Media.Path = vodUrl;
-
         this._programRollingListsDict[program.ProgramId].addItem(program);
     }
 

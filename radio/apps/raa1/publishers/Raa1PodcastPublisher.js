@@ -113,17 +113,12 @@ class Raa1PodcastPublisher extends PodcastPublisher {
         rssFeedItem.title = program.Title;
 
         // Clips[0] is the combined clip
-        let vodRelativeURI = program.Show.Clips[0].Media.Path
-                            .replace(Context.CWD, '');
-        let vodUrl = new URL(vodRelativeURI, 'http://vod.raa.media/');
-        vodUrl = 'https://api.raa.media/linkgenerator/podcast.mp3?src=' + Buffer.from(vodUrl.toString()).toString('base64');
-
         rssFeedItem.description = program.Show.Clips[0].Description;
-        rssFeedItem.url = vodUrl.toString();
+        rssFeedItem.url = program.Show.Clips[0].Media.Path;
         rssFeedItem.date = Date().toString();
 
         rssFeedItem.enclosure = {};
-        rssFeedItem.enclosure.url = vodUrl;
+        rssFeedItem.enclosure.url = program.Show.Clips[0].Media.Path;
 
         let itunesSubtitleElement = {};
         itunesSubtitleElement['itunes:subtitle'] =

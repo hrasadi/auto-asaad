@@ -331,7 +331,7 @@ class Program extends BaseProgram {
     publish(targetDate) {
         // Publish in podcast
         let mergedClip = Context.LineupManager.RadioApp
-                                .Utils.mergeClips(this.Show.Clips);
+                                .Utils.getPublicClip(this.Show.Clips);
         let programToPublish = Context.LineupManager
                                 .RadioApp.ObjectBuilder.buildProgram(this);
         programToPublish.Show.Clips = [mergedClip];

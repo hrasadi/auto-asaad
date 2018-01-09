@@ -113,6 +113,10 @@ class LineupManager {
         return null;
     }
 
+    get MediaDirectory() {
+        return this._lineupTemplate.MediaDirectory;
+    }
+
     get BaseDate() {
         return this._baseDate;
     }

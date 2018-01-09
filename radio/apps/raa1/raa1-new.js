@@ -11,7 +11,7 @@ const StandaloneMedia = require('../../standalone/StandaloneMedia');
 const StandaloneBox = require('../../standalone/StandaloneBox');
 const StandaloneProgram = require('../../standalone/StandaloneProgram');
 
-const StandaloneUtils = require('../../standalone/StandaloneUtils');
+const Raa1ClipUtils = require('./Raa1ClipUtils');
 
 const Raa1PodcastPublisher = require('./publishers/Raa1PodcastPublisher');
 const Raa1ArchivePublisher = require('./publishers/Raa1ArchivePublisher');
@@ -45,7 +45,7 @@ class Raa1 extends RadioApp {
 
         this._actionManager = new ActionManager();
 
-        this._utils = new StandaloneUtils();
+        this._utils = new Raa1ClipUtils(this._conf);
 
         this._manager.initiate(this._conf.Radio, this);
     }

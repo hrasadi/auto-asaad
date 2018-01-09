@@ -129,7 +129,8 @@ class ClipPlan extends BaseClip {
      */
     set Media(value) {
         if (value) {
-            this._media = Context.LineupManager.RadioApp.ObjectBuilder.buildMedia(value);
+            this._media = Context.LineupManager
+                        .RadioApp.ObjectBuilder.buildMedia(value);
         }
     }
 }
@@ -155,6 +156,10 @@ class Clip extends BaseClip {
             return this.Media.Duration;
         }
         return 0;
+    }
+
+    set Duration(value) {
+        // Do nothing!
     }
 }
 
