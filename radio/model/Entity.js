@@ -10,23 +10,27 @@ class Entity extends SerializableObject {
     }
 
     onEvent(eventName) {
-        let customAction = this.findCustomAction(eventName);
-        if (customAction) {
-            let action = Context.LineupManager.RadioApp
-                        .ActionManager.getAction(customAction.Action);
-            if (action) {
-                action(this, customAction.Params);
+        let customActions = this.findCustomAction(eventName);
+        if (customActions) {
+            for (let customAction of customActions) {
+                let action = Context.LineupManager.RadioApp.ActionManager
+                                                    .getAction(customAction.Action);
+                if (action) {
+                    action(this, customAction.Params);
+                }
             }
         }
     }
 
     findCustomAction(eventName) {
+        let result = [];
         if (this.CustomActions) {
             for (let customAction of this.CustomActions) {
                 if (customAction.On === eventName) {
-                    return customAction;
+                    result.push(customAction);
                 }
             }
+            return result;
         }
         return null;
     }

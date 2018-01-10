@@ -11,6 +11,8 @@ const ShowTemplate = S.ShowTemplate;
 const PreShowTemplate = S.PreShowTemplate;
 const PreShowPlan = S.PreShowPlan;
 const ShowPlan = S.ShowPlan;
+const PreShow = S.PreShow;
+const Show = S.Show;
 
 const moment = require('moment');
 
@@ -355,6 +357,13 @@ class Program extends BaseProgram {
         }
     }
 
+    // Should be called after modifying the clips (e.g. addClip());
+    readjustTiming() {
+        this.Metadata.EndTime =
+                             moment(this.Metadata.ShowStartTime)
+                            .add(this.Show.Duration, 'seconds');
+    }
+
     schedule(targetDate, boxIdx, programIdx) {
         if (this.Priority != 'High') {
             throw Error('Logic error: scheduling on programs is only valid' +
@@ -399,7 +408,7 @@ class Program extends BaseProgram {
 
     set PreShow(value) {
         if (value) {
-            this._preShow = value;
+            this._preShow = new PreShow(value, this);
         }
     }
 
@@ -409,7 +418,7 @@ class Program extends BaseProgram {
 
     set Show(value) {
         if (value) {
-            this._show = value;
+            this._show = new Show(value, this);
         }
     }
 

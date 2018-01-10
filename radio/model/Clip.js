@@ -151,15 +151,11 @@ class Clip extends BaseClip {
         }
     }
 
-    get Duration() {
+    getDuration() {
         if (this.Media) {
             return this.Media.Duration;
         }
         return 0;
-    }
-
-    set Duration(value) {
-        // Do nothing!
     }
 }
 

@@ -55,14 +55,6 @@ class SerializableObject {
            .filter(([key, descriptor]) => typeof descriptor.get === 'function')
            .map(([key]) => key);
     }
-
-    get CustomActions() {
-
-    }
-
-    set CustomActions(values) {
-        
-    }
 }
 
 module.exports = SerializableObject;

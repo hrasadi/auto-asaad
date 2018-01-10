@@ -27,6 +27,7 @@ class Raa1 extends RadioApp {
 
         Context.LineupManager = this._manager;
         Context.NoScheduling = true;
+        Context.CWD = __dirname;
 
         this.initiate();
     }

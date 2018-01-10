@@ -3,6 +3,7 @@ const Entity = require('./Entity');
 const C = require('./Clip');
 const ClipTemplate = C.ClipTemplate;
 const ClipPlan = C.ClipPlan;
+const Clip = C.Clip;
 
 class ShowTemplate extends Entity {
     constructor(jsonOrOther, parent) {
@@ -114,7 +115,7 @@ class ShowPlan extends Entity {
                 let clip = clipPlan.compile(compiledObject);
                 if (clip) {
                     compiledObject.Duration =
-                        compiledObject.Duration + clip.Duration;
+                        compiledObject.Duration + clip.getDuration();
                     compiledObject.Clips.push(clip);
                 }
             }
@@ -185,17 +186,35 @@ class Show extends Entity {
         super(jsonOrOther);
     }
 
+    appendClip(newClip) {
+        this.addClip(newClip, this._clips.length);
+    }
+
+    addClip(newClip, position) {
+        this._clips.splice(position, 0, newClip);
+
+        this.Duration = 0;
+        for (let clip of this._clips) {
+            if (clip) {
+                this.Duration = this.Duration + clip.getDuration();
+            }
+        }
+    }
+
     get Clips() {
         return this.getOrNull(this._clips);
     }
 
     /**
      * This value should be set during compilation
-     * @param {Clip[]} value Array of clip plans
+     * @param {Clip[]} values Array of clip plans
      */
-    set Clips(value) {
-        if (value) {
-            this._clips = value;
+    set Clips(values) {
+        if (values) {
+            this._clips = [];
+            for (let value of values) {
+                this._clips.push(new Clip(value, this));
+            }
         }
     }
 
@@ -218,7 +237,7 @@ class PreShow extends Show {
     }
 
     set FillerClip(value) {
-        this._fillerClip = new ClipPlan(value);
+        this._fillerClip = new Clip(value);
     }
 }
 

@@ -23,8 +23,13 @@ class Media extends Entity {
         let plannedMedia = Context.LineupManager.RadioApp
                             .ObjectBuilder
                             .buildMedia(this, this._parentMediaGroup);
-        plannedMedia.Path = Context.LineupManager.MediaDirectory.BaseDir +
-                            '/' + this.Path;
+
+        // In some cases, we want to use a media from outside the MediaDirectory
+        // (example is TTS). For these cases, we use 'IsAbsolutePath' property.
+        if (!this.IsAbsolutePath) {
+            plannedMedia.Path = Context.LineupManager.MediaDirectory.BaseDir +
+                                '/' + this.Path;
+        }
 
         return plannedMedia;
     }

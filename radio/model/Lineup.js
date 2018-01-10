@@ -266,7 +266,7 @@ class Lineup extends Entity {
                     this._boxes.push(value);
                 } else {
                     this._boxes.push(Context.LineupManager.RadioApp
-                                        .ObjectBuilder.buildBox(value));
+                                        .ObjectBuilder.buildBox(value, this));
                 }
             }
         }

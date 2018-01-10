@@ -187,6 +187,15 @@ class Box extends BaseBox {
         }
     }
 
+    readjustTiming() {
+        for (let program of this._programs) {
+            program.readjustTiming();
+        }
+
+        this.EndTime = moment(this.Programs[this.Programs.length - 1].Metadata.EndTime);
+    }
+
+
     schedule(targetDate, boxIdx) {
         this.onEvent('Event::ScheduleBegins');
 
@@ -311,7 +320,7 @@ class Box extends BaseBox {
                     this._programs.push(value);
                 } else {
                     this._programs.push(Context.LineupManager.RadioApp
-                                        .ObjectBuilder.buildProgram(value));
+                                        .ObjectBuilder.buildProgram(value, this));
                 }
             }
         }
