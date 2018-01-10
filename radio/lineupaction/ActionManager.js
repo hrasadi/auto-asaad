@@ -1,6 +1,10 @@
+const addClip = require('./AddClip');
+
 class ActionManager {
     constructor() {
         this._actionMap = {};
+
+        this.registerAction('AddClip', addClip);
     }
 
     registerAction(name, fn) {

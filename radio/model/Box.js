@@ -188,6 +188,8 @@ class Box extends BaseBox {
     }
 
     schedule(targetDate, boxIdx) {
+        this.onEvent('Event::ScheduleBegins');
+
         let oldLineupFilePath = Context.LineupManager
                             .getScheduledLineupFilePath(targetDate);
 

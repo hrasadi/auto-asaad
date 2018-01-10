@@ -23,8 +23,7 @@ class Media extends Entity {
         let plannedMedia = Context.LineupManager.RadioApp
                             .ObjectBuilder
                             .buildMedia(this, this._parentMediaGroup);
-        plannedMedia.Path = this._parentMediaGroup
-                            ._parentMediaDirectory.BaseDir +
+        plannedMedia.Path = Context.LineupManager.MediaDirectory.BaseDir +
                             '/' + this.Path;
 
         return plannedMedia;

@@ -11,11 +11,9 @@ class Entity extends SerializableObject {
 
     onEvent(eventName) {
         let customAction = this.findCustomAction(eventName);
-
         if (customAction) {
-            let action = Context.LineupManager
+            let action = Context.LineupManager.RadioApp
                         .ActionManager.getAction(customAction.Action);
-
             if (action) {
                 action(this, customAction.Params);
             }

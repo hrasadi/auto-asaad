@@ -4,7 +4,7 @@ const Context = require('../../Context');
 
 const LineupManager = require('../../LineupManager');
 
-const ActionManager = require('../../lineupaction/ActionManager');
+const Raa1ActionManager = require('./lineupaction/Raa1ActionManager');
 
 const ObjectBuilder = require('../../model/ObjectBuilder');
 const StandaloneMedia = require('../../standalone/StandaloneMedia');
@@ -43,7 +43,7 @@ class Raa1 extends RadioApp {
             'ArchivePublisher': new Raa1ArchivePublisher(),
         };
 
-        this._actionManager = new ActionManager();
+        this._actionManager = new Raa1ActionManager();
 
         this._utils = new Raa1ClipUtils(this._conf);
 
