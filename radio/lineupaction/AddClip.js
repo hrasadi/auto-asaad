@@ -13,7 +13,7 @@ let addClip = (targetEntity, params) => {
         params.At = 'End';
     }
 
-    let media = Context.LineupManager.RadioApp.ObjectBuilder.buildMedia(params.Media);
+    let media = Context.RadioApp.ObjectBuilder.buildMedia(params.Media);
     media = media.plan();
     media = media.compile();
 

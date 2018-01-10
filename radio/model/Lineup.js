@@ -168,11 +168,9 @@ class Lineup extends Entity {
         }
 
         // commit all publishers
-        for (let publisherName in Context.LineupManager.RadioApp.Publishers) {
-            if (Context.LineupManager.RadioApp.Publishers
-                                    .hasOwnProperty(publisherName)) {
-                Context.LineupManager.RadioApp
-                            .Publishers[publisherName].commit();
+        for (let publisherName in Context.RadioApp.Publishers) {
+            if (Context.RadioApp.Publishers.hasOwnProperty(publisherName)) {
+                Context.RadioApp.Publishers[publisherName].commit();
             }
         }
     }
@@ -265,8 +263,7 @@ class Lineup extends Entity {
                 if (value.constructor.name === 'Box') {
                     this._boxes.push(value);
                 } else {
-                    this._boxes.push(Context.LineupManager.RadioApp
-                                        .ObjectBuilder.buildBox(value, this));
+                    this._boxes.push(Context.RadioApp.ObjectBuilder.buildBox(value, this));
                 }
             }
         }

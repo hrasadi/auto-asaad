@@ -15,9 +15,7 @@ class LineupManager {
         this._lineupTemplate = null;
     }
 
-    initiate(config, radioApp) {
-        this._radioApp = radioApp;
-
+    initiate(config) {
         // Read the template
         this._lineupTemplate = new LineupTemplate(config);
     }
@@ -119,10 +117,6 @@ class LineupManager {
 
     get BaseDate() {
         return this._baseDate;
-    }
-
-    get RadioApp() {
-        return this._radioApp;
     }
 }
 

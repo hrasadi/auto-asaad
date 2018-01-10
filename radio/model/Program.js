@@ -256,9 +256,7 @@ class ProgramPlan extends BaseProgram {
     }
 
     compile(startTimeMoment, parent) {
-        let compiledProgram = Context.LineupManager
-                                .RadioApp.ObjectBuilder
-                                .buildProgram(this, parent);
+        let compiledProgram = Context.RadioApp.ObjectBuilder.buildProgram(this, parent);
 
         let compiledPreShow = null;
         if (this.PreShowPlan) {
@@ -332,21 +330,19 @@ class Program extends BaseProgram {
 
     publish(targetDate) {
         // Publish in podcast
-        let mergedClip = Context.LineupManager.RadioApp
-                                .Utils.getPublicClip(this.Show.Clips);
-        let programToPublish = Context.LineupManager
-                                .RadioApp.ObjectBuilder.buildProgram(this);
+        let mergedClip = Context.RadioApp.Utils.getPublicClip(this.Show.Clips);
+        let programToPublish = Context.RadioApp.ObjectBuilder.buildProgram(this);
         programToPublish.Show.Clips = [mergedClip];
         programToPublish.Metadata.Duration = programToPublish.Show.Duration;
 
         if (this.Publishing.Podcast) {
-            Context.LineupManager.RadioApp.Publishers
-                    .PodcastPublisher.publish(programToPublish, targetDate);
+            Context.RadioApp.Publishers.PodcastPublisher
+                                            .publish(programToPublish, targetDate);
         }
         // Publish in Archive
         if (this.Publishing.Archive) {
-            Context.LineupManager.RadioApp.Publishers
-                    .ArchivePublisher.publish(programToPublish, targetDate);
+            Context.RadioApp.Publishers.ArchivePublisher
+                                            .publish(programToPublish, targetDate);
         }
         // Publish social feed
         if (this.Publishing.SocialListeningMode === 'Social') {
@@ -387,10 +383,8 @@ class Program extends BaseProgram {
     }
 
     split(breakAtTime, continueAtTime, breakDuration) {
-        let p1 = Context.LineupManager.RadioApp
-                            .ObjectBuilder.buildProgram(this, this._parentBox);
-        let p2 = Context.LineupManager.RadioApp
-                            .ObjectBuilder.buildProgram(this, this._parentBox);
+        let p1 = Context.RadioApp.ObjectBuilder.buildProgram(this, this._parentBox);
+        let p2 = Context.RadioApp.ObjectBuilder.buildProgram(this, this._parentBox);
 
         p1.Metadata.EndTime = moment(breakAtTime);
         p2.Metadata.StartTime = moment(continueAtTime);

@@ -119,8 +119,7 @@ class BoxPlan extends BaseBox {
     }
 
     compile(parent) {
-        let box = Context.LineupManager
-                        .RadioApp.ObjectBuilder.buildBox(this, parent);
+        let box = Context.RadioApp.ObjectBuilder.buildBox(this, parent);
         let programs = [];
 
         if (!this.ProgramPlans || this.ProgramPlans.length == 0) {
@@ -206,8 +205,7 @@ class Box extends BaseBox {
             let oldLineup = JSON.parse(fs.readFileSync(oldLineupFilePath));
             for (let oldBox of oldLineup.Boxes) {
                 if (oldBox.BoxId == this.BoxId) {
-                    this.unscheduleBox(Context.LineupManager.RadioApp
-                                            .ObjectBuilder.buildBox(oldBox));
+                    this.unscheduleBox(Context.RadioApp.ObjectBuilder.buildBox(oldBox));
                 }
             }
         }
@@ -251,8 +249,7 @@ class Box extends BaseBox {
     }
 
     injectProgram(interruptingProgram) {
-        let newBox = Context.LineupManager.RadioApp
-                        .ObjectBuilder.buildBox(this, this._parentLineup);
+        let newBox = Context.RadioApp.ObjectBuilder.buildBox(this, this._parentLineup);
         // find the program that should be interrupted
         // This is the closest program that starts
         // sooner than interrupting.
@@ -319,8 +316,7 @@ class Box extends BaseBox {
                 if (value.constructor.name == 'Program') {
                     this._programs.push(value);
                 } else {
-                    this._programs.push(Context.LineupManager.RadioApp
-                                        .ObjectBuilder.buildProgram(value, this));
+                    this._programs.push(Context.RadioApp.ObjectBuilder.buildProgram(value, this));
                 }
             }
         }

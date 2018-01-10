@@ -14,6 +14,10 @@ class RadioApp {
     get Utils() {
         return this._utils;
     }
+
+    get Config() {
+        return this._conf;
+    }
 }
 
 module.exports = RadioApp;

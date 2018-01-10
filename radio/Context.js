@@ -16,6 +16,7 @@ const Context = {
     },
     MaxPodcastEntries: 50,
     Logger: logger,
+    RadioApp: null,
     LineupManager: null,
     LineupFileNamePrefix: 'raa1',
     NoScheduling: false,

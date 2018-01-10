@@ -24,7 +24,7 @@ let say = (targetEntity, params) => {
     if (!fs.existsSync(ttsFilePath)) {
         // If not in cache, download
         let qs = {
-            'APIKey': '6M6NZPQDTTAXAXU',
+            'APIKey': Context.RadioApp.Config.Credentials.ArianaAPIKey,
             'Format': 'mp3/32/m',
         };
         qs.Text = params.Text;
