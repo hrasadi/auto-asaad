@@ -212,6 +212,17 @@ class Show extends Entity {
         }
     }
 
+    getMainClip() {
+        if (this._clips) {
+            for (let clip of this._clips) {
+                if (clip.IsMainClip) {
+                    return clip;
+                }
+            }
+            throw Error('Show does not have Main Clip');
+        }
+    }
+
     get Clips() {
         return this.getOrNull(this._clips);
     }

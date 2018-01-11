@@ -82,17 +82,6 @@ class ProgramTemplate extends BaseProgram {
     set PremiereDate(value) {
         this._premiereDate = value;
     }
-
-    /**
-     * Path to program cover image (used in feed cards and podcasts)
-     */
-    get CoverArt() {
-        return this.getOrNull(this._coverArt);
-    }
-
-    set CoverArt(value) {
-        this._coverArt = value;
-    }
 }
 class PremiereProgramTemplate extends ProgramTemplate {
     constructor(jsonOrOther, parent) {

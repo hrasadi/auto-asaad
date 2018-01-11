@@ -18,6 +18,10 @@ class RadioApp {
     get Config() {
         return this._conf;
     }
+
+    get ProgramInfoDirectory() {
+        return this._pinfoDirectory;
+    }
 }
 
 module.exports = RadioApp;

@@ -4,7 +4,6 @@ const RollingList = require('./RollingList');
 const ArchivePublisher = require('../../../publishers/ArchivePublisher');
 
 const fs = require('fs');
-const {URL} = require('url');
 
 class Raa1ArchivePublisher extends ArchivePublisher {
     constructor() {
@@ -19,8 +18,6 @@ class Raa1ArchivePublisher extends ArchivePublisher {
         } else {
             this._programDictionary = {};
         }
-
-        this._programRollingListsDict = {};
     }
 
     doPublish(program, targetDate) {
@@ -29,23 +26,25 @@ class Raa1ArchivePublisher extends ArchivePublisher {
                                     'archive/' + program.ProgramId + '.json';
         }
 
-        if (!this._programRollingListsDict[program.ProgramId]) {
-            this._programRollingListsDict[program.ProgramId] =
+        if (!this._rollingListsDict[program.ProgramId]) {
+            this._rollingListsDict[program.ProgramId] =
                     new RollingList(program.ProgramId, targetDate,
                                         Context.CWD + '/run/archive/',
                                         'unlimited');
         }
 
-        this._programRollingListsDict[program.ProgramId].addItem(program);
+        this._rollingListsDict[program.ProgramId].addItem(program);
     }
 
     commit() {
         fs.writeFileSync(this._archiveParentFilePath,
             JSON.stringify(this._programDictionary, null, 2));
 
-        for (let program in this._programRollingListsDict) {
-            if (this._programRollingListsDict.hasOwnProperty(program)) {
-                this._programRollingListsDict[program].flush();
+        for (let program in this._rollingListsDict) {
+            if (this._rollingListsDict.hasOwnProperty(program)) {
+                this._rollingListsDict[program].flush();
+                // We also publish our archives in the form of RSS
+                this.generateRSS(program, 'SingleProgram');
             }
         }
     }

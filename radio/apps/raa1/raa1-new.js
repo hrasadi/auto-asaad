@@ -23,6 +23,8 @@ class Raa1 extends RadioApp {
     constructor() {
         super();
         this._conf = JSON.parse(fs.readFileSync('./conf/raa1-new.conf'));
+        this._pinfoDirectory =
+                        JSON.parse(fs.readFileSync('./conf/raa1-pinfo-directory.conf'));
         this._manager = new LineupManager();
 
         Context.LineupManager = this._manager;
