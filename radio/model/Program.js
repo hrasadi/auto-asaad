@@ -120,6 +120,9 @@ class PremiereProgramTemplate extends ProgramTemplate {
         plannedProgram.PreShowPlan = plannedPreShow;
         plannedProgram.ShowPlan = plannedShow;
 
+        // This is where we evaluate custom action params
+        plannedProgram.evaluateCustomActionParams();
+
         return plannedProgram;
     }
 
@@ -288,6 +291,10 @@ class ProgramPlan extends BaseProgram {
             compiledProgram.Priority = 'High';
         }
         compiledProgram.Metadata = compiledProgramMetadata;
+
+        // Handle events
+        compiledProgram.onEvent('Event::CompileEnds');
+
         return compiledProgram;
     }
 
@@ -298,6 +305,18 @@ class ProgramPlan extends BaseProgram {
     pruneProgramPlan() {
         this.PreShowPlan = null;
         this.ShowPlan.pruneClipPlans();
+    }
+
+    evaluateCustomActionParam(param) {
+        let paramString = param.toString();
+
+        paramString = paramString.replace(/__desc__/gi,
+                                this.ShowPlan.getMainClip().Media.Description);
+        paramString = paramString.replace(/__sdesc__/gi,
+                                this.ShowPlan.getMainClip().Media.ShortDescription);
+        paramString = paramString.replace(/__title__/gi, this.Title);
+
+        return paramString;
     }
 
     get PreShowPlan() {

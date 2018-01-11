@@ -2,7 +2,7 @@ const {createLogger, format, transports} = require('winston');
 
 let Logger = function(logFilePath) {
   let logger = createLogger({
-    level: 'verbose',
+    level: 'debug',
     format: format.combine(
       format.json(),
       format.timestamp(),
@@ -19,13 +19,13 @@ let Logger = function(logFilePath) {
       })
     ),
     transports: [
-        new transports.File({filename: logFilePath, level: 'info'}),
+        new transports.File({filename: logFilePath, level: 'debug'}),
     ],
   });
 
   if (process.env.NODE_ENV !== 'production') {
     logger.add(new transports.Console({
-      level: 'verbose',
+      level: 'debug',
       format: format.combine(
         format.colorize(),
         format.printf((info) => {

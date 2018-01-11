@@ -53,6 +53,15 @@ class Media extends Entity {
         this._description = value;
     }
 
+    get ShortDescription() {
+        return this._shortDescription ? this._shortDescription :
+                                this.getOrNull(this._description);
+    }
+
+    set ShortDescription(value) {
+        this._shortDescription = value;
+    }
+
     get Duration() {
         return this.getOrElse(this._duration, 0.0);
     }

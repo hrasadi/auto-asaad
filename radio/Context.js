@@ -20,6 +20,7 @@ const Context = {
     LineupManager: null,
     LineupFileNamePrefix: 'raa1',
     NoScheduling: false,
+    NoTTS: false,
 };
 
 module.exports = Context;

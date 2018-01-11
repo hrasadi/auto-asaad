@@ -127,6 +127,17 @@ class ShowPlan extends Entity {
         return null;
     }
 
+    getMainClip() {
+        if (this._clipPlans) {
+            for (let clipPlan of this._clipPlans) {
+                if (clipPlan.IsMainClip) {
+                    return clipPlan;
+                }
+            }
+            throw Error('Show does not have Main Clip');
+        }
+    }
+
     /**
      * Remove clips from the show and keep only the main clip
      */

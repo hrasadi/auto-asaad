@@ -11,7 +11,7 @@ let say = (targetEntity, params) => {
     if (!params.Text) {
         Context.Logger.warn('Say action cannot be completed because the params does not' +
                             ' contain a valid \'Text\'. Params is: ' + params);
-        return null;
+        return;
     }
     if (!params.At) {
         params.At = 'End';
@@ -19,6 +19,12 @@ let say = (targetEntity, params) => {
 
     let textHash = md5(params.Text);
     let ttsFilePath = Context.CWD + '/run/tts-cache/' + textHash + '.mp3';
+
+    if (Context.NoTTS) {
+        Context.Logger.debug('Say action text is: "' + params.Text +
+                                '" with md5 hash: ' + textHash);
+        return;
+    }
 
     // Check cache first
     if (!fs.existsSync(ttsFilePath)) {
