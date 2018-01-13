@@ -1,6 +1,5 @@
-const SerializableObject = require('./SerializableObject') {
-    
-}
+const SerializableObject = require('../entities/SerializableObject');
+
 class User extends SerializableObject {
     get UserId() {
         return this.getOrNull(this._userId);
@@ -15,7 +14,7 @@ class User extends SerializableObject {
     }
 
     set DeviceType(value) {
-        this._deviceType = value;
+        this._deviceType = DeviceTypeEnum[value];
     }
 
     get IP() {
@@ -65,10 +64,16 @@ class Location {
 
     set City(value) {
         this._city = value;
-    }    
+    }
 }
+
+const DeviceTypeEnum = Object.freeze({
+    'Web': 0,
+    'iOS': 1,
+    'Android': 2,
+});
 
 module.exports = {
     'User': User,
     'Location': Location,
-}
+};
