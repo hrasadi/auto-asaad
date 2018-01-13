@@ -1,6 +1,6 @@
 const Context = require('../Context');
 
-const Clip = require('../model/Clip').Clip;
+const Clip = require('../entities/Clip').Clip;
 
 let addClip = (targetEntity, params) => {
     // Create the clip

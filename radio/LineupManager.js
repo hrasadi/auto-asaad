@@ -1,6 +1,6 @@
 const Context = require('./Context');
 
-const L = require('./model/Lineup');
+const L = require('./entities/Lineup');
 const LineupTemplate = L.LineupTemplate;
 const LineupPlan = L.LineupPlan;
 const Lineup = L.Lineup;

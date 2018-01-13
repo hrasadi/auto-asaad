@@ -6,7 +6,7 @@ const LineupManager = require('../../LineupManager');
 
 const Raa1ActionManager = require('./lineupaction/Raa1ActionManager');
 
-const ObjectBuilder = require('../../model/ObjectBuilder');
+const ObjectBuilder = require('../../entities/ObjectBuilder');
 const StandaloneMedia = require('../../standalone/StandaloneMedia');
 const StandaloneBox = require('../../standalone/StandaloneBox');
 const StandaloneProgram = require('../../standalone/StandaloneProgram');

@@ -1,4 +1,4 @@
-const SerializableObject = require('../model/SerializableObject');
+const SerializableObject = require('../entities/SerializableObject');
 
 class LivePlaybackSchedulerMeta extends SerializableObject {
     constructor(jsonOrOther) {

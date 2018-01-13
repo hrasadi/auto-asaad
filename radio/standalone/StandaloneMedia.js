@@ -1,4 +1,4 @@
-const Media = require('../model/media/Media');
+const Media = require('../entities/media/Media');
 
 const execSync = require('child_process').execSync;
 

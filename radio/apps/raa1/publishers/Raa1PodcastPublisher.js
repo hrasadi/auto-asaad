@@ -2,7 +2,7 @@ const Context = require('../../../Context');
 
 const PodcastPublisher = require('../../../publishers/PodcastPublisher');
 
-const RollingList = require('./RollingList');
+const RollingList = require('../../../publishers/RollingList');
 
 class Raa1PodcastPublisher extends PodcastPublisher {
     constructor() {

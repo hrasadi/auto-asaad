@@ -1,7 +1,7 @@
 const Context = require('../Context');
 
-const LivePlaybackSchedulerMeta = require('../model/LivePlaybackSchedulerMeta');
-const Box = require('../model/Box').Box;
+const LivePlaybackSchedulerMeta = require('../entities/LivePlaybackSchedulerMeta');
+const Box = require('../entities/Box').Box;
 
 const moment = require('moment');
 const execSync = require('child_process').execSync;

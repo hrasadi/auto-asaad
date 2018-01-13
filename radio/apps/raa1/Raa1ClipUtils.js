@@ -1,4 +1,4 @@
-const Clip = require('../../model/Clip').Clip;
+const Clip = require('../../entities/Clip').Clip;
 
 const Context = require('../../Context');
 const Utils = require('../../Utils');
@@ -14,7 +14,6 @@ class Raa1ClipUtils extends Utils {
         // Initiate AWS connection
         if (conf.Credentials.AWS) {
             AWS.config.loadFromPath(Context.CWD + '/' + conf.Credentials.AWS);
-
         }
         this.s3 = new AWS.S3();
     }
@@ -75,10 +74,13 @@ class WrappedClip {
                 this._allMediaPath = this._allMediaPath + clip.Media.Path + ' ';
                 this._duration += clip.Media.Duration;
                 if (clip.IsMainClip) {
-                    this._relativePath = clip.Media.Path.replace(Context.LineupManager.MediaDirectory.BaseDir, '');
-                    this._relativePath = this._relativePath[0] == '/' ? this._relativePath.substring(1) :
-                                                                        this._relativePath;
-                    this._name = this._relativePath.substring(this._relativePath.lastIndexOf('/'));
+                    this._relativePath = clip.Media.Path.replace(
+                                    Context.LineupManager.MediaDirectory.BaseDir, '');
+                    this._relativePath =
+                        this._relativePath[0] == '/' ? this._relativePath.substring(1) :
+                                                        this._relativePath;
+                    this._name = this._relativePath.substring(
+                                                    this._relativePath.lastIndexOf('/'));
 
                     this._publicClip = new Clip(clip);
                 }
@@ -87,16 +89,19 @@ class WrappedClip {
             this._absolutePath = this._absolutePath.replace('.mp3', '_MP3WRAP.mp3');
         } else {
             this._absolutePath = this._clips[0].Media.Path;
-            this._relativePath = this._clips[0].Media.Path.replace(Context.LineupManager.MediaDirectory.BaseDir, '');
-            this._name = this._relativePath.substring(this._relativePath.lastIndexOf('/'));
+            this._relativePath = this._clips[0].Media.Path.replace(
+                                    Context.LineupManager.MediaDirectory.BaseDir, '');
+            this._name = this._relativePath.substring(
+                                    this._relativePath.lastIndexOf('/'));
             this._duration = this._clips[0].Media.Duration;
 
             this._publicClip = new Clip(this._clips[0]);
         }
 
         let vodUrl = new URL(this._relativePath, 'http://vod.raa.media/');
-        vodUrl = 'https://api.raa.media/linkgenerator/podcast.mp3?src=' + Buffer.from(vodUrl.toString())
-                                                                                            .toString('base64');
+        vodUrl = 'https://api.raa.media/linkgenerator/podcast.mp3?src=' +
+                                                Buffer.from(vodUrl.toString())
+                                                .toString('base64');
         // Return the clip
         this._publicClip.Media.Path = vodUrl;
         this._publicClip.Media.Duration = this._duration;
@@ -104,12 +109,14 @@ class WrappedClip {
 
     wrap() {
         if (this.IsWrapped) {
-            let wrapCmd = 'echo y | mp3wrap ' + this._absolutePath + ' ' + this._allMediaPath;
+            let wrapCmd = 'echo y | mp3wrap ' + this._absolutePath +
+                            ' ' + this._allMediaPath;
 
             try {
                 execSync(wrapCmd);
             } catch (error) {
-                throw Error('Merging clips was unsuccessful. Error was: ' + error.message);
+                throw Error('Merging clips was unsuccessful. Error was: ' +
+                            error.message);
             }
         }
     }

@@ -1,6 +1,6 @@
 const Context = require('../../../Context');
 
-const RollingList = require('./RollingList');
+const RollingList = require('../../../publishers/RollingList');
 const ArchivePublisher = require('../../../publishers/ArchivePublisher');
 
 const fs = require('fs');

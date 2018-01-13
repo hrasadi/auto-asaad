@@ -1,5 +1,5 @@
-const Program = require('../model/Program').Program;
-const LivePlaybackSchedulerMeta = require('../model/LivePlaybackSchedulerMeta');
+const Program = require('../entities/Program').Program;
+const LivePlaybackSchedulerMeta = require('../entities/LivePlaybackSchedulerMeta');
 
 const Context = require('../Context');
 
