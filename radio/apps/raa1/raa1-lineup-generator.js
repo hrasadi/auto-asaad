@@ -43,15 +43,18 @@ class Raa1LineupGenerator extends LineupGenerator {
         if (program.test) {
             this._generatorOptions.TestMode = true;
         }
-        if (program['no-planning']) {
+        if (!program.planning) {
             this._generatorOptions.ActiveStages.Plan = false;
         }
-        if (program['no-tts']) {
+        if (!program.atJob) {
+            this._generatorOptions.NoAtJob = true;
+        }
+        if (!program.tts) {
             this._generatorOptions.NoTTS = true;
         }
 
-        if (program['target-date']) {
-            this._targetDate = program['target-date'];
+        if (program.targetDate) {
+            this._targetDate = program.targetDate;
         } else {
             // Current date (earliest tz on earth)
             this._targetDate = moment().tz('Pacific/Kiritimati').format('YYYY-MM-DD');
@@ -106,6 +109,8 @@ program
                                                         'and entails \'-ns\' as well')
     .option('-c --no-planning', 'Use the current plan and start from compiling stage')
     .option('-s --no-tts', 'Do not call Text-to-Speech services.')
+    .option('-j --no-at-job', 'Do not creat system jobs for boxes and interrupting ' +
+                                'programs in system (no UNIX at call)')
     .option('-d --target-date [date]', 'Target date in YYYY-MM-DD format', moment)
     .parse(process.argv);
 

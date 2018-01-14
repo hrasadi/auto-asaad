@@ -26,7 +26,8 @@ class StandaloneProgram extends Program {
                                 programIdx + ' \' | at -t ' +
                                 showStartTimeString + ' 2>&1';
 
-        if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
+        if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode ||
+            AppContext.getInstance('LineupGenerator').GeneratorOptions.NoAtJob) {
             AppContext.getInstance().Logger.debug('Program show scheduler command is: ' +
                                                         showSchedulerCmd);
         } else {
@@ -51,7 +52,8 @@ class StandaloneProgram extends Program {
                                 ' \' | at -t ' +
                                 preShowStartTimeString + ' 2>&1';
 
-            if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
+            if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode ||
+                AppContext.getInstance('LineupGenerator').GeneratorOptions.NoAtJob) {
                 AppContext.getInstance().Logger.debug('PreShow scheduler command is: ' +
                                                         preShowSchedulerCmd);
             } else {
@@ -82,7 +84,8 @@ class StandaloneProgram extends Program {
         let showUnschedulingCmd = 'atrm ' +
                                     this.LivePlaybackSchedulerMeta.ShowId;
 
-        if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
+        if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode ||
+            AppContext.getInstance('LineupGenerator').GeneratorOptions.NoAtJob) {
             if (preShowUnschedulingCmd) {
                 AppContext.getInstance().Logger.debug('PreShow unscheduler command is: ' +
                                                     preShowUnschedulingCmd);

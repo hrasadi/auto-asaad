@@ -116,9 +116,9 @@ class WrappedClip {
 
     wrap() {
         if (this.IsWrapped) {
-            let wrapCmd = 'echo y | ffmpeg -i "concat:"' + this._allMediaPath +
-                            '" -ac 2 ' + this._absolutePath;
-                            
+            let wrapCmd = 'echo y | ffmpeg -i "concat:' + this._allMediaPath +
+                            '" -ac 2 ' + this._absolutePath + ' 2>&1 >/dev/null';
+
 
             try {
                 if (AppContext.getInstance('LineupGenerator')

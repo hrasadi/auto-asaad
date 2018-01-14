@@ -24,7 +24,8 @@ class StandaloneBox extends Box {
                                     ' ' + boxIdx + '\' | at -t ' +
                                     boxStartTimeString + ' 2>&1';
 
-        if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
+        if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode ||
+            AppContext.getInstance('LineupGenerator').GeneratorOptions.NoAtJob) {
             AppContext.getInstance().Logger.debug('Box scheduler command is: ' +
                                                         boxSchedulerCmd);
         } else {
@@ -47,7 +48,8 @@ class StandaloneBox extends Box {
 
         let boxUnschedulingCmd = 'atrm ' +
                                         this.LivePlaybackSchedulerMeta.ShowId;
-        if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
+        if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode ||
+            AppContext.getInstance('LineupGenerator').GeneratorOptions.NoAtJob) {
             AppContext.getInstance().Logger.debug('Box unscheduler command is: ' +
                                                         boxUnschedulingCmd);
         } else {
