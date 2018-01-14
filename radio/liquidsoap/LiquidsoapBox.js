@@ -24,7 +24,7 @@ class LiquidsoapBox extends Box {
                                     boxStartTimeString + ' 2>&1';
 
         if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
-            AppContext.getInstance().Logger.info('Box scheduler command is: ' +
+            AppContext.getInstance().Logger.debug('Box scheduler command is: ' +
                                                         boxSchedulerCmd);
         } else {
             let ret = execSync(boxSchedulerCmd);
@@ -47,7 +47,7 @@ class LiquidsoapBox extends Box {
         let boxUnschedulingCmd = 'atrm ' +
                                         this.LivePlaybackSchedulerMeta.ShowId;
         if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
-            AppContext.getInstance().Logger.info('Box unscheduler command is: ' +
+            AppContext.getInstance().Logger.debug('Box unscheduler command is: ' +
                                                         boxUnschedulingCmd);
         } else {
             let ret = execSync(boxUnschedulingCmd);

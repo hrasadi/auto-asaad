@@ -77,7 +77,7 @@ class WrappedClip {
             this._allMediaPath = '';
 
             for (let clip of this._clips) {
-                this._allMediaPath = this._allMediaPath + clip.Media.Path + ' ';
+                this._allMediaPath = this._allMediaPath + clip.Media.Path + '|';
                 this._duration += clip.Media.Duration;
                 if (clip.IsMainClip) {
                     this._relativePath = clip.Media.Path.replace(
@@ -93,7 +93,6 @@ class WrappedClip {
                 }
             }
             this._absolutePath = AppContext.getInstance().CWD + '/run/tmp/' + this._name;
-            this._absolutePath = this._absolutePath.replace('.mp3', '_MP3WRAP.mp3');
         } else {
             this._absolutePath = this._clips[0].Media.Path;
             this._relativePath = this._clips[0].Media.Path.replace(
@@ -117,8 +116,9 @@ class WrappedClip {
 
     wrap() {
         if (this.IsWrapped) {
-            let wrapCmd = 'echo y | mp3wrap ' + this._absolutePath +
-                            ' ' + this._allMediaPath;
+            let wrapCmd = 'echo y | ffmpeg -i "concat:"' + this._allMediaPath +
+                            '" -ac 2 ' + this._absolutePath;
+                            
 
             try {
                 if (AppContext.getInstance('LineupGenerator')

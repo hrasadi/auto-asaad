@@ -27,7 +27,7 @@ class LiquidsoapProgram extends Program {
                                 showStartTimeString + ' 2>&1';
 
         if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
-            AppContext.getInstance().Logger.info('Program show scheduler command is: ' +
+            AppContext.getInstance().Logger.debug('Program show scheduler command is: ' +
                                                         showSchedulerCmd);
         } else {
             let ret = execSync(showSchedulerCmd);
@@ -52,7 +52,7 @@ class LiquidsoapProgram extends Program {
                                 preShowStartTimeString + ' 2>&1';
 
             if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
-                AppContext.getInstance().Logger.info('PreShow scheduler command is: ' +
+                AppContext.getInstance().Logger.debug('PreShow scheduler command is: ' +
                                                         preShowSchedulerCmd);
             } else {
                 let ret = execSync(preShowSchedulerCmd);
@@ -84,10 +84,10 @@ class LiquidsoapProgram extends Program {
 
         if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
             if (preShowUnschedulingCmd) {
-                AppContext.getInstance().Logger.info('PreShow unscheduler command is: ' +
+                AppContext.getInstance().Logger.debug('PreShow unscheduler command is: ' +
                                                     preShowUnschedulingCmd);
             }
-            AppContext.getInstance().Logger.info('Show unscheduler command is: ' +
+            AppContext.getInstance().Logger.debug('Show unscheduler command is: ' +
                                                         showUnschedulingCmd);
         } else {
             if (preShowUnschedulingCmd) {
