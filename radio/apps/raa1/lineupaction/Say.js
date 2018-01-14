@@ -28,27 +28,29 @@ let say = (targetEntity, params) => {
         return;
     }
 
-    // Check cache first
-    if (!fs.existsSync(ttsFilePath)) {
-        // If not in cache, download
-        let qs = {
-            'APIKey': AppContext.getInstance().Config.Credentials.ArianaAPIKey,
-            'Format': 'mp3/32/m',
-        };
-        qs.Text = params.Text;
+    if (!AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
+        // Check cache first
+        if (!fs.existsSync(ttsFilePath)) {
+            // If not in cache, download
+            let qs = {
+                'APIKey': AppContext.getInstance().Config.Credentials.ArianaAPIKey,
+                'Format': 'mp3/32/m',
+            };
+            qs.Text = params.Text;
 
-        let res = request('GET',
-                        'http://api.farsireader.com/ArianaCloudService/ReadTextGET?' +
-                        queryString.stringify(qs));
+            let res = request('GET',
+                            'http://api.farsireader.com/ArianaCloudService/ReadTextGET?' +
+                            queryString.stringify(qs));
 
-        if (res.statusCode > 400) {
-            AppContext.getInstance().Logger.warn('TTS request failed with error: ' +
-                                                            res.statusCode +
-                                                            ' ' + res.getBody());
-            return;
+            if (res.statusCode > 400) {
+                AppContext.getInstance().Logger.warn('TTS request failed with error: ' +
+                                                                res.statusCode +
+                                                                ' ' + res.getBody());
+                return;
+            }
+
+            fs.writeFileSync(ttsFilePath, res.getBody());
         }
-
-        fs.writeFileSync(ttsFilePath, res.getBody());
     }
 
     // Now having the file, append it to entity

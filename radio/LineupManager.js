@@ -12,6 +12,7 @@ class LineupManager {
     constructor() {
         // Dictionary from date to LineupPlan objects.
         this._lineupPlansCache = {};
+        this._lineupsCache = {};
         this._lineupTemplate = null;
     }
 
@@ -30,16 +31,21 @@ class LineupManager {
             this._lineupPlansCache[targetDate] =
                     this._lineupTemplate.plan(targetDate);
 
-            fs.writeFileSync(this.getLineupPlanFilePath(targetDate),
-                    JSON.stringify(this._lineupPlansCache[targetDate], null, 2));
+            if (!AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
+                fs.writeFileSync(this.getLineupPlanFilePath(targetDate),
+                        JSON.stringify(this._lineupPlansCache[targetDate], null, 2));
+            }
         }
     }
 
     compileLineup(targetDate) {
         let lineup = this.getLineupPlan(targetDate).compile();
+        this._lineupsCache[targetDate] = lineup;
 
-        fs.writeFileSync(this.getLineupFilePath(targetDate),
+        if (!AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
+            fs.writeFileSync(this.getLineupFilePath(targetDate),
                 JSON.stringify(lineup, null, 2));
+        }
     }
 
     publishLineup(targetDate) {
@@ -56,8 +62,13 @@ class LineupManager {
         if (lineup) {
             lineup.schedule(targetDate);
 
-            fs.writeFileSync(this.getScheduledLineupFilePath(targetDate),
-                                            JSON.stringify(lineup, null, 2));
+            let lineupJSON = JSON.stringify(lineup, null, 2);
+            if (!AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
+                fs.writeFileSync(
+                        this.getScheduledLineupFilePath(targetDate), lineupJSON);
+            } else {
+                AppContext.getInstance().Logger.debug(lineupJSON);
+            }
         } else {
             throw Error('Lineup not found for date ' + targetDate);
         }
@@ -103,6 +114,10 @@ class LineupManager {
 
     getLineup(targetDate) {
         // Load from file if not in memory
+        if (this._lineupsCache[targetDate]) {
+            return this._lineupsCache[targetDate];
+        }
+
         let lineupFilePath = this.getLineupFilePath(targetDate);
         if (fs.existsSync(lineupFilePath)) {
             return new Lineup(JSON.parse(fs.readFileSync(lineupFilePath)));

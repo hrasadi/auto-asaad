@@ -15,10 +15,6 @@ let addClip = (targetEntity, params) => {
         params.At = 'End';
     }
 
-    let media = AppContext.getInstance().ObjectBuilder.buildOfType(Media, params.Media);
-    media = media.plan();
-    media = media.compile();
-
     let targetProgram = null;
     if (targetEntity.constructor.name.includes('Box')) {
         // Find the program (first or last) add the clip to it
@@ -31,7 +27,14 @@ let addClip = (targetEntity, params) => {
         targetProgram = targetEntity;
     } else {
         AppContext.getInstance().Logger
-                                .warn('AddClip is currently supported for boxes only');
+                    .warn('AddClip is currently supported for boxes and programs only');
+    }
+
+    let media = AppContext.getInstance().ObjectBuilder.buildOfType(Media, params.Media);
+    media = media.plan();
+
+    if (!AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
+        media = media.compile();
     }
 
     if (targetProgram) {
