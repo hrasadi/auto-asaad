@@ -1,6 +1,6 @@
 const Entity = require('../Entity');
 
-const Context = require('../../Context');
+const AppContext = require('../../AppContext');
 
 class Media extends Entity {
     constructor(jsonOrOther, parent) {
@@ -20,14 +20,15 @@ class Media extends Entity {
         // (Object.getPrototypeOf(this)) returns
         // a new object of the same child type
         // i.e. Standalone or LiquidSoap
-        let plannedMedia = Context.RadioApp.ObjectBuilder
-                            .buildMedia(this, this._parentMediaGroup);
+        let plannedMedia = AppContext.getInstance().ObjectBuilder
+                            .buildOfType(Media, this, this._parentMediaGroup);
 
         // In some cases, we want to use a media from outside the MediaDirectory
         // (example is TTS). For these cases, we use 'IsAbsolutePath' property.
         if (!this.IsAbsolutePath) {
-            plannedMedia.Path = Context.LineupManager.MediaDirectory.BaseDir +
-                                '/' + this.Path;
+            plannedMedia.Path = AppContext.getInstance('LineupGenerator')
+                                        .LineupManager.MediaDirectory.BaseDir +
+                                        '/' + this.Path;
         }
 
         return plannedMedia;

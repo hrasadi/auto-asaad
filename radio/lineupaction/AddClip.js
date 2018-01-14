@@ -1,19 +1,21 @@
-const Context = require('../Context');
+const AppContext = require('../AppContext');
 
 const Clip = require('../entities/Clip').Clip;
+const Media = require('../entities/media/Media');
 
 let addClip = (targetEntity, params) => {
     // Create the clip
     if (!params.Media) {
-        Context.Logger.warn('AddClip cannot be completed because the params does not' +
-                                    ' contain a valid media. Params is: ' + params);
+        AppContext.getInstance().Logger
+                                .warn('AddClip cannot be completed because the params' +
+                                 'does not contain a valid media. Params is: ' + params);
         return null;
     }
     if (!params.At) {
         params.At = 'End';
     }
 
-    let media = Context.RadioApp.ObjectBuilder.buildMedia(params.Media);
+    let media = AppContext.getInstance().ObjectBuilder.buildOfType(Media, params.Media);
     media = media.plan();
     media = media.compile();
 
@@ -28,12 +30,14 @@ let addClip = (targetEntity, params) => {
     } else if (targetEntity.constructor.name.includes('Program')) {
         targetProgram = targetEntity;
     } else {
-        Context.Logger.warn('AddClip is currently supported for boxes only');
+        AppContext.getInstance().Logger
+                                .warn('AddClip is currently supported for boxes only');
     }
 
     if (targetProgram) {
-        let clipToAdd = new Clip();
+        let clipToAdd = new Clip(null, targetProgram);
         clipToAdd.Media = media;
+
         targetProgram.Show.appendClip(clipToAdd);
 
         targetProgram._parentBox.readjustTiming();

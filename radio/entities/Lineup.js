@@ -1,11 +1,12 @@
 const Entity = require('./Entity');
 
-const Context = require('../Context');
+const AppContext = require('../AppContext');
 
 const MediaDirectory = require('./media/MediaDirectory');
 
 const B = require('./Box');
 const BoxTemplate = B.BoxTemplate;
+const Box = B.Box;
 
 const moment = require('moment');
 
@@ -15,7 +16,7 @@ class LineupTemplate extends Entity {
     }
 
     plan(targetDate) {
-        Context.Logger.info('Planning lineup for ' + targetDate);
+        AppContext.getInstance().Logger.info('Planning lineup for ' + targetDate);
 
         let lineupPlan = new LineupPlan();
 
@@ -46,7 +47,8 @@ class LineupTemplate extends Entity {
     }
 
     get Version() {
-        return this.getOrElse(this.value, Context.Defaults.Version);
+        return this.getOrElse(this.value, AppContext.getInstance('LineupGenerator')
+                                                                    .Defaults.Version);
     }
 
     set Version(value) {
@@ -89,6 +91,9 @@ class LineupPlan extends Entity {
         // manually validate the compiled lineup
         lineup.validate();
 
+        // Handle events
+        lineup.onEvent('Event::CompileEnds');
+
         return lineup;
     }
 
@@ -113,7 +118,8 @@ class LineupPlan extends Entity {
     }
 
     get Version() {
-        return this.getOrElse(this._version, Context.Defaults.Version);
+        return this.getOrElse(this._version, AppContext.getInstance('LineupGenerator')
+                                                                    .Defaults.Version);
     }
 
     set Version(value) {
@@ -168,9 +174,11 @@ class Lineup extends Entity {
         }
 
         // commit all publishers
-        for (let publisherName in Context.RadioApp.Publishers) {
-            if (Context.RadioApp.Publishers.hasOwnProperty(publisherName)) {
-                Context.RadioApp.Publishers[publisherName].commit();
+        for (let publisherName in AppContext.getInstance('LineupGenerator').Publishers) {
+            if (AppContext.getInstance('LineupGenerator')
+                                        .Publishers.hasOwnProperty(publisherName)) {
+                AppContext.getInstance('LineupGenerator')
+                                        .Publishers[publisherName].commit();
             }
         }
     }
@@ -180,6 +188,8 @@ class Lineup extends Entity {
      * @param {String} targetDate The date for which we are scheduling lineup
      */
     schedule(targetDate) {
+        this.onEvent('Event::ScheduleBegins');
+
         this.fixFloatingBoxes();
         this.validate();
 
@@ -252,6 +262,13 @@ class Lineup extends Entity {
         this.Boxes.splice(floatingBoxIdx, 1);
     }
 
+    onEvent(eventName) {
+        for (let box of this._boxes) {
+            box.onEvent(eventName);
+        }
+        this.onEvent0(eventName);
+    }
+
     get Boxes() {
         return this.getOrElse(this._boxes, []);
     }
@@ -263,14 +280,18 @@ class Lineup extends Entity {
                 if (value.constructor.name === 'Box') {
                     this._boxes.push(value);
                 } else {
-                    this._boxes.push(Context.RadioApp.ObjectBuilder.buildBox(value, this));
+                    this._boxes.push(AppContext
+                                        .getInstance().ObjectBuilder
+                                        .buildOfType(Box, value, this));
                 }
             }
         }
     }
 
     get Version() {
-        return this.getOrElse(this._version, Context.Defaults.Version);
+        return this.getOrElse(this._version, AppContext
+                                                    .getInstance('LineupGenerator')
+                                                    .Defaults.Version);
     }
 
     set Version(value) {

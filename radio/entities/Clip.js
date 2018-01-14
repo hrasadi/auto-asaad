@@ -1,9 +1,11 @@
 const Entity = require('./Entity');
 
-const Context = require('../Context');
+const AppContext = require('../AppContext');
 
 const C = require('./media/Counter');
 const Counter = C.Counter;
+
+const Media = require('./media/Media');
 
 const moment = require('moment');
 
@@ -48,7 +50,8 @@ class ClipTemplate extends BaseClip {
         // If the point is in future, the counter should be immutable
         let futureOffset =
             moment(targetDate)
-                .diff(moment(Context.LineupManager.BaseDate), 'days');
+                .diff(moment(AppContext.getInstance('LineupGenerator')
+                                        .LineupManager.BaseDate), 'days');
 
         // immutable if in future
         let counter = Counter.createCounter(this.IteratorPolicy,
@@ -129,7 +132,8 @@ class ClipPlan extends BaseClip {
      */
     set Media(value) {
         if (value) {
-            this._media = Context.RadioApp.ObjectBuilder.buildMedia(value);
+            this._media = AppContext.getInstance().ObjectBuilder
+                                                    .buildOfType(Media, value);
         }
     }
 }
@@ -145,7 +149,8 @@ class Clip extends BaseClip {
 
     set Media(value) {
         if (value) {
-            this._media = Context.RadioApp.ObjectBuilder.buildMedia(value);
+            this._media = AppContext.getInstance().ObjectBuilder
+                                                    .buildOfType(Media, value);
         }
     }
 

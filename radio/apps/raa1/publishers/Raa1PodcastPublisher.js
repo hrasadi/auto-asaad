@@ -1,4 +1,4 @@
-const Context = require('../../../Context');
+const AppContext = require('../../../AppContext');
 
 const PodcastPublisher = require('../../../publishers/PodcastPublisher');
 
@@ -15,8 +15,9 @@ class Raa1PodcastPublisher extends PodcastPublisher {
         if (!this._rollingListsDict[feedName]) {
             this._rollingListsDict[feedName] =
                     new RollingList(feedName, targetDate,
-                                        Context.CWD + '/run/podcast/',
-                                        Context.MaxPodcastEntries);
+                                    AppContext.getInstance().CWD + '/run/podcast/',
+                                    AppContext.getInstance('LineupGenerator')
+                                                                    .MaxPodcastEntries);
         }
 
         this._rollingListsDict[feedName].addItem(program);

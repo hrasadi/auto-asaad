@@ -1,4 +1,4 @@
-const Context = require('./Context');
+const AppContext = require('./AppContext');
 
 const L = require('./entities/Lineup');
 const LineupTemplate = L.LineupTemplate;
@@ -31,8 +31,7 @@ class LineupManager {
                     this._lineupTemplate.plan(targetDate);
 
             fs.writeFileSync(this.getLineupPlanFilePath(targetDate),
-                    JSON.stringify(this._lineupPlansCache[targetDate],
-                        null, 2));
+                    JSON.stringify(this._lineupPlansCache[targetDate], null, 2));
         }
     }
 
@@ -65,23 +64,23 @@ class LineupManager {
     }
 
     getLineupFileName(targetDate) {
-        return Context.LineupFileNamePrefix +
-                '-' + targetDate;
+        return AppContext.getInstance('LineupGenerator').LineupFileNamePrefix +
+                                                                    '-' + targetDate;
     }
 
     getLineupPlanFilePath(targetDate) {
-        return Context.CWD + '/run/lineup/' +
-            this.getLineupFileName(targetDate) + '.planned.json';
+        return AppContext.getInstance().CWD + '/run/lineup/' +
+                                this.getLineupFileName(targetDate) + '.planned.json';
     }
 
     getLineupFilePath(targetDate) {
-        return Context.CWD + '/run/lineup/' +
-            this.getLineupFileName(targetDate) + '.json';
+        return AppContext.getInstance().CWD + '/run/lineup/' +
+                                this.getLineupFileName(targetDate) + '.json';
     }
 
     getScheduledLineupFilePath(targetDate) {
-        return Context.CWD + '/run/lineup/' +
-            this.getLineupFileName(targetDate) + '.json.scheduled';
+        return AppContext.getInstance().CWD + '/run/lineup/' +
+                                this.getLineupFileName(targetDate) + '.json.scheduled';
     }
 
     getLineupPlan(targetDate) {

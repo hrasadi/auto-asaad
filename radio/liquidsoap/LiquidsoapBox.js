@@ -6,15 +6,14 @@ const Box = require('../entities/Box').Box;
 const moment = require('moment');
 const execSync = require('child_process').execSync;
 
-class StandaloneBox extends Box {
+class LiquidsoapBox extends Box {
     constructor(jsonOrOther) {
         super(jsonOrOther);
     }
 
     doScheduleBox(targetDate, boxIdx) {
-        let lineupFilePath = AppContext.getInstance('LineupGenerator')
-                                                .LineupManager
-                                                .getScheduledLineupFilePath(targetDate);
+        let lineupFilePath = AppContext.getInstance('LineupGenerator').LineupManager
+                                .getScheduledLineupFilePath(targetDate);
 
         let boxStartTimeString = moment(this.StartTime)
                                         .format('YYYYMMDDHHmm.ss');
@@ -61,4 +60,4 @@ class StandaloneBox extends Box {
     }
 }
 
-module.exports = StandaloneBox;
+module.exports = LiquidsoapBox;

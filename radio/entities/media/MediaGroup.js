@@ -2,7 +2,7 @@ const Entity = require('../Entity');
 
 const Media = require('./Media');
 
-const Context = require('../../Context');
+const AppContext = require('../../AppContext');
 
 const fs = require('fs');
 
@@ -17,7 +17,8 @@ class MediaGroup extends Entity {
 
     deflatePartial() {
         if (this.PartialConfigFilePath) {
-            let partialConfigFilePrefix = Context.CWD + '/conf/partials/';
+            let partialConfigFilePrefix = AppContext.getInstance().CWD +
+                                                                '/conf/partials/';
 
             let mediaInPartial = JSON.parse(
                 fs.readFileSync(partialConfigFilePrefix +

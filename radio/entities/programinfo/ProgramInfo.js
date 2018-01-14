@@ -1,6 +1,6 @@
 const SerializableObject = require('../SerializableObject');
 
-const Context = require('../../Context');
+const AppContext = require('../../AppContext');
 
 const fs = require('fs');
 
@@ -13,7 +13,8 @@ class ProgramInfo extends SerializableObject {
 
     deflateProgramInfo() {
         if (this.ProgramInfoFilePath) {
-            let absPath = Context.CWD + '/conf/pinfo/' + this.ProgramInfoFilePath;
+            let absPath = AppContext.getInstance().CWD + '/conf/pinfo/' +
+                                                         this.ProgramInfoFilePath;
             let pInfoJSON = JSON.parse(fs.readFileSync(absPath));
             Object.assign(this, pInfoJSON);
         }

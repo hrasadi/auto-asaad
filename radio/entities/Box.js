@@ -1,12 +1,13 @@
 const Entity = require('./Entity');
 
-const Context = require('../Context');
+const AppContext = require('../AppContext');
 
 const Schedule = require('./Schedule');
 
 const LivePlaybackSchedulerMeta = require('./LivePlaybackSchedulerMeta');
 const P = require('./Program');
 const ProgramTemplate = P.ProgramTemplate;
+const Program = P.Program;
 
 const fs = require('fs');
 const moment = require('moment');
@@ -119,7 +120,8 @@ class BoxPlan extends BaseBox {
     }
 
     compile(parent) {
-        let box = Context.RadioApp.ObjectBuilder.buildBox(this, parent);
+        let box = AppContext.getInstance()
+                            .ObjectBuilder.buildOfType(Box, this, parent);
         let programs = [];
 
         if (!this.ProgramPlans || this.ProgramPlans.length == 0) {
@@ -187,7 +189,7 @@ class Box extends BaseBox {
     }
 
     readjustTiming() {
-        for (let program of this._programs) {
+        for (let program of this.Programs) {
             program.readjustTiming();
         }
 
@@ -196,16 +198,15 @@ class Box extends BaseBox {
 
 
     schedule(targetDate, boxIdx) {
-        this.onEvent('Event::ScheduleBegins');
-
-        let oldLineupFilePath = Context.LineupManager
-                            .getScheduledLineupFilePath(targetDate);
+        let oldLineupFilePath = AppContext.getInstance('LineupGenerator').LineupManager
+                                            .getScheduledLineupFilePath(targetDate);
 
         if (fs.existsSync(oldLineupFilePath)) {
             let oldLineup = JSON.parse(fs.readFileSync(oldLineupFilePath));
             for (let oldBox of oldLineup.Boxes) {
                 if (oldBox.BoxId == this.BoxId) {
-                    this.unscheduleBox(Context.RadioApp.ObjectBuilder.buildBox(oldBox));
+                    this.unscheduleBox(AppContext.getInstance()
+                                                .ObjectBuilder.buildOfType(Box, oldBox));
                 }
             }
         }
@@ -218,7 +219,6 @@ class Box extends BaseBox {
         // only to have high priority programs
         for (let i = 0; i < this.Programs.length; i++) {
             if (this.Programs[i].Priority == 'High') {
-                console.log(boxIdx + ' ' + i);
                 this.Programs[i].schedule(targetDate, boxIdx, i);
             }
         }
@@ -249,7 +249,8 @@ class Box extends BaseBox {
     }
 
     injectProgram(interruptingProgram) {
-        let newBox = Context.RadioApp.ObjectBuilder.buildBox(this, this._parentLineup);
+        let newBox = AppContext.getInstance()
+                            .ObjectBuilder.buildOfType(Box, this, this._parentLineup);
         // find the program that should be interrupted
         // This is the closest program that starts
         // sooner than interrupting.
@@ -300,6 +301,13 @@ class Box extends BaseBox {
         }
     }
 
+    onEvent(eventName) {
+        for (let program of this._programs) {
+            program.onEvent(eventName);
+        }
+        this.onEvent0(eventName);
+    }
+
     get Programs() {
         return this.getOrNull(this._programs);
     }
@@ -316,7 +324,8 @@ class Box extends BaseBox {
                 if (value.constructor.name == 'Program') {
                     this._programs.push(value);
                 } else {
-                    this._programs.push(Context.RadioApp.ObjectBuilder.buildProgram(value, this));
+                    this._programs.push(AppContext.getInstance()
+                                        .ObjectBuilder.buildOfType(Program, value, this));
                 }
             }
         }

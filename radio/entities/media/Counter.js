@@ -1,4 +1,4 @@
-const Context = require('../../Context');
+const AppContext = require('../../AppContext');
 
 const fs = require('fs');
 
@@ -16,7 +16,7 @@ class Counter {
         this._maxValue = maxValue;
         this._immutable = immutable;
 
-        this._counterFilePath = Context.CWD +
+        this._counterFilePath = AppContext.getInstance().CWD +
             '/run/counter/' + this._counterId + '.counter';
         this._counterValue = 0;
         this._tag = -1;

@@ -2,18 +2,22 @@ const SerializableObject = require('./SerializableObject');
 
 const CustomAction = require('./CustomAction');
 
-const Context = require('../Context');
+const AppContext = require('../AppContext');
 
 class Entity extends SerializableObject {
     constructor(jsonOrOther) {
         super(jsonOrOther);
     }
 
-    onEvent(eventName) {
+    // Implemented in subclasses
+    onEvent() {
+    }
+
+    onEvent0(eventName) {
         let customActions = this.findCustomAction(eventName);
         if (customActions) {
             for (let customAction of customActions) {
-                let action = Context.RadioApp.ActionManager
+                let action = AppContext.getInstance('LineupGenerator').ActionManager
                                         .getAction(customAction.Action);
                 if (action) {
                     action(this, customAction.Params);
@@ -61,7 +65,6 @@ class Entity extends SerializableObject {
     set CustomActions(values) {
         if (values) {
             this._customActions = [];
-            this._
             for (let value of values) {
                 this._customActions.push(new CustomAction(value));
             }

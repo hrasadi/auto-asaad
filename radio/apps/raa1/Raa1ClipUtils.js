@@ -1,6 +1,6 @@
 const Clip = require('../../entities/Clip').Clip;
 
-const Context = require('../../Context');
+const AppContext = require('../../AppContext');
 const Utils = require('../../Utils');
 
 const AWS = require('aws-sdk');
@@ -13,7 +13,8 @@ class Raa1ClipUtils extends Utils {
         super(conf);
         // Initiate AWS connection
         if (conf.Credentials.AWS) {
-            AWS.config.loadFromPath(Context.CWD + '/' + conf.Credentials.AWS);
+            AWS.config.loadFromPath(AppContext.getInstance().CWD +
+                                    '/' + conf.Credentials.AWS);
         }
         this.s3 = new AWS.S3();
     }
@@ -28,25 +29,30 @@ class Raa1ClipUtils extends Utils {
         };
         wrappedClip.wrap();
 
-        ((w) => {
-            fs.readFile(w.AbsolutePath, (err, data) => {
-                if (err) {
-                    throw Error('Error reading merged file. Exception is: ' + err);
-                }
-                uploadParams.Body = data;
-                this.s3.putObject(uploadParams, (err, data) => {
+        if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
+            AppContext.getInstance().Logger.debug('S3 upload key is: ' +
+                                                    wrappedClip.RelativePath);
+        } else {
+            ((w) => {
+                fs.readFile(w.AbsolutePath, (err, data) => {
                     if (err) {
-                        Context.Logger.error(
-                                'Error uploading file to S3. Error is: ' + err);
-                    } else {
-                        // Remove the temp file
-                        if (w.IsWrapped) {
-                            fs.unlinkSync(w.AbsolutePath);
-                        }
+                        throw Error('Error reading merged file. Exception is: ' + err);
                     }
+                    uploadParams.Body = data;
+                    this.s3.putObject(uploadParams, (err, data) => {
+                        if (err) {
+                            AppContext.getInstance().Logger.error(
+                                    'Error uploading file to S3. Error is: ' + err);
+                        } else {
+                            // Remove the temp file
+                            if (w.IsWrapped) {
+                                fs.unlinkSync(w.AbsolutePath);
+                            }
+                        }
+                    });
                 });
-            });
-        })(wrappedClip);
+            })(wrappedClip);
+        }
 
         return wrappedClip.PublicClip;
     }
@@ -75,7 +81,8 @@ class WrappedClip {
                 this._duration += clip.Media.Duration;
                 if (clip.IsMainClip) {
                     this._relativePath = clip.Media.Path.replace(
-                                    Context.LineupManager.MediaDirectory.BaseDir, '');
+                                    AppContext.getInstance('LineupGenerator')
+                                    .LineupManager.MediaDirectory.BaseDir, '');
                     this._relativePath =
                         this._relativePath[0] == '/' ? this._relativePath.substring(1) :
                                                         this._relativePath;
@@ -85,12 +92,13 @@ class WrappedClip {
                     this._publicClip = new Clip(clip);
                 }
             }
-            this._absolutePath = Context.CWD + '/run/tmp/' + this._name;
+            this._absolutePath = AppContext.getInstance().CWD + '/run/tmp/' + this._name;
             this._absolutePath = this._absolutePath.replace('.mp3', '_MP3WRAP.mp3');
         } else {
             this._absolutePath = this._clips[0].Media.Path;
             this._relativePath = this._clips[0].Media.Path.replace(
-                                    Context.LineupManager.MediaDirectory.BaseDir, '');
+                                    AppContext.getInstance('LineupGenerator')
+                                    .LineupManager.MediaDirectory.BaseDir, '');
             this._name = this._relativePath.substring(
                                     this._relativePath.lastIndexOf('/'));
             this._duration = this._clips[0].Media.Duration;
@@ -113,7 +121,13 @@ class WrappedClip {
                             ' ' + this._allMediaPath;
 
             try {
-                execSync(wrapCmd);
+                if (AppContext.getInstance('LineupGenerator')
+                                        .GeneratorOptions.TestMode) {
+                    AppContext.getInstance().Logger.debug(
+                                            'Clip wrapping cmd is: ' + wrapCmd);
+                } else {
+                    execSync(wrapCmd);
+                }
             } catch (error) {
                 throw Error('Merging clips was unsuccessful. Error was: ' +
                             error.message);

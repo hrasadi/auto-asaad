@@ -1,4 +1,4 @@
-const Context = require('../../../Context');
+const AppContext = require('../../../AppContext');
 
 const RollingList = require('../../../publishers/RollingList');
 const ArchivePublisher = require('../../../publishers/ArchivePublisher');
@@ -10,7 +10,7 @@ class Raa1ArchivePublisher extends ArchivePublisher {
         super();
 
         this._archiveParentFilePath =
-                        Context.CWD + '/run/archive/raa1-archive.json';
+                        AppContext.getInstance().CWD + '/run/archive/raa1-archive.json';
 
         if (fs.existsSync(this._archiveParentFilePath)) {
             this._programDictionary = JSON.parse(
@@ -29,7 +29,7 @@ class Raa1ArchivePublisher extends ArchivePublisher {
         if (!this._rollingListsDict[program.ProgramId]) {
             this._rollingListsDict[program.ProgramId] =
                     new RollingList(program.ProgramId, targetDate,
-                                        Context.CWD + '/run/archive/',
+                                        AppContext.getInstance().CWD + '/run/archive/',
                                         'unlimited');
         }
 

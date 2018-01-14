@@ -1,6 +1,6 @@
 const addClip = require('../../../lineupaction/AddClip');
 
-const Context = require('../../../Context');
+const AppContext = require('../../../AppContext');
 
 const request = require('sync-request');
 const queryString = require('query-string');
@@ -9,8 +9,9 @@ const md5 = require('md5');
 
 let say = (targetEntity, params) => {
     if (!params.Text) {
-        Context.Logger.warn('Say action cannot be completed because the params does not' +
-                            ' contain a valid \'Text\'. Params is: ' + params);
+        AppContext.getInstance().Logger.warn(
+                            'Say action cannot be completed because the params' +
+                            'does not contain a valid \'Text\'. Params is: ' + params);
         return;
     }
     if (!params.At) {
@@ -18,10 +19,11 @@ let say = (targetEntity, params) => {
     }
 
     let textHash = md5(params.Text);
-    let ttsFilePath = Context.CWD + '/run/tts-cache/' + textHash + '.mp3';
+    let ttsFilePath = AppContext.getInstance().CWD +
+                                    '/run/tts-cache/' + textHash + '.mp3';
 
-    if (Context.NoTTS) {
-        Context.Logger.debug('Say action text is: "' + params.Text +
+    if (AppContext.getInstance('LineupGenerator').GeneratorOptions.NoTTS) {
+        AppContext.getInstance().Logger.debug('Say action text is: "' + params.Text +
                                 '" with md5 hash: ' + textHash);
         return;
     }
@@ -30,7 +32,7 @@ let say = (targetEntity, params) => {
     if (!fs.existsSync(ttsFilePath)) {
         // If not in cache, download
         let qs = {
-            'APIKey': Context.RadioApp.Config.Credentials.ArianaAPIKey,
+            'APIKey': AppContext.getInstance().Config.Credentials.ArianaAPIKey,
             'Format': 'mp3/32/m',
         };
         qs.Text = params.Text;
@@ -40,8 +42,9 @@ let say = (targetEntity, params) => {
                         queryString.stringify(qs));
 
         if (res.statusCode > 400) {
-            Context.Logger.warn('TTS request failed with error: ' + res.statusCode +
-                                                                ' ' + res.getBody());
+            AppContext.getInstance().Logger.warn('TTS request failed with error: ' +
+                                                            res.statusCode +
+                                                            ' ' + res.getBody());
             return;
         }
 

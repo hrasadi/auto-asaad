@@ -1,6 +1,6 @@
 const Entity = require('./Entity');
 
-const Context = require('../Context');
+const AppContext = require('../AppContext');
 
 class Publishing extends Entity {
     constructor(jsonOrOther) {
@@ -8,7 +8,7 @@ class Publishing extends Entity {
     }
 
     validate() {
-        if (this.SocialListeningMode === 'Personal' &&
+        if (this.CollaborativeListeningFeed === 'Personal' &&
                 !this.PersonalSchedulingHandler) {
             throw Error('Personal listening mode requires ' +
                 'PersonalSchudulingHandler property to be set.');
@@ -32,24 +32,26 @@ class Publishing extends Entity {
     }
 
     get PodcastFeed() {
-        return this.getOrElse(this._podcastFeed,
-         Object.assign({}, Context.Defaults.Publishing.PodcastFeed));
+        let defaultFeed = this._podcast ?
+                            AppContext.getInstance('LineupGenerator')
+                            .Defaults.Publishing.PodcastFeed : null;
+        return this.getOrElse(this._podcastFeed, defaultFeed);
     }
 
     set PodcastFeed(value) {
         this._podcastFeed = value;
     }
 
-    get SocialListeningMode() {
-        return this.getOrElse(this._socialListeningMode, 'None');
+    get CollaborativeListeningFeed() {
+        return this.getOrElse(this._collaborativeListeningFeed, 'None');
     }
 
-    set SocialListeningMode(value) {
-        if (value && !['Social', 'Personal', 'None'].includes(value)) {
-            throw Error('Invalid Social Listening mode.' +
-                'Acceptable values are "Social", "Personal" and "None"');
+    set CollaborativeListeningFeed(value) {
+        if (value && !['Public', 'Personal', 'None'].includes(value)) {
+            throw Error('Invalid CollaborativeListening feed.' +
+                'Acceptable values are "Public", "Personal" and "None"');
         }
-        this._socialListeningMode = value;
+        this._collaborativeListeningFeed = value;
     }
 
     get PersonalSchedulingHandler() {
@@ -60,25 +62,30 @@ class Publishing extends Entity {
         this._personalSchedulingHandler = value;
     }
 
-    get SocialListeningProps() {
-        return this.getOrElse(this._socialListeningProps,
-         Object.assign({}, Context.Defaults.Publishing.SocialListeningProps));
+    get ColloborativeListeningProps() {
+        let defaultCLProps = this._collaborativeListeningFeed !== 'None' ?
+                            Object.assign({}, AppContext.getInstance('LineupGenerator')
+                            .Defaults.Publishing.ColloborativeListening) : null;
+        return this.getOrElse(this._collaborativeListeningProps, defaultCLProps);
     }
 
-    set SocialListeningProps(value) {
+    set ColloborativeListeningProps(value) {
         if (!value) {
             value = {};
         }
 
         value.DefaultLife = value.DefaultLife ?
-            Context.Defaults.Publishing.SocialListeningProps.DefaultLife :
+            AppContext.getInstance('LineupGenerator')
+                    .Defaults.Publishing.ColloborativeListening.DefaultLife :
             value.DefaultLife;
         value.MaxLife = value.MaxLife ?
-            Context.Defaults.Publishing.SocialListeningProps.MaxLife :
+            AppContext.getInstance('LineupGenerator')
+                    .Defaults.Publishing.ColloborativeListening.MaxLife :
             value.MaxLife;
-        value.VoteEffect = value.VoteEffect ?
-            Context.Defaults.Publishing.SocialListeningProps.VoteBonus :
-            value.VoteBonus;
+        value.UpvoteBonus = value.UpvoteBonus ?
+            AppContext.getInstance('LineupGenerator')
+                    .Defaults.Publishing.ColloborativeListening.UpvoteBonus :
+            value.UpvoteBonus;
 
         this._value = value;
     }

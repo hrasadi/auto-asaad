@@ -1,6 +1,6 @@
 const Entity = require('./Entity');
 
-const Context = require('../Context');
+const AppContext = require('../AppContext');
 
 const Publishing = require('./Publishing');
 
@@ -150,7 +150,7 @@ class ReplayProgramTemplate extends ProgramTemplate {
         // If offset == 0, we are replaying from today
         let originalAiringLineupPlan =
                 !this.OriginalAiringOffset ? parent._parentLineupPlan :
-                Context.LineupManager
+                AppContext.getInstance('LineupGenerator').LineupManager
                 .getLineupPlan(originalAiringDate);
 
         if (!originalAiringLineupPlan ||
@@ -248,7 +248,8 @@ class ProgramPlan extends BaseProgram {
     }
 
     compile(startTimeMoment, parent) {
-        let compiledProgram = Context.RadioApp.ObjectBuilder.buildProgram(this, parent);
+        let compiledProgram = AppContext.getInstance().ObjectBuilder
+                                            .buildOfType(Program, this, parent);
 
         let compiledPreShow = null;
         if (this.PreShowPlan) {
@@ -280,9 +281,6 @@ class ProgramPlan extends BaseProgram {
             compiledProgram.Priority = 'High';
         }
         compiledProgram.Metadata = compiledProgramMetadata;
-
-        // Handle events
-        compiledProgram.onEvent('Event::CompileEnds');
 
         return compiledProgram;
     }
@@ -337,25 +335,33 @@ class Program extends BaseProgram {
     }
 
     publish(targetDate) {
+        // Program is not being published
+        if (!this.Publishing.Podcast && !this.Publishing.Archive &&
+            this.Publishing.CollaborativeListeningFeed === 'None') {
+            return;
+        }
+
         // Publish in podcast
-        let mergedClip = Context.RadioApp.Utils.getPublicClip(this.Show.Clips);
-        let programToPublish = Context.RadioApp.ObjectBuilder.buildProgram(this);
+        let mergedClip = AppContext.getInstance('LineupGenerator')
+                                            .Utils.getPublicClip(this.Show.Clips);
+        let programToPublish = AppContext.getInstance().ObjectBuilder
+                                                        .buildOfType(Program, this);
         programToPublish.Show.Clips = [mergedClip];
         programToPublish.Metadata.Duration = programToPublish.Show.Duration;
 
         if (this.Publishing.Podcast) {
-            Context.RadioApp.Publishers.PodcastPublisher
+            AppContext.getInstance('LineupGenerator').Publishers.PodcastPublisher
                                             .publish(programToPublish, targetDate);
         }
         // Publish in Archive
         if (this.Publishing.Archive) {
-            Context.RadioApp.Publishers.ArchivePublisher
+            AppContext.getInstance('LineupGenerator').Publishers.ArchivePublisher
                                             .publish(programToPublish, targetDate);
         }
-        // Publish social feed
-        if (this.Publishing.SocialListeningMode === 'Social') {
+        // Publish  feed
+        if (this.Publishing.CollaborativeListeningFeed === 'Public') {
 
-        } else if (this.Publishing.SocialListeningMode === 'Social') {
+        } else if (this.Publishing.CollaborativeListeningFeed === 'Personal') {
             // Schedule for personal feed
 
         }
@@ -391,8 +397,10 @@ class Program extends BaseProgram {
     }
 
     split(breakAtTime, continueAtTime, breakDuration) {
-        let p1 = Context.RadioApp.ObjectBuilder.buildProgram(this, this._parentBox);
-        let p2 = Context.RadioApp.ObjectBuilder.buildProgram(this, this._parentBox);
+        let p1 = AppContext.getInstance().ObjectBuilder
+                            .buildOfType(Program, this, this._parentBox);
+        let p2 = AppContext.getInstance().ObjectBuilder
+                            .buildOfType(Program, this, this._parentBox);
 
         p1.Metadata.EndTime = moment(breakAtTime);
         p2.Metadata.StartTime = moment(continueAtTime);
@@ -402,6 +410,10 @@ class Program extends BaseProgram {
         p2.Title = 'ادامه‌ی ' + p2.Title;
 
         return [p1, p2];
+    }
+
+    onEvent(eventName) {
+        this.onEvent0(eventName);
     }
 
     get PreShow() {

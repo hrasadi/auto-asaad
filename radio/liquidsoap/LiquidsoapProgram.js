@@ -6,7 +6,7 @@ const AppContext = require('../AppContext');
 const moment = require('moment');
 const execSync = require('child_process').execSync;
 
-class StandaloneProgram extends Program {
+class LiquidsoapProgram extends Program {
     constructor(jsonOrOther, parent) {
         super(jsonOrOther, parent);
     }
@@ -109,4 +109,4 @@ class StandaloneProgram extends Program {
     }
 }
 
-module.exports = StandaloneProgram;
+module.exports = LiquidsoapProgram;

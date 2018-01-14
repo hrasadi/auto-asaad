@@ -1,4 +1,4 @@
-const Context = require('../Context');
+const AppContext = require('../AppContext');
 
 const RSS = require('rss');
 
@@ -18,7 +18,8 @@ class Publisher {
     }
 
     generateRSS(feedName, feedMode) {
-        let feedRSSFilePath = Context.CWD + '/run/rss/' + feedName + '.xml';
+        let feedRSSFilePath = AppContext.getInstance().CWD +
+                                        '/run/rss/' + feedName + '.xml';
 
         let feed = this.createFeedGenerator(feedName, feedMode);
         if (this._rollingListsDict[feedName].Items) {
@@ -37,10 +38,13 @@ class Publisher {
                             'است که امکان پخش عمومی آن‌ها برای ما وجود داشته است.';
 
       if (feedMode == 'SingleProgram') {
-        if (Context.RadioApp.ProgramInfoDirectory.ProgramInfos[feedName]) {
-          if (Context.RadioApp.ProgramInfoDirectory.ProgramInfos[feedName].About) {
+        if (AppContext.getInstance('LineupGenerator')
+                      .ProgramInfoDirectory.ProgramInfos[feedName]) {
+          if (AppContext.getInstance('LineupGenerator')
+                      .ProgramInfoDirectory.ProgramInfos[feedName].About) {
             feedDescription =
-                  Context.RadioApp.ProgramInfoDirectory.ProgramInfos[feedName].About;
+                  AppContext.getInstance('LineupGenerator')
+                      .ProgramInfoDirectory.ProgramInfos[feedName].About;
           }
         }
       }
@@ -87,8 +91,9 @@ class Publisher {
 
     getRSSItem(program, feedMode) {
         let displayThumbnail = null;
-        if (Context.RadioApp.ProgramInfoDirectory[program.ProgramId]) {
-            displayThumbnail = Context.RadioApp
+        if (AppContext.getInstance('LineupGenerator')
+                      .ProgramInfoDirectory[program.ProgramId]) {
+          displayThumbnail = AppContext.getInstance('LineupGenerator')
                             .ProgramInfoDirectory[program.ProgramId].Thumbnail;
         } else {
             displayThumbnail = 'http://raa.media/img/raa-cover-itunes.png';
