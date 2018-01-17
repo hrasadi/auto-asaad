@@ -1,6 +1,7 @@
 const Entity = require('./Entity');
 
 const AppContext = require('../AppContext');
+const DateUtils = require('../DateUtils');
 
 const Publishing = require('./Publishing');
 
@@ -143,9 +144,8 @@ class ReplayProgramTemplate extends ProgramTemplate {
 
     plan(targetDate, parent) {
         let originalAiringDate =
-                moment(targetDate)
-                .subtract(this.OriginalAiringOffset, 'days')
-                .format('YYYY-MM-DD');
+                DateUtils.getDateString(moment(targetDate)
+                .subtract(this.OriginalAiringOffset, 'days'));
 
         // If offset == 0, we are replaying from today
         let originalAiringLineupPlan =

@@ -1,4 +1,5 @@
 const Logger = require('../../../logger');
+const DateUtils = require('../../DateUtils');
 
 const ObjectBuilder = require('../../entities/ObjectBuilder');
 const LineupGenerator = require('../../LineupGenerator');
@@ -57,7 +58,7 @@ class Raa1LineupGenerator extends LineupGenerator {
             this._targetDate = program.targetDate;
         } else {
             // Current date (earliest tz on earth)
-            this._targetDate = moment().tz('Pacific/Kiritimati').format('YYYY-MM-DD');
+            this._targetDate = DateUtils.getTodayString();
         }
 
         this._generatorOptions.PlanAheadDays = 5;
