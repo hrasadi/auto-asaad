@@ -1,15 +1,52 @@
+const DateUtils = require('../DateUtils');
+
 const F = require('./Feed');
 const Feed = F.Feed;
 const FeedWatcher = F.FeedWatcher;
 const FeedEntry = F.FeedEntry;
 
-class PublicFeed extends Feed {
-    registerProgram(program) {
+const moment = require('moment');
 
+class PublicFeed extends Feed {
+    constructor(dbFileName) {
+        super(dbFileName);
     }
 
-    getPublicFeed(userId) {
+    init() {
+        let self = this;
+        this.init0(() => {
+            self._db.run('CREATE TABLE IF NOT EXISTS PUBLICFEEDENTRY ' +
+                        '(Id TEXT PRIMARY_KEY, ' +
+                        'Program TEXT, Upvotes INTEGER, ReleaseTimestamp REAL,' +
+                        'ExpirationTimestamp REAL, unique(Id))');
+        });
 
+        this._type = PublicFeedEntry;
+        this._tableName = 'PublicFeedEntry';
+    }
+
+    registerProgram(program) {
+        let feedEntry = new PublicFeedEntry();
+        feedEntry.ReleaseTimestamp =
+                        DateUtils.getEpochSeconds(program.Metadata.StartTime);
+        feedEntry.ExpirationTimestamp =
+                        DateUtils.getEpochSeconds(program.Metadata.EndTime);
+        feedEntry.Program = program;
+        feedEntry.Upvotes = 0;
+
+        this.persist(feedEntry);
+    }
+
+    deregisterEntry(feedEntry) {
+        // TODO:
+    }
+
+    renderFeed(onFeedRendered) {
+        let now = DateUtils.getEpochSeconds(moment());
+        this.entryListForAll({
+            statement: 'ReleaseTimestamp < ?', // skip programs planned for future
+            values: now,
+        }, onFeedRendered);
     }
 
     getWatcher() {
@@ -18,21 +55,14 @@ class PublicFeed extends Feed {
 }
 
 class PublicFeedWatcher extends FeedWatcher {
-
+    constructor(feed) {
+        super(feed);
+    }
 }
 
 class PublicFeedEntry extends FeedEntry {
     constructor() {
         super();
-        // TODO: set Id
-    }
-
-    get EntryId() {
-        return this._entryId;
-    }
-
-    set EntryId(value) {
-        this._entryId = value;
     }
 
     get Program() {

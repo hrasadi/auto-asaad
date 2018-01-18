@@ -17,6 +17,15 @@ class DBProvider {
                                         '/run/db/' + this._dbFileName, resolve);
     }
 
+    // implemented in subclasses
+    shutdown() {
+        this.shutdown0();
+    }
+
+    shutdown0() {
+        this._db.close();
+    }
+
     persist(dbObject) {
         let query = dbObject.getInsertPreStatement();
         this._db.run(query.statement, query.values);
@@ -32,10 +41,14 @@ class DBProvider {
         this._db.run(query.statement, query.values);
     }
 
-    getEntryList(whereClause) {
-        let query = DBObject.getSelectPreStatement(whereClause);
-        this._db.run(query.statement, query.values);
+    entryListForEach(fromType, whereClause, onRow) {
+        let query = DBObject.getSelectPreStatement(fromType, whereClause);
+        this._db.each(query.statement, query.values, onRow);
+    }
 
+    entryListForAll(fromType, whereClause, onRows) {
+        let query = DBObject.getSelectPreStatement(fromType, whereClause);
+        this._db.all(query.statement, query.values, onRows);
     }
 }
 

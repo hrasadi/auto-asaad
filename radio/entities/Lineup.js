@@ -29,6 +29,8 @@ class LineupTemplate extends Entity {
                 }
             }
         }
+        AppContext.getInstance().Logger.info('Planned ' + lineupPlan.BoxPlans.length
+                                                                            + ' boxes');
         return lineupPlan;
     }
 
@@ -151,14 +153,14 @@ class Lineup extends Entity {
             if (i > 0) {
                 if (moment(this.Boxes[i].StartTime)
                         .isBefore(moment(this.Boxes[i - 1].EndTime)) &&
-                    !this.Boxes[i - 1].IsFloating) {
-                        throw Error('Boxes are overlapping: Box: ' +
-                                this.Boxes[i - 1].BoxId + ' ending at: ' +
-                                moment(this.Boxes[i - 1].EndTime).toString() +
-                                ', with Box: ' + this.Boxes[i].BoxId +
-                                ' starting at: ' +
-                                moment(this.Boxes[i].StartTime).toString());
-                    }
+                        !this.Boxes[i - 1].IsFloating) {
+                    throw Error('Boxes are overlapping: Box: ' +
+                            this.Boxes[i - 1].BoxId + ' ending at: ' +
+                            moment(this.Boxes[i - 1].EndTime).toString() +
+                            ', with Box: ' + this.Boxes[i].BoxId +
+                            ' starting at: ' +
+                            moment(this.Boxes[i].StartTime).toString());
+                }
             }
         }
     }
@@ -225,6 +227,10 @@ class Lineup extends Entity {
                         } else {
                             // the floating box should be
                             // wrapped by the program box
+                            AppContext.getInstance().Logger.info(
+                                            'Box ' + this.Boxes[i + 1].BoxId +
+                                            ' will be splitted to wrap box ' +
+                                            this.Boxes[i].BoxId);
                             this.wrapBox(i, i + 1);
                         }
                     }
@@ -233,6 +239,10 @@ class Lineup extends Entity {
                     // floating box collides with previous box
                     if (moment(this.Boxes[i].StartTime)
                             .isBefore(moment(this.Boxes[i - 1].EndTime))) {
+                        AppContext.getInstance().Logger.info('Box ' +
+                                        this.Boxes[i - 1].BoxId +
+                                        ' will be splitted to wrap box ' +
+                                        this.Boxes[i].BoxId);
                         this.wrapBox(i, i - 1);
                     }
                 }

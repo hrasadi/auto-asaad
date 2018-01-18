@@ -6,14 +6,20 @@ class UserManager extends DBProvider {
         super(dbFileName);
     }
 
-    init(resolve) {
+    init() {
+        this.init1();
+    }
+
+    init1() {
         let self = this;
         this.init0(() => {
             self._db.run('CREATE TABLE IF NOT EXISTS USER (Id TEXT PRIMARY_KEY, ' +
                         'DeviceType INTEGER, IP TEXT, TimeZone TEXT,' +
                         'Latitude REAL, Longitude REAL, City TEXT, unique(Id))');
-            resolve();
         });
+
+        this._type = User;
+        this._tableName = 'User';
     }
 
     registerUser(user) {
@@ -21,7 +27,7 @@ class UserManager extends DBProvider {
     }
 
     updateUser(user) {
-        this.updateWithId();
+        this.update(user);
     }
 }
 
@@ -87,4 +93,5 @@ const DeviceTypeEnum = Object.freeze({
 module.exports = {
     'UserManager': UserManager,
     'User': User,
+    'DeviceTypeEnum': DeviceTypeEnum,
 };

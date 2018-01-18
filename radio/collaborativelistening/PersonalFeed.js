@@ -8,7 +8,7 @@ class PersonalFeed extends Feed {
 
     }
 
-    getPublicFeed(userId) {
+    renderFeed(userId) {
 
     }
 

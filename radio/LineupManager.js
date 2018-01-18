@@ -16,7 +16,7 @@ class LineupManager {
         this._lineupTemplate = null;
     }
 
-    initiate(config) {
+    init(config) {
         // Read the template
         this._lineupTemplate = new LineupTemplate(config);
     }

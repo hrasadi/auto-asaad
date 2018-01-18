@@ -6,8 +6,7 @@
     },
     "env" : {
         "browser" : true,
-        "node" : true,
-        "es6" : true
+        "node" : true
     },
     "rules" : {
         "no-unused-vars" : 2,
@@ -16,6 +15,7 @@
         "max-len": ["error", { "code": 90 }]
     },
     "parserOptions": {
-        "sourceType": "module"
+        "sourceType": "module",
+        "ecmaVersion": 2017
     }
 }

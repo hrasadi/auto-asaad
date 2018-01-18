@@ -11,7 +11,7 @@ class DateUtils {
 
     static getEpochSeconds(m) {
         // .unix() returns timestamp is Epoch seconds
-        return m.unix();
+        return moment(m).seconds(0).unix();
     }
 }
 

@@ -5,7 +5,6 @@ const PersonalFeed = P.PersonalFeed;
 const PersonalFeedWatcher = P.PersonalFeedWatcher;
 const PersonalFeedEntry = P.PersonalFeedEntry;
 
-
 class Raa1PersonalFeed extends PersonalFeed {
     constructor() {
         super();

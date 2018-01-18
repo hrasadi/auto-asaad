@@ -27,10 +27,10 @@ class DBObject {
         };
     }
 
-    static getSelectPreStatement(query) {
+    static getSelectPreStatement(fromType, query) {
         return {
-            statement: 'SELECT * FROM ' + this._tableName +
-                        query ? ' WHERE ' + query.statement : '',
+            statement: 'SELECT * FROM ' + fromType.name +
+                        (query ? ' WHERE ' + query.statement : ''),
             values: query.values,
         };
     }

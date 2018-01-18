@@ -1,32 +1,125 @@
+const AppContext = require('../AppContext');
+
 const DBObject = require('./DBObject');
 const DBProvider = require('./DBProvider');
+
+const DateUtils = require('../DateUtils');
+
+const moment = require('moment');
+const fs = require('fs');
 
 const FEED_CHECKING_FREQUENCY = 60000; // One minute
 
 class Feed extends DBProvider {
-    constructor() {
-        super();
+    constructor(dbFileName) {
+        super(dbFileName);
+
+        // Set in persistent subclass
+        this._type = null;
     }
 
-    // override in subclasses
+    // implemented in subclasses
+    init() {
+    }
+
+    // implemented in subclasses
+    registerProgram(program, userId) {
+    }
+
+    // implemented in subclasses
+    deregisterFeedEntry(feedEntry) {
+    }
+
+    // implemented in subclasses
+    renderFeed(userId, onFeedRendered) {
+    }
+
+    foreachProgramStartingWithinMinute(nowEpoch, onFeedEntry) {
+        return this.entryListForEach(this._type, {
+            statement: 'ReleaseTimestamp <= ? AND ReleaseTimestamp >= ?',
+            values: [nowEpoch, nowEpoch - 60],
+        }, onFeedEntry);
+    }
+
+    foreachProgramEndingUntilNow(nowEpoch, onFeedEntry) {
+        return this.entryListForEach(this._type, {
+            statement: 'ExpirationTimestamp <= ?',
+            values: nowEpoch,
+        }, onFeedEntry);
+    }
+
+    // implemented in subclasses
+    notifyProgramStart(feedEntry) {
+    }
+
+    // overriden in subclasses
     getWatcher() {
         return new FeedWatcher(this);
     }
-
 }
 
 class FeedWatcher {
     constructor(feed) {
         this._feed = feed;
-        setInterval(this.tick, FEED_CHECKING_FREQUENCY);
+
+        this._epochLockFilePath = AppContext.getInstance().CWD + '/run/db/' +
+                                            this._feed.constructor.name + '-epoch.lock';
     }
 
-    tick() {
-        // check time
+    init() {
+        let self = this;
+        setInterval(() => this.tick(self), FEED_CHECKING_FREQUENCY);
+        // Start with a firing
+        this.tick(self);
+    }
+
+    tick(self) {
+        let currentTimeEpoch = DateUtils.getEpochSeconds(moment());
         // check last persisted time (should be one minute before)
-        // check for new released programs
-        // check for expired programs
-        // if more that one minute, cleanup at the end (too late to notify people)
+        if (self.LastProcessedEpoch +
+            (FEED_CHECKING_FREQUENCY / 1000) != currentTimeEpoch) {
+            AppContext.getInstance()
+                    .Logger.warn('Watcher ' +
+                            self._feed.constructor.name + ' has time inconsistencies. ' +
+                            'Jumping from ' + self.LastProcessedEpoch + ' to ' +
+                            currentTimeEpoch);
+        }
+        // One minute in (success path).
+        // Check for programs released now. Notify listeners
+        self._feed.foreachProgramStartingWithinMinute(currentTimeEpoch,
+                                                            (err, feedEntry) => {
+            if (err) {
+                throw err;
+            }
+            self._feed.notifyProgramStart(feedEntry);
+        });
+        // Check for expired programs
+        self._feed.foreachProgramEndingUntilNow(currentTimeEpoch, (err, feedEntry) => {
+            if (err) {
+                throw err;
+            }
+            self._feed.deregisterFeedEntry(feedEntry);
+        });
+        // Persist new epoch
+        self.LastProcessedEpoch = currentTimeEpoch;
+    }
+
+    get LastProcessedEpoch() {
+        if (this._lastProcessedEpoch) {
+            return this._lastProcessedEpoch;
+        }
+
+        if (fs.existsSync(this._epochLockFilePath)) {
+            return parseFloat(fs.readFileSync(this._epochLockFilePath));
+        } else {
+            this._lastProcessedEpoch = DateUtils.getEpochSeconds(moment());
+            return this._lastProcessedEpoch;
+        }
+    }
+
+    set LastProcessedEpoch(value) {
+        this._lastProcessedEpoch = value;
+        fs.writeFileSync(this._epochLockFilePath, this._lastProcessedEpoch);
     }
 }
 
@@ -43,12 +136,12 @@ class FeedEntry extends DBObject {
         this._releaseTimestamp = value;
     }
 
-    get ExpiryTimestamp() {
-        return this._expiryTimestamp;
+    get ExpirationTimestamp() {
+        return this._expirationTimestamp;
     }
 
-    set ExpiryTimestamp(value) {
-        this._expiryTimestamp = value;
+    set ExpirationTimestamp(value) {
+        this._expirationTimestamp = value;
     }
 }
 

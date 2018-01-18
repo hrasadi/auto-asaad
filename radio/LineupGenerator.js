@@ -35,11 +35,11 @@ class LineupGenerator extends AppContext {
     }
 
     // imlemented in subclasses
-    initiate() {
+    init() {
     }
 
     run() {
-        this.initiate();
+        this.init();
 
         if (this.GeneratorOptions.ActiveStages.Plan) {
             this.LineupManager.planLineupRange(this._targetDate,

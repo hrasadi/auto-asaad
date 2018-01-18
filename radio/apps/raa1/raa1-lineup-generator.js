@@ -69,7 +69,7 @@ class Raa1LineupGenerator extends LineupGenerator {
         this._lineupFileNamePrefix = 'raa1';
     }
 
-    initiate() {
+    init() {
         try {
             this._conf = JSON.parse(fs.readFileSync(this._confFilePath));
         } catch (e) {
@@ -100,7 +100,7 @@ class Raa1LineupGenerator extends LineupGenerator {
             process.exit(1);
         }
 
-        this._lineupManager.initiate(this._conf.Radio);
+        this._lineupManager.init(this._conf.LineupTemplate);
     }
 }
 /* === Entry Point === */
@@ -116,7 +116,7 @@ program
     .parse(process.argv);
 
 if (program.args.length < 2) {
-    console.log('Usage: [NODE_ENV=production] node raa1.js OPTIONS' +
+    console.log('Usage: [NODE_ENV=production] node raa1-lineup-generator.js OPTIONS' +
                 '{config-file} {program-info-directory-file}');
     process.exit(1);
 }
