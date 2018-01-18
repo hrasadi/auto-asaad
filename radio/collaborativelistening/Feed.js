@@ -11,15 +11,26 @@ const fs = require('fs');
 const FEED_CHECKING_FREQUENCY = 60000; // One minute
 
 class Feed extends DBProvider {
-    constructor(dbFileName) {
+    constructor(dbFileName, historyDbFileName) {
         super(dbFileName);
 
-        // Set in persistent subclass
+        if (historyDbFileName) {
+            this._historyProdiver = new DBProvider(historyDbFileName);
+        }
+
+        // Set in persistent subclasses
         this._type = null;
     }
 
     // implemented in subclasses
-    init() {
+    init(resolve) {
+    }
+
+    async init1(resolve) {
+        await this.init0(resolve);
+        if (this._historyProdiver) {
+            await this._historyProdiver.init0(resolve);
+        }
     }
 
     // implemented in subclasses

@@ -358,7 +358,7 @@ class Program extends BaseProgram {
             AppContext.getInstance('LineupGenerator').Publishers.ArchivePublisher
                                             .publish(programToPublish, targetDate);
         }
-        // Publish  feed
+        // Publish to public feed
         if (this.Publishing.CollaborativeListeningFeed === 'Public') {
 
         } else if (this.Publishing.CollaborativeListeningFeed === 'Personal') {

@@ -32,8 +32,12 @@ class UserManager extends DBProvider {
 }
 
 class User extends DBObject {
-    constructor() {
-        super();
+    constructor(jsonOrOther, deviceType) {
+        super(jsonOrOther);
+
+        if (deviceType) {
+            this._deviceType = DeviceTypeEnum.fromString(deviceType);
+        }
     }
 
     get DeviceType() {
@@ -88,6 +92,14 @@ const DeviceTypeEnum = Object.freeze({
     'Web': 0,
     'iOS': 1,
     'Android': 2,
+
+    fromString(string) {
+        for (let key of Object.keys(this)) {
+            if (key.toLowerCase() === string) {
+                return this[key];
+            }
+        }
+    },
 });
 
 module.exports = {

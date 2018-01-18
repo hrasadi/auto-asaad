@@ -12,6 +12,10 @@ class DBProvider {
     init(resolve) {
     }
 
+    // implemented in subclasses
+    init1(resolve) {
+    }
+
     init0(resolve) {
         this._db = new sqlite3.Database(AppContext.getInstance().CWD +
                                         '/run/db/' + this._dbFileName, resolve);

@@ -25,12 +25,6 @@ class Raa1CLWatcher extends AppContext {
 
         let myName = path.basename(__filename, '.js');
         this._logger = new Logger(this._cwd + '/run/logs/' + myName + '.log');
-
-        // User manager
-        this._userManager = new Raa1UserManager('feed.db');
-        // Feeds
-        this._publicFeed = new Raa1PublicFeed('feed.db');
-        // this._personalFeed = new Raa1PersonalFeed('feed.db');
     }
 
     async init() {
@@ -41,12 +35,23 @@ class Raa1CLWatcher extends AppContext {
                 this.Logger.error('Error parsing config file. Inner exception is: ' + e);
                 process.exit(1);
             }
+            // User manager
+            this._userManager = new Raa1UserManager(
+                this._conf.CollaborativeListening.FeedDBFile,
+                this._conf.CollaborativeListening.FeedHistoryDBFile
+            );
+            // Feeds
+            this._publicFeed = new Raa1PublicFeed(
+                this._conf.CollaborativeListening.FeedDBFile,
+                this._conf.CollaborativeListening.FeedHistoryDBFile
+            );
+            // this._personalFeed = new Raa1PersonalFeed('feed.db');
 
             await this._publicFeed.init();
             this._publicFeedWatcher = this._publicFeed.getWatcher();
             this._publicFeedWatcher.init();
 
-            this._userManager.init(this._conf.Credentials);
+            await this._userManager.init(this._conf.Credentials);
 
             process.on('SIGINT', () => this.shutdown());
         } catch (error) {

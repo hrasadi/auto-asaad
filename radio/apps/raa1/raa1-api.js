@@ -1,149 +1,171 @@
-var fs = require('fs');
-var fsextra = require('fs-extra');
-var path = require('path');
+const Logger = require('../../../logger');
+const AppContext = require('../../AppContext');
 
-var program = require('commander');
+const UF = require('./collaborativelistening/Raa1PublicFeed');
+const Raa1PublicFeed = UF.Raa1PublicFeed;
 
-var express = require('express');
-var request = require('request');
-var sqlite3 = require('sqlite3').verbose();
+const SF = require('./collaborativelistening/Raa1PersonalFeed');
+const Raa1PersonalFeed = SF.Raa1PersonalFeed;
 
-var Logger = require('../../../logger');
+const Raa1UserManager = require('./collaborativelistening/Raa1UserManager');
+const U = require('../../collaborativelistening/UserManager');
+const User = U.User;
 
-var RaaAPI = function(program) {	
-    this.configFilePath = path.resolve(program.args[0]);
-    this.cwd = path.resolve(path.dirname(program.args[0]) + '/..');
+const program = require('commander');
+const path = require('path');
+const fs = require('fs');
+const express = require('express');
+const bodyParser = require('body-parser');
+const request = require('request');
 
-    var logFilePath = this.cwd + "/logs/api.log";
-    this.logger = new Logger(logFilePath);
-}
+class Raa1API extends AppContext {
+    constructor(program) {
+        super();
 
+        this._confFilePath = program.args[0];
 
-RaaAPI.prototype.register = function() {
-    var self = this;
+        this._productionMode = process.env.NODE_ENV == 'production' ? true : false;
 
-    self.iosDB = new sqlite3.Database(this.cwd + '/run/ios-device-list.db', sqlite3.OPEN_READWRITE, function(err) {
-      if (err) {
-        self.logger.error('Error connecting to iOS database: ' + err.message);        
-      }
-      self.logger.info('Connected to the iOS database.');
-    });
-    
-    self.fcmDB = new sqlite3.Database(this.cwd + '/run/fcm-device-list.db', sqlite3.OPEN_READWRITE, function(err) {
-      if (err) {
-        self.logger.error('Error connecting to FCM database: ' + err.message);        
-      }
-      self.logger.info('Connected to the FCM database.');
-    });
+        this._cwd = __dirname;
 
-    self.iosDB.serialize(function() {
-        self.iosDB.run("CREATE TABLE if not exists devices (deviceId TEXT PRIMARY_KEY, unique(deviceId))");
-    });
+        let myName = path.basename(__filename, '.js');
+        this._logger = new Logger(this._cwd + '/run/logs/' + myName + '.log');
 
-    self.fcmDB.serialize(function() {
-        self.fcmDB.run("CREATE TABLE if not exists devices (deviceId TEXT PRIMARY_KEY, unique(deviceId))");
-    });
+        this._webApp = express();
+    }
 
-    self.webApp = express()
-    self.webApp.get('/registerDevice/ios/:deviceId', function(req, res) {
-        var deviceId = req.params['deviceId'];
-        if (deviceId) {
-            // Persist deviceId in our local database
-            self.iosDB.serialize(function() {
-                var stmt = self.iosDB.prepare("INSERT INTO devices VALUES (?)");
-                stmt.run(deviceId, function(err) {
-                    // Insertion can fail because of duplicate rows coming in. Ignore them
-                    // TODO better exception handling
-                });
-            });
-        }
-        res.send("Success");
-    });
-
-    self.webApp.get('/registerDevice/fcm/:deviceId', function(req, res) {
-        var deviceId = req.params['deviceId'];
-        if (deviceId) {
-            // Persist deviceId in our local database
-            self.fcmDB.serialize(function() {
-                var stmt = self.fcmDB.prepare("INSERT INTO devices VALUES (?)");
-                stmt.run(deviceId, function(err) {
-                    // Insertion can fail because of duplicate rows coming in. Ignore them
-                    // TODO better exception handling
-                });
-            });
-        }
-        res.send("Success");
-    });
-
-    self.webApp.get('/linkgenerator/:medium', function(req, res) {
-        var medium = req.params['medium'];
-        var urlEncoded = req.query['src'];
-        var reqUrl = Buffer.from(urlEncoded, 'base64').toString('ascii');
-
-        if (reqUrl) {
-            var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-            var userAgent = req.headers['user-agent'];
-            
-            // Report to GA server
-            var gaParams = {
-                'v': '1',
-                'tid': 'UA-103579661-1',
-                'cid': '555',
-                't': 'event',
-                'ea': 'play',
-            };
-            gaParams.el = reqUrl;
-            gaParams.uip = ip;
-            gaParams.ua = userAgent;
-            gaParams.ec = medium;
-            gaParams.ca = medium;
-            gaParams.cn = medium;
-            gaParams.cm = medium;
-
-            var requestOptions = {
-                url: "https://www.google-analytics.com/collect",
-                method: "POST",
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                form: gaParams                
+    async init() {
+        try {
+            try {
+                this._conf = JSON.parse(fs.readFileSync(this._confFilePath));
+            } catch (e) {
+                this.Logger.error('Error parsing config file. Inner exception is: ' + e);
+                process.exit(1);
             }
+            // User manager
+            this._userManager = new Raa1UserManager(
+                this._conf.CollaborativeListening.FeedDBFile
+            );
+            // Feeds
+            this._publicFeed = new Raa1PublicFeed(
+                this._conf.CollaborativeListening.FeedDBFile
+            );
+            // this._personalFeed = new Raa1PersonalFeed('feed.db');
 
-            request.post(requestOptions, 
-                function(error, response, body) {
+            await this._publicFeed.init();
+            await this._userManager.init(this._conf.Credentials);
+
+            this.registerAPI();
+
+            process.on('SIGINT', () => this.shutdown());
+        } catch (error) {
+            this._logger.error('Uncaught Error: ' + error.stack);
+            process.exit(0);
+        }
+    }
+
+    shutdown() {
+        this._logger.info('Signal received. Shutting down...');
+
+        // Wait for any incomplete work
+        this.UserManager.shutdown();
+        this.PublicFeed.shutdown();
+
+        process.exit();
+    }
+
+    registerAPI() {
+        let self = this;
+        this._webApp.post('/registerDevice/:deviceType/', (req, res) => {
+            let user = new User(request.body, req.params.deviceType);
+            self.UserManager.registerUser(user);
+            res.send('Success');
+        });
+
+        this._webApp.get('/publicfeed', async (req, res) => {
+            try {
+                let feed = await this.PublicFeed.renderFeed();
+                res.send(feed);
+            } catch (error) {
+                AppContext.getInstance.Logger.error(error.stack);
+            }
+        });
+
+        this._webApp.get('/linkgenerator/:medium', (req, res) => {
+            let medium = req.params['medium'];
+            let urlEncoded = req.query['src'];
+            let reqUrl = Buffer.from(urlEncoded, 'base64').toString('ascii');
+
+            if (reqUrl) {
+                let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+                let userAgent = req.headers['user-agent'];
+
+                // Report to GA server
+                let gaParams = {
+                    v: '1',
+                    tid: 'UA-103579661-1',
+                    cid: '555',
+                    t: 'event',
+                    ea: 'play',
+                };
+                gaParams.el = reqUrl;
+                gaParams.uip = ip;
+                gaParams.ua = userAgent;
+                gaParams.ec = medium;
+                gaParams.ca = medium;
+                gaParams.cn = medium;
+                gaParams.cm = medium;
+
+                let requestOptions = {
+                    url: 'https://www.google-analytics.com/collect',
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    form: gaParams,
+                };
+
+                request.post(requestOptions, function(error, response, body) {
                     if (error) {
-                        self.logger.error("Error while sending GA request: " + error);
+                        self.logger.error('Error while sending GA request: ' + error);
                     }
                 });
 
-            return res.redirect(reqUrl);
-        }
+                return res.redirect(reqUrl);
+            }
 
-        return res.status(400).send("The querystring is missing or not valid");
-    });
+            return res.status(400).send('The querystring is missing or not valid');
+        });
 
-    self.webApp.listen(7799, function () {
-        self.logger.info('Raa device registration endpoint activated on port 7799');
-    });	
-}
+        this._webApp.use(bodyParser.json());
+        this._webApp.use((err, req, res, next) => {
+            AppContext.getInstance().Logger.error(err.stack);
+            res
+                .status(500)
+                .send(
+                    'Oops! We cannot think of anything right now.' +
+                        'Please come back later'
+                );
+        });
+        this._webApp.listen(this._conf.Port, () => {
+            AppContext.getInstance().Logger.info(
+                'Raa API started on port ' + this._conf.Port
+            );
+        });
+    }
 
-var RaaAPIUtils = function() {
-    var encodeUrl = function(vodUrl) {
-        return 'https://api.raa.media/linkgenerator/podcast.mp3?src=' + Buffer.from(vodUrl.toString()).toString('base64');
+    get PublicFeed() {
+        return this._publicFeed;
+    }
+
+    get UserManager() {
+        return this._userManager;
     }
 }
 
-module.exports = RaaAPIUtils;
-
-/* === Entry Point === */
-
-program
-    .version('1.0.0')
-    .parse(process.argv)
+program.version('1.0.0').parse(process.argv);
 
 if (program.args.length < 1) {
-    console.error("Usage: node raa1.js {config-file}");
+    console.log('Usage: [NODE_ENV=production] node raa1-api.js ' + '{config-file}');
     process.exit(1);
 }
 
-var api = new RaaAPI(program);
-
-api.register();
+new Raa1API(program).init();
