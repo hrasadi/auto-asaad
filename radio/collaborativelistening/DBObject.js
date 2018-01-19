@@ -39,12 +39,11 @@ class DBObject {
         let properties = this.getProperties();
         let propertyNames = this.getInsertQueryPropertyNames(properties);
         let placeholders = this.getInsertQueryPlaceholders(properties);
-
         let propertyValues = this.getValues(properties);
 
         return {
             statement: 'INSERT INTO ' + this._tableName + '(' + propertyNames.join(', ') +
-                                        ') VALUES ' + placeholders.join(', '),
+                                        ') VALUES ' + placeholders,
             values: propertyValues,
         };
     }

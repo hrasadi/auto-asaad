@@ -161,10 +161,11 @@ class Raa1API extends AppContext {
     }
 }
 
+/* === Entry Point === */
 program.version('1.0.0').parse(process.argv);
 
 if (program.args.length < 1) {
-    console.log('Usage: [NODE_ENV=production] node raa1-api.js ' + '{config-file}');
+    console.log('Usage: [NODE_ENV=production] node raa1-api.js {config-file}');
     process.exit(1);
 }
 

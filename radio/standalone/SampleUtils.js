@@ -1,6 +1,6 @@
-const Utils = require('../Utils');
+const ClipUtils = require('../ClipUtils');
 
-class SampleUtils extends Utils {
+class SampleUtils extends ClipUtils {
     getPublicClip(clips) {
         return clips[0];
     }

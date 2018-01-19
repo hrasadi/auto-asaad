@@ -17,13 +17,13 @@ class PublicFeed extends Feed {
     async init() {
         await this.init1();
 
-        this._db.run(
+        await this._db.runAsync(
             'CREATE TABLE IF NOT EXISTS PUBLICFEEDENTRY ' +
                 '(Id TEXT PRIMARY_KEY, ' +
                 'Program TEXT, Upvotes INTEGER, ReleaseTimestamp REAL,' +
                 'ExpirationTimestamp REAL, unique(Id))'
         );
-        this._db.run(
+        await this._db.runAsync(
             'CREATE TABLE IF NOT EXISTS UPVOTES ' +
                 '(UserId TEXT, ' +
                 'ProgramId TEXT, Timestamp REAL,' +
@@ -31,13 +31,13 @@ class PublicFeed extends Feed {
         );
 
         if (this._historyProdiver) {
-            this._historyProdiver._db.run(
+            await this._historyProdiver._db.runAsync(
                 'CREATE TABLE IF NOT EXISTS PUBLICFEEDENTRY ' +
                     '(Id TEXT PRIMARY_KEY, ' +
                     'Program TEXT, Upvotes INTEGER, ReleaseTimestamp REAL,' +
                     'ExpirationTimestamp REAL, unique(Id))'
             );
-            this._historyProdiver._db.run(
+            await this._historyProdiver._db.runAsync(
                 'CREATE TABLE IF NOT EXISTS UPVOTES ' +
                     '(UserId TEXT ,' +
                     'ProgramId TEXT, Timestamp REAL,' +
@@ -49,42 +49,54 @@ class PublicFeed extends Feed {
         this._tableName = 'PublicFeedEntry';
     }
 
-    registerProgram(program) {
+    async registerProgram(program, releaseMoment) {
         let feedEntry = new PublicFeedEntry();
-        feedEntry.ReleaseTimestamp = DateUtils.getEpochSeconds(
-            program.Metadata.StartTime
-        );
+        if (releaseMoment) {
+            feedEntry.ReleaseTimestamp = DateUtils.getEpochSeconds(releaseMoment);
+        } else {
+            feedEntry.ReleaseTimestamp = DateUtils.getEpochSeconds(
+                program.Metadata.StartTime
+            );
+        }
+
         feedEntry.ExpirationTimestamp = DateUtils.getEpochSeconds(
-            program.Metadata.EndTime
+            moment.unix(feedEntry.ReleaseTimestamp).add(
+                program.Publishing.ColloborativeListeningProps.DefaultLife,
+                'hours')
         );
         feedEntry.Program = program;
         feedEntry.Upvotes = 0;
 
-        this.persist(feedEntry);
+        if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
+            AppContext.getInstance().Logger.debug(
+                'Register program to public feed with entry: ' +
+                    JSON.stringify(feedEntry, null, 2)
+            );
+        } else {
+            await this.persist(feedEntry);
+        }
     }
 
     deregisterEntry(feedEntry) {
         // TODO:
-        AppContext.getInstance().Logger.debug('Program ' + feedEntry.Id +
-                                                ' marked for deregistration.');
+        AppContext.getInstance().Logger.debug(
+            'Program ' + feedEntry.Id + ' marked for deregistration.'
+        );
     }
 
     upvoteProgram(programId, userId) {
         // TODO:
-        AppContext.getInstance().Logger.debug('Upvote program Id ' + programId +
-                                                ' by user ' + userId);
+        AppContext.getInstance().Logger.debug(
+            'Upvote program Id ' + programId + ' by user ' + userId
+        );
     }
 
-    renderFeed(onFeedRendered) {
+    async renderFeed() {
         let now = DateUtils.getEpochSeconds(moment());
-        this.entryListForAll(
-            PublicFeedEntry,
-            {
-                statement: 'ReleaseTimestamp < ?', // skip programs planned for future
-                values: now,
-            },
-            onFeedRendered
-        );
+        return await this.entryListForAll(PublicFeedEntry, {
+            statement: 'ReleaseTimestamp < ?', // skip programs planned for future
+            values: now,
+        });
     }
 
     getWatcher() {

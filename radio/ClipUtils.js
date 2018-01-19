@@ -1,9 +1,9 @@
 /**
  * Abstract class. Implemented by radio app
  */
-class Utils {
+class ClipUtils {
     getPublicClip(clips) {
     }
 }
 
-module.exports = Utils;
+module.exports = ClipUtils;

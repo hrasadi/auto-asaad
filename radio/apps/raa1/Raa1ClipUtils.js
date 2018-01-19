@@ -1,14 +1,14 @@
 const Clip = require('../../entities/Clip').Clip;
 
 const AppContext = require('../../AppContext');
-const Utils = require('../../Utils');
+const ClipUtils = require('../../ClipUtils');
 
 const AWS = require('aws-sdk');
 const execSync = require('child_process').execSync;
 const fs = require('fs');
 const {URL} = require('url');
 
-class Raa1ClipUtils extends Utils {
+class Raa1ClipUtils extends ClipUtils {
     constructor(conf) {
         super(conf);
         // Initiate AWS connection

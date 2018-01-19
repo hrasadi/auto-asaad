@@ -4,8 +4,6 @@ const DateUtils = require('../../DateUtils');
 const ObjectBuilder = require('../../entities/ObjectBuilder');
 const LineupGenerator = require('../../LineupGenerator');
 
-const LineupManager = require('../../LineupManager');
-
 const Raa1ActionManager = require('./lineupaction/Raa1ActionManager');
 
 const StandaloneMedia = require('../../standalone/StandaloneMedia');
@@ -19,6 +17,9 @@ const Raa1ClipUtils = require('./Raa1ClipUtils');
 
 const Raa1PodcastPublisher = require('./publishers/Raa1PodcastPublisher');
 const Raa1ArchivePublisher = require('./publishers/Raa1ArchivePublisher');
+
+const RUF = require('./collaborativelistening/Raa1PublicFeed');
+const Raa1PublicFeed = RUF.Raa1PublicFeed;
 
 const fs = require('fs');
 const moment = require('moment-timezone');
@@ -69,7 +70,7 @@ class Raa1LineupGenerator extends LineupGenerator {
         this._lineupFileNamePrefix = 'raa1';
     }
 
-    init() {
+    async init() {
         try {
             this._conf = JSON.parse(fs.readFileSync(this._confFilePath));
         } catch (e) {
@@ -77,20 +78,21 @@ class Raa1LineupGenerator extends LineupGenerator {
             process.exit(1);
         }
 
+        this._lineupManager.init(this._conf.LineupTemplate);
+
         this._objectBuilder = new ObjectBuilder({
             'Box': this._productionMode ? LiquidsoapBox : StandaloneBox,
             'Program': this._productionMode ? LiquidsoapProgram : StandaloneProgram,
             'Media': this._productionMode ? LiquidsoapMedia : StandaloneMedia,
         });
 
-        this._lineupManager = new LineupManager();
         this._actionManager = new Raa1ActionManager();
         this._publishers = {
             'PodcastPublisher': new Raa1PodcastPublisher(),
             'ArchivePublisher': new Raa1ArchivePublisher(),
         };
 
-        this._utils = new Raa1ClipUtils(this._conf);
+        this._clipUtils = new Raa1ClipUtils(this._conf);
         try {
             this._pinfoDirectory = JSON.parse(
                                     fs.readFileSync(this._pinfoDirectoryFilePath));
@@ -100,9 +102,15 @@ class Raa1LineupGenerator extends LineupGenerator {
             process.exit(1);
         }
 
-        this._lineupManager.init(this._conf.LineupTemplate);
+        // Feeds
+        this._publicFeed = new Raa1PublicFeed(
+            this._conf.CollaborativeListening.FeedDBFile
+        );
+        // this._personalFeed = new Raa1PersonalFeed('feed.db');
+        await this._publicFeed.init();
     }
 }
+
 /* === Entry Point === */
 program
     .version('1.0.0')
@@ -116,7 +124,7 @@ program
     .parse(process.argv);
 
 if (program.args.length < 2) {
-    console.log('Usage: [NODE_ENV=production] node raa1-lineup-generator.js OPTIONS' +
+    console.log('Usage: [NODE_ENV=production] node raa1-lineup-generator.js OPTIONS ' +
                 '{config-file} {program-info-directory-file}');
     process.exit(1);
 }

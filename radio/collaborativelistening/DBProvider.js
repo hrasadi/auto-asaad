@@ -1,7 +1,8 @@
 const AppContext = require('../AppContext');
-const DBObject = require('./DBObject');
 
-const sqlite3 = require('sqlite3').verbose();
+const AsyncDB = require('../AsyncDB');
+
+const DBObject = require('./DBObject');
 
 class DBProvider {
     constructor(dbFileName) {
@@ -16,8 +17,8 @@ class DBProvider {
     init1(resolve) {
     }
 
-    init0(resolve) {
-        this._db = new sqlite3.Database(AppContext.getInstance().CWD +
+    async init0(resolve) {
+        this._db = await new AsyncDB(AppContext.getInstance().CWD +
                                         '/run/db/' + this._dbFileName, resolve);
     }
 
@@ -32,27 +33,27 @@ class DBProvider {
 
     persist(dbObject) {
         let query = dbObject.getInsertPreStatement();
-        this._db.run(query.statement, query.values);
+        return this._db.runAsync(query.statement, query.values);
     }
 
     persistList(dbObjects) {
         let query = DBObject.getListInsertPreStatement(dbObjects);
-        this._db.run(query.statement, query.values);
+        return this._db.runAsync(query.statement, query.values);
     }
 
     update(dbObject) {
         let query = dbObject.getUpdatePreStatement();
-        this._db.run(query.statement, query.values);
+        return this._db.runAsync(query.statement, query.values);
     }
 
     entryListForEach(fromType, whereClause, onRow) {
         let query = DBObject.getSelectPreStatement(fromType, whereClause);
-        this._db.each(query.statement, query.values, onRow);
+        return this._db.eachAsync(query.statement, query.values, onRow);
     }
 
-    entryListForAll(fromType, whereClause, onRows) {
+    entryListForAll(fromType, whereClause) {
         let query = DBObject.getSelectPreStatement(fromType, whereClause);
-        this._db.all(query.statement, query.values, onRows);
+        return this._db.allAsync(query.statement, query.values);
     }
 }
 

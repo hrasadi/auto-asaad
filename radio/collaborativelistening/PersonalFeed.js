@@ -8,7 +8,7 @@ class PersonalFeed extends Feed {
 
     }
 
-    renderFeed(userId) {
+    async renderFeed(userId) {
 
     }
 

@@ -42,7 +42,7 @@ class Feed extends DBProvider {
     }
 
     // implemented in subclasses
-    renderFeed(userId, onFeedRendered) {
+    async renderFeed(userId) {
     }
 
     foreachProgramStartingWithinMinute(nowEpoch, onFeedEntry) {

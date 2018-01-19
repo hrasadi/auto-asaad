@@ -143,26 +143,28 @@ class ReplayProgramTemplate extends ProgramTemplate {
     }
 
     plan(targetDate, parent) {
-        let originalAiringDate =
-                DateUtils.getDateString(moment(targetDate)
-                .subtract(this.OriginalAiringOffset, 'days'));
+        let originalAiringDate = DateUtils.getDateString(
+            moment(targetDate).subtract(this.OriginalAiringOffset, 'days')
+        );
 
         // If offset == 0, we are replaying from today
-        let originalAiringLineupPlan =
-                !this.OriginalAiringOffset ? parent._parentLineupPlan :
-                AppContext.getInstance('LineupGenerator').LineupManager
-                .getLineupPlan(originalAiringDate);
+        let originalAiringLineupPlan = !this.OriginalAiringOffset
+            ? parent._parentLineupPlan
+            : AppContext.getInstance('LineupGenerator').LineupManager.getLineupPlan(
+                  originalAiringDate
+              );
 
-        if (!originalAiringLineupPlan ||
+        if (
+            !originalAiringLineupPlan ||
             !originalAiringLineupPlan.Version ||
-            originalAiringLineupPlan.Version !== '3.0') {
+            originalAiringLineupPlan.Version !== '3.0'
+        ) {
             // Not supported! Format too old or
             // original lineup does not exist at all
             return null;
         }
 
-        let originalBoxPlan =
-            originalAiringLineupPlan.getBoxPlan(this.OriginalBoxId);
+        let originalBoxPlan = originalAiringLineupPlan.getBoxPlan(this.OriginalBoxId);
         if (!originalBoxPlan) {
             return null;
         }
@@ -189,8 +191,7 @@ class ReplayProgramTemplate extends ProgramTemplate {
                 if (replayProgram) {
                     replayProgram.pruneProgramPlan();
 
-                    replayProgram.ProgramId =
-                                        programPlan.ProgramId + '_Replay';
+                    replayProgram.ProgramId = programPlan.ProgramId + '_Replay';
                     replayProgram.Title = programPlan.Title + ' - تکرار';
                     // Replat program should not inherit properties
                     // from original program
@@ -248,8 +249,11 @@ class ProgramPlan extends BaseProgram {
     }
 
     compile(startTimeMoment, parent) {
-        let compiledProgram = AppContext.getInstance().ObjectBuilder
-                                            .buildOfType(Program, this, parent);
+        let compiledProgram = AppContext.getInstance().ObjectBuilder.buildOfType(
+            Program,
+            this,
+            parent
+        );
 
         let compiledPreShow = null;
         if (this.PreShowPlan) {
@@ -267,15 +271,17 @@ class ProgramPlan extends BaseProgram {
         let compiledProgramMetadata = new Metadata();
 
         if (compiledPreShow) {
-            compiledProgramMetadata.PreShowStartTime =
-                                moment(startTimeMoment)
-                                .subtract(compiledPreShow.Duration, 'seconds');
+            compiledProgramMetadata.PreShowStartTime = moment(startTimeMoment).subtract(
+                compiledPreShow.Duration,
+                'seconds'
+            );
         }
         compiledProgramMetadata.ShowStartTime = moment(startTimeMoment);
         // End time is only dependent to show
-        compiledProgramMetadata.EndTime =
-                             moment(startTimeMoment)
-                            .add(compiledShow.Duration, 'seconds');
+        compiledProgramMetadata.EndTime = moment(startTimeMoment).add(
+            compiledShow.Duration,
+            'seconds'
+        );
 
         if (this._parentBoxPlan.IsFloating) {
             compiledProgram.Priority = 'High';
@@ -297,10 +303,14 @@ class ProgramPlan extends BaseProgram {
     evaluateCustomActionParam(param) {
         let paramString = param.toString();
 
-        paramString = paramString.replace(/__desc__/gi,
-                                this.ShowPlan.getMainClip().Media.Description);
-        paramString = paramString.replace(/__sdesc__/gi,
-                                this.ShowPlan.getMainClip().Media.ShortDescription);
+        paramString = paramString.replace(
+            /__desc__/gi,
+            this.ShowPlan.getMainClip().Media.Description
+        );
+        paramString = paramString.replace(
+            /__sdesc__/gi,
+            this.ShowPlan.getMainClip().Media.ShortDescription
+        );
         paramString = paramString.replace(/__title__/gi, this.Title);
 
         return paramString;
@@ -336,55 +346,74 @@ class Program extends BaseProgram {
 
     publish(targetDate) {
         // Program is not being published
-        if (!this.Publishing.Podcast && !this.Publishing.Archive &&
+        if (
+            !this.Publishing.Podcast &&
+            !this.Publishing.Archive &&
             this.Publishing.CollaborativeListeningFeed === 'None') {
             return;
         }
 
         // Publish in podcast
-        let mergedClip = AppContext.getInstance('LineupGenerator')
-                                            .Utils.getPublicClip(this.Show.Clips);
-        let programToPublish = AppContext.getInstance().ObjectBuilder
-                                                        .buildOfType(Program, this);
+        let mergedClip = AppContext.getInstance(
+            'LineupGenerator'
+        ).ClipUtils.getPublicClip(this.Show.Clips);
+        let programToPublish = AppContext.getInstance().ObjectBuilder.buildOfType(
+            Program,
+            this
+        );
         programToPublish.Show.Clips = [mergedClip];
         programToPublish.Metadata.Duration = programToPublish.Show.Duration;
 
-        if (this.Publishing.Podcast) {
-            AppContext.getInstance('LineupGenerator').Publishers.PodcastPublisher
-                                            .publish(programToPublish, targetDate);
+        if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
+            AppContext.getInstance().Logger.debug(
+                'Program publishing called for program "' +
+                    this.ProgramId +
+                    '" with params: ' +
+                    JSON.stringify(this.Publishing));
+        } else {
+            if (this.Publishing.Podcast) {
+                AppContext.getInstance(
+                    'LineupGenerator'
+                ).Publishers.PodcastPublisher.publish(programToPublish, targetDate);
+            }
+            // Publish in Archive
+            if (this.Publishing.Archive) {
+                AppContext.getInstance(
+                    'LineupGenerator'
+                ).Publishers.ArchivePublisher.publish(programToPublish, targetDate);
+            }
         }
-        // Publish in Archive
-        if (this.Publishing.Archive) {
-            AppContext.getInstance('LineupGenerator').Publishers.ArchivePublisher
-                                            .publish(programToPublish, targetDate);
-        }
+
         // Publish to public feed
         if (this.Publishing.CollaborativeListeningFeed === 'Public') {
-
+            AppContext.getInstance('LineupGenerator').PublicFeed.registerProgram(
+                programToPublish
+            );
         } else if (this.Publishing.CollaborativeListeningFeed === 'Personal') {
             // Schedule for personal feed
-
         }
     }
 
     // Should be called after modifying the clips (e.g. addClip());
     readjustTiming() {
-        this.Metadata.EndTime =
-                             moment(this.Metadata.ShowStartTime)
-                            .add(this.Show.Duration, 'seconds');
+        this.Metadata.EndTime = moment(this.Metadata.ShowStartTime).add(
+            this.Show.Duration,
+            'seconds'
+        );
     }
 
     schedule(targetDate, boxIdx, programIdx) {
         if (this.Priority != 'High') {
-            throw Error('Logic error: scheduling on programs is only valid' +
-                        'when program is interrrupting');
+            throw Error(
+                'Logic error: scheduling on programs is only valid' +
+                    'when program is interrrupting'
+            );
         }
         this.doScheduleProgram(targetDate, boxIdx, programIdx);
     }
 
     // Implemented in subclasses
-    doScheduleProgram(targetDate, boxIdx, programIdx) {
-    }
+    doScheduleProgram(targetDate, boxIdx, programIdx) {}
 
     unschedule() {
         if (this.LivePlaybackSchedulerMeta) {
@@ -393,19 +422,23 @@ class Program extends BaseProgram {
     }
 
     // Implemented in subclasses
-    doUnscheduleProgram() {
-    }
+    doUnscheduleProgram() {}
 
     split(breakAtTime, continueAtTime, breakDuration) {
-        let p1 = AppContext.getInstance().ObjectBuilder
-                            .buildOfType(Program, this, this._parentBox);
-        let p2 = AppContext.getInstance().ObjectBuilder
-                            .buildOfType(Program, this, this._parentBox);
+        let p1 = AppContext.getInstance().ObjectBuilder.buildOfType(
+            Program,
+            this,
+            this._parentBox
+        );
+        let p2 = AppContext.getInstance().ObjectBuilder.buildOfType(
+            Program,
+            this,
+            this._parentBox
+        );
 
         p1.Metadata.EndTime = moment(breakAtTime);
         p2.Metadata.StartTime = moment(continueAtTime);
-        p2.Metadata.EndTime = moment(p2.Metadata.EndTime)
-                                        .add(breakDuration, 'seconds');
+        p2.Metadata.EndTime = moment(p2.Metadata.EndTime).add(breakDuration, 'seconds');
         p2.ProgramId = p2.ProgramId + '_continue';
         p2.Title = 'ادامه‌ی ' + p2.Title;
 
@@ -480,8 +513,9 @@ class Program extends BaseProgram {
 
 class Metadata extends Entity {
     get StartTime() {
-        return this.getOrNull(this.PreShowStartTime ?
-                                this.PreShowStartTime : this.ShowStartTime);
+        return this.getOrNull(
+            this.PreShowStartTime ? this.PreShowStartTime : this.ShowStartTime
+        );
     }
 
     set StartTime(value) {
@@ -513,8 +547,7 @@ class Metadata extends Entity {
     }
 
     get Duration() {
-        return moment(this.EndTime)
-            .diff(this.StartTime, 'seconds');
+        return moment(this.EndTime).diff(this.StartTime, 'seconds');
     }
 
     set Duration(value) {
@@ -531,9 +564,9 @@ class Metadata extends Entity {
 }
 
 module.exports = {
-    'ProgramTemplate': ProgramTemplate,
-    'ProgramPlan': ProgramPlan,
-    'Program': Program,
-    'PremiereProgramTemplate': PremiereProgramTemplate,
-    'ReplayProgramTemplate': ReplayProgramTemplate,
+    ProgramTemplate: ProgramTemplate,
+    ProgramPlan: ProgramPlan,
+    Program: Program,
+    PremiereProgramTemplate: PremiereProgramTemplate,
+    ReplayProgramTemplate: ReplayProgramTemplate,
 };

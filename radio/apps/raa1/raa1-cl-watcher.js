@@ -79,6 +79,7 @@ class Raa1CLWatcher extends AppContext {
     }
 }
 
+/* === Entry Point === */
 program
     .version('1.0.0')
     .parse(process.argv);
