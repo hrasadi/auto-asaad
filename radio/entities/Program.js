@@ -4,6 +4,7 @@ const AppContext = require('../AppContext');
 const DateUtils = require('../DateUtils');
 
 const Publishing = require('./Publishing');
+const Schedule = require('./Schedule');
 
 const LivePlaybackSchedulerMeta = require('./LivePlaybackSchedulerMeta');
 
@@ -72,16 +73,14 @@ class ProgramTemplate extends BaseProgram {
         this._programType = value;
     }
 
-    get PremiereDate() {
-        let result = this.getOrNull(this._premiereDate);
-        if (result) {
-            result = moment(result);
-        }
-        return result;
+    get Schedule() {
+        return this.getOrNull(this._schedule);
     }
 
-    set PremiereDate(value) {
-        this._premiereDate = value;
+    set Schedule(value) {
+        if (value) {
+            this._schedule = new Schedule(value);
+        }
     }
 }
 class PremiereProgramTemplate extends ProgramTemplate {
@@ -91,6 +90,10 @@ class PremiereProgramTemplate extends ProgramTemplate {
 
     plan(targetDate, parent) {
         // Plan a new episode
+        if (!this.Schedule || !this.Schedule.isOnSchedule(targetDate)) {
+            return null;
+        }
+
         let plannedPreShow = null;
         let plannedShow = null;
 
@@ -143,6 +146,10 @@ class ReplayProgramTemplate extends ProgramTemplate {
     }
 
     plan(targetDate, parent) {
+        if (!this.Schedule || !this.Schedule.isOnSchedule(targetDate)) {
+            return null;
+        }
+
         let originalAiringDate = DateUtils.getDateString(
             moment(targetDate).subtract(this.OriginalAiringOffset, 'days')
         );

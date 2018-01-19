@@ -48,11 +48,14 @@ class MediaGroup extends Entity {
     }
 
     get Media() {
-        return this.getOrElse(this._media, []);
+        if (!this._media) {
+            this._media = [];
+        }
+        return this._media;
     }
 
     /*
-        Each media value contains a (Path, Description) tuple.
+    Each media value contains a (Path, Description) tuple.
     */
     set Media(values) {
         this._media = [];

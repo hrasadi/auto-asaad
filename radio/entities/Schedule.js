@@ -89,7 +89,7 @@ class Schedule extends Entity {
         if (values) {
             this._weeklySchedule = values;
 
-            this._weeklyScheduleBitmap = Array(7);
+            this._weeklyScheduleBitmap = Array(7).fill(0);
             for (let value of values) {
                 this._weeklyScheduleBitmap[WeekDayIndexMap[value]] = 1;
             }

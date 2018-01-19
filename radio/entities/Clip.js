@@ -53,6 +53,10 @@ class ClipTemplate extends BaseClip {
                 .diff(moment(AppContext.getInstance('LineupGenerator')
                                         .LineupManager.BaseDate), 'days');
 
+        if (!this.MediaGroup || !this.MediaGroup.Media) {
+            AppContext.getInstance().Logger.error('MediaGroup ' +
+                                    this.MediaGroupName + ' could not be found.');
+        }
         // immutable if in future
         let counter = Counter.createCounter(this.IteratorPolicy,
             counterId, this.MediaGroup.Media.length,
@@ -66,6 +70,7 @@ class ClipTemplate extends BaseClip {
 
         let mediaIdx = counter.next(targetDate,
                             this.Offset + extraFutureOffset);
+
         if (mediaIdx == null) {
             return null;
         }
