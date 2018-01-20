@@ -134,7 +134,7 @@ class ShowPlan extends Entity {
                     return clipPlan;
                 }
             }
-            throw Error('Show does not have Main Clip');
+            throw Error('Show does not have main clip.');
         }
     }
 
@@ -219,7 +219,7 @@ class Show extends Entity {
                     return clip;
                 }
             }
-            throw Error('Show does not have Main Clip');
+            throw Error('Show does not have main clip.');
         }
     }
 

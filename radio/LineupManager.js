@@ -108,8 +108,8 @@ class LineupManager {
         }
 
         // If not found (date belongs to feature of latest planned lineup)
-        throw Error('LineupPlan for specified date does not exist.' +
-         'Perhaps this date is in future');
+        throw Error('LineupPlan for ' + targetDate +' does not exist.' +
+         ' Perhaps this date is in future');
     }
 
     getLineup(targetDate) {

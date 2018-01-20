@@ -91,6 +91,9 @@ class PremiereProgramTemplate extends ProgramTemplate {
     plan(targetDate, parent) {
         // Plan a new episode
         if (!this.Schedule || !this.Schedule.isOnSchedule(targetDate)) {
+            AppContext.getInstance().Logger.debug(
+                'Program ' + this.ProgramId + ' not on schedule. Skipping...'
+            );
             return null;
         }
 
@@ -106,6 +109,9 @@ class PremiereProgramTemplate extends ProgramTemplate {
         }
 
         if (!plannedShow) {
+            AppContext.getInstance().Logger.debug(
+                'Empty show planned. Skipping program ' + this.ProgramId + '...'
+            );
             return null;
         }
 
@@ -116,6 +122,7 @@ class PremiereProgramTemplate extends ProgramTemplate {
         // This is where we evaluate custom action params
         plannedProgram.evaluateCustomActionParams();
 
+        AppContext.getInstance().Logger.debug('Planned program: ' + this.ProgramId);
         return plannedProgram;
     }
 
@@ -146,64 +153,77 @@ class ReplayProgramTemplate extends ProgramTemplate {
     }
 
     plan(targetDate, parent) {
-        if (!this.Schedule || !this.Schedule.isOnSchedule(targetDate)) {
+        // Schedule object is not manatory for programs
+        if (this.Schedule && !this.Schedule.isOnSchedule(targetDate)) {
             return null;
         }
 
-        let originalAiringDate = DateUtils.getDateString(
-            moment(targetDate).subtract(this.OriginalAiringOffset, 'days')
-        );
-
-        // If offset == 0, we are replaying from today
-        let originalAiringLineupPlan = !this.OriginalAiringOffset
-            ? parent._parentLineupPlan
-            : AppContext.getInstance('LineupGenerator').LineupManager.getLineupPlan(
-                  originalAiringDate
-              );
-
-        if (
-            !originalAiringLineupPlan ||
-            !originalAiringLineupPlan.Version ||
-            originalAiringLineupPlan.Version !== '3.0'
-        ) {
-            // Not supported! Format too old or
-            // original lineup does not exist at all
-            return null;
-        }
-
-        let originalBoxPlan = originalAiringLineupPlan.getBoxPlan(this.OriginalBoxId);
-        if (!originalBoxPlan) {
-            return null;
-        }
-
-        // Now check for the programs in the original airing and
-        // find the target programs
-        // Apply include filter
+        // Result
         let replayProgramPlans = [];
-        for (let programPlan of originalBoxPlan.ProgramPlans) {
-            let replayEligible = false;
 
-            // Apply the include filter (no include section means *)
-            if (!this.Include || this.Include.includes(programPlan.ProgramId)) {
-                replayEligible = true;
+        // Original offset could be an array (to save abbrevity in the config)
+        for (let originalAiringOffset of this.OriginalAiringOffset) {
+            let originalAiringDate = DateUtils.getDateString(
+                moment(targetDate).subtract(originalAiringOffset, 'days')
+            );
+
+            // If offset == 0, we are replaying from today
+            let originalAiringLineupPlan = !originalAiringOffset
+                ? parent._parentLineupPlan
+                : AppContext.getInstance('LineupGenerator').LineupManager.getLineupPlan(
+                      originalAiringDate
+                  );
+
+            if (
+                !originalAiringLineupPlan ||
+                !originalAiringLineupPlan.Version ||
+                originalAiringLineupPlan.Version !== '3.0'
+            ) {
+                // Not supported! Format too old or
+                // original lineup does not exist at all
+                continue;
             }
 
-            // Apply the exclude filter (no include section means null)
-            if (this.Exclude && this.Exclude.includes(programPlan.ProgramId)) {
-                replayEligible = false;
+            let originalBoxPlan = originalAiringLineupPlan.getBoxPlan(this.OriginalBoxId);
+            if (!originalBoxPlan) {
+                AppContext.getInstance().Logger.debug(
+                    'Original box ' +
+                        this.OriginalBoxId +
+                        ' for ' +
+                        originalAiringOffset +
+                        ' days ago is not planned. Skipping replay.'
+                );
+                continue;
             }
 
-            if (replayEligible) {
-                let replayProgram = new ProgramPlan(programPlan, parent);
-                if (replayProgram) {
-                    replayProgram.pruneProgramPlan();
+            // Now check for the programs in the original airing and
+            // find the target programs
+            // Apply include filter
+            for (let programPlan of originalBoxPlan.ProgramPlans) {
+                let replayEligible = false;
 
-                    replayProgram.ProgramId = programPlan.ProgramId + '_Replay';
-                    replayProgram.Title = programPlan.Title + ' - تکرار';
-                    // Replat program should not inherit properties
-                    // from original program
-                    replayProgram.Publishing = this.Publishing;
-                    replayProgramPlans.push(replayProgram);
+                // Apply the include filter (no include section means *)
+                if (!this.Include || this.Include.includes(programPlan.ProgramId)) {
+                    replayEligible = true;
+                }
+
+                // Apply the exclude filter (no include section means null)
+                if (this.Exclude && this.Exclude.includes(programPlan.ProgramId)) {
+                    replayEligible = false;
+                }
+
+                if (replayEligible) {
+                    let replayProgram = new ProgramPlan(programPlan, parent);
+                    if (replayProgram) {
+                        replayProgram.pruneProgramPlan();
+
+                        replayProgram.ProgramId = programPlan.ProgramId + '_Replay';
+                        replayProgram.Title = programPlan.Title + ' - تکرار';
+                        // Replay program should not inherit properties
+                        // from original program
+                        replayProgram.Publishing = this.Publishing;
+                        replayProgramPlans.push(replayProgram);
+                    }
                 }
             }
         }
@@ -212,15 +232,28 @@ class ReplayProgramTemplate extends ProgramTemplate {
             return null;
         }
 
+        AppContext.getInstance().Logger.debug(
+            'Programs planned for replay: ' +
+                replayProgramPlans
+                    .map((programPlan) => programPlan.ProgramId)
+                    .join(', ') +
+                ' offset(s) ' +
+                this.OriginalAiringOffset.join(', ')
+        );
         return replayProgramPlans;
     }
 
     get OriginalAiringOffset() {
-        return this.getOrNull(this._originalAiringOffset);
+        return this.getOrElse(this._originalAiringOffset, [0]);
     }
 
-    set OriginalAiringOffset(value) {
-        this._originalAiringOffset = parseInt(value);
+    set OriginalAiringOffset(values) {
+        // Covert to array even if it is not already
+        if (values) {
+            this._originalAiringOffset = []
+                .concat(values)
+                .map((value) => parseInt(value));
+        }
     }
 
     get OriginalBoxId() {
@@ -301,10 +334,13 @@ class ProgramPlan extends BaseProgram {
     /**
      * Removes all clips except the main clip.
      * Also removes the preshow if any.
+     * All clips in a replay program is not main. This is to ensure that they will
+     * not get replayed again.
      */
     pruneProgramPlan() {
         this.PreShowPlan = null;
         this.ShowPlan.pruneClipPlans();
+        this.ShowPlan.ClipPlans.map((clipPlan) => (clipPlan.IsMainClip = false));
     }
 
     evaluateCustomActionParam(param) {
@@ -356,7 +392,8 @@ class Program extends BaseProgram {
         if (
             !this.Publishing.Podcast &&
             !this.Publishing.Archive &&
-            this.Publishing.CollaborativeListeningFeed === 'None') {
+            this.Publishing.CollaborativeListeningFeed === 'None'
+        ) {
             return;
         }
 
@@ -376,7 +413,8 @@ class Program extends BaseProgram {
                 'Program publishing called for program "' +
                     this.ProgramId +
                     '" with params: ' +
-                    JSON.stringify(this.Publishing));
+                    JSON.stringify(this.Publishing)
+            );
         } else {
             if (this.Publishing.Podcast) {
                 AppContext.getInstance(
