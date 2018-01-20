@@ -1,8 +1,8 @@
 const {createLogger, format, transports} = require('winston');
 
-let Logger = function(logFilePath) {
+let Logger = function(logFilePath, forceDebug = false) {
   let logger = createLogger({
-    level: 'debug',
+    level: 'info',
     format: format.combine(
       format.json(),
       format.timestamp(),
@@ -23,7 +23,7 @@ let Logger = function(logFilePath) {
     ],
   });
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== 'production' || forceDebug) {
     logger.add(new transports.Console({
       level: 'debug',
       format: format.combine(
