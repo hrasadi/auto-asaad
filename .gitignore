@@ -1,2 +1,3 @@
 node_modules/**
 radio/apps/raa1/liquidsoap-handlers/test-fcm.js
+.vscode/**

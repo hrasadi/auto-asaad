@@ -86,6 +86,10 @@ class BoxTemplate extends BaseBox {
 
                 boxPlan.StartTime =
                             this.Schedule.calculateStartTime(targetDate, null);
+
+                // This is where we evaluate custom action params
+                boxPlan.evaluateCustomActionParams();
+
                 return boxPlan;
             }
         }
@@ -100,7 +104,7 @@ class BoxTemplate extends BaseBox {
         if (typeof values !== 'undefined' && values) {
             if (this.IsFloating && values.length > 1) {
                 throw Error(
-                    'Box is marked as floating but' + 'it contains more than one program.'
+                    'Box is marked as floating but it contains more than one program.'
                 );
             }
 

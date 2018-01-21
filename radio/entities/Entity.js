@@ -39,6 +39,9 @@ class Entity extends SerializableObject {
         return null;
     }
 
+    /**
+     * Called during plan phase
+     */
     evaluateCustomActionParams() {
         if (this.CustomActions) {
             for (let caction of this.CustomActions) {

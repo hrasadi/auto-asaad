@@ -19,6 +19,12 @@ class Raa1ClipUtils extends ClipUtils {
         this.s3 = new AWS.S3();
     }
 
+    /**
+     * Merges clips to a single one and posts it somewhere available to public
+     * (e.g. Public S3)
+     * @param {Clip[]} clips clips to be mereged
+     * @return {Clip} the public clip object
+     */
     getPublicClip(clips) {
         let wrappedClip = new WrappedClip(clips);
 
@@ -118,7 +124,6 @@ class WrappedClip {
         if (this.IsWrapped) {
             let wrapCmd = 'echo y | ffmpeg -i "concat:' + this._allMediaPath +
                             '" -ac 2 ' + this._absolutePath + ' 2>&1 >/dev/null';
-
 
             try {
                 if (AppContext.getInstance('LineupGenerator')

@@ -10,11 +10,6 @@ class Publishing extends Entity {
     }
 
     validate() {
-        if (this.CollaborativeListeningFeed === 'Personal' &&
-                !this.PersonalSchedulingHandler) {
-            throw Error('Personal listening mode requires ' +
-                'PersonalSchudulingHandler property to be set.');
-        }
     }
 
     get Archive() {
@@ -54,14 +49,6 @@ class Publishing extends Entity {
                 'Acceptable values are "Public", "Personal" and "None"');
         }
         this._collaborativeListeningFeed = value;
-    }
-
-    get PersonalSchedulingHandler() {
-        return this.getOrNull(this._personalSchedulingHandler);
-    }
-
-    set PersonalSchedulingHandler(value) {
-        this._personalSchedulingHandler = value;
     }
 
     get ColloborativeListeningProps() {

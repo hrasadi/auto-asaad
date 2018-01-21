@@ -73,6 +73,7 @@ class ProgramTemplate extends BaseProgram {
         this._programType = value;
     }
 
+    // Only WeeklySchedule field will be used
     get Schedule() {
         return this.getOrNull(this._schedule);
     }
