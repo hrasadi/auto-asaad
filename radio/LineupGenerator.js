@@ -99,6 +99,10 @@ class LineupGenerator extends AppContext {
         return this._actionManager;
     }
 
+    get StartTimeCalculatorManager() {
+        return this._startTimeCalculatorManager;
+    }
+
     get PublicFeed() {
         return this._publicFeed;
     }

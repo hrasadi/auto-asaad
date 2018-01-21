@@ -9,12 +9,12 @@ const fs = require('fs');
 const {URL} = require('url');
 
 class Raa1ClipUtils extends ClipUtils {
-    constructor(conf) {
-        super(conf);
+    constructor(credentialsConf) {
+        super();
         // Initiate AWS connection
-        if (conf.Credentials.AWS) {
+        if (credentialsConf.AWS) {
             AWS.config.loadFromPath(AppContext.getInstance().CWD +
-                                    '/' + conf.Credentials.AWS);
+                                    '/' + credentialsConf.AWS);
         }
         this.s3 = new AWS.S3();
     }

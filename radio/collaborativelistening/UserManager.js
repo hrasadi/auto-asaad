@@ -13,9 +13,11 @@ class UserManager extends DBProvider {
     init1() {
         let self = this;
         this.init0(() => {
-            self._db.run('CREATE TABLE IF NOT EXISTS USER (Id TEXT PRIMARY_KEY, ' +
-                        'DeviceType INTEGER, IP TEXT, TimeZone TEXT,' +
-                        'Latitude REAL, Longitude REAL, City TEXT, unique(Id))');
+            self._db.run(
+                'CREATE TABLE IF NOT EXISTS USER (Id TEXT PRIMARY_KEY, ' +
+                'DeviceType INTEGER, IP TEXT, TimeZone TEXT, Latitude REAL, ' +
+                'Longitude REAL, Country TEXT, State TEXT, City TEXT, unique(Id))'
+            );
         });
 
         this._type = User;
@@ -79,6 +81,22 @@ class User extends DBObject {
         this._longitude = value;
     }
 
+    get Country() {
+        return this.getOrNull(this._country);
+    }
+
+    set Country(value) {
+        this._country = value;
+    }
+
+    get State() {
+        return this.getOrNull(this._state);
+    }
+
+    set State(value) {
+        this._state = value;
+    }
+
     get City() {
         return this.getOrNull(this._city);
     }
@@ -89,9 +107,9 @@ class User extends DBObject {
 }
 
 const DeviceTypeEnum = Object.freeze({
-    'Web': 0,
-    'iOS': 1,
-    'Android': 2,
+    Web: 0,
+    iOS: 1,
+    Android: 2,
 
     fromString(string) {
         for (let key of Object.keys(this)) {
@@ -103,7 +121,7 @@ const DeviceTypeEnum = Object.freeze({
 });
 
 module.exports = {
-    'UserManager': UserManager,
-    'User': User,
-    'DeviceTypeEnum': DeviceTypeEnum,
+    UserManager: UserManager,
+    User: User,
+    DeviceTypeEnum: DeviceTypeEnum,
 };

@@ -1,31 +1,22 @@
 const Entity = require('./Entity');
 
+const AppContext = require('../AppContext');
+
 const moment = require('moment');
 
 const WeekDayIndexMap = {
-    'Sun': 0,
-    'Mon': 1,
-    'Tue': 2,
-    'Wed': 3,
-    'Thu': 4,
-    'Fri': 5,
-    'Sat': 6,
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
 };
 
 class Schedule extends Entity {
     constructor(jsonOrOther) {
         super(jsonOrOther);
-    }
-
-    validate() {
-        if (this.CalculationMethod === 'static' && !this.At) {
-            throw Error(
-                'Property "At" must be set with calulation method static.');
-        }
-        if (this.CalculationMethod === 'dynamic' && !this.Calculator) {
-            throw Error('Property "Calculator" must be set with calulation' +
-            'method dynamic.');
-        }
     }
 
     isOnSchedule(targetDate) {
@@ -41,36 +32,26 @@ class Schedule extends Entity {
         return false;
     }
 
-    calculateStartTime(targetDate, id) {
-        let startTimeMoment = null;
-        if (this.CalculationMethod == 'static') {
-            let startTime = moment(this.At, ['h:m:s', 'H:m:s']);
-            startTimeMoment = moment(targetDate)
-                .hours(startTime.hours())
-                .minutes(startTime.minutes())
-                .seconds(startTime.seconds());
-        } else {
-            // TODO:
-            // startTimeMoment = moment(this.context.radio[template.StartTime.Calculator](targetDateMoment, itemId));
+    calculateStartTime(targetDate, user) {
+        return this.getCalculatorObject().calculate(targetDate, this, user);
+    }
+
+    getCalculatorObject() {
+        let calculatorObj = null;
+
+        if (this._calculator) {
+            calculatorObj = AppContext.getInstance(
+                'LineupGenerator'
+            ).StartTimeCalculatorManager.getCalculator(this._calculator);
+
+            if (!calculatorObj) {
+                throw Error(
+                    'Calculator ' + this._calculator + ' is not registered.'
+                );
+            }
         }
 
-        return startTimeMoment;
-    }
-
-    get CalculationMethod() {
-        return this.getOrNull(this._calculationMethod);
-    }
-
-    set CalculationMethod(value) {
-        this._calculationMethod = value;
-    }
-
-    get At() {
-        return this.getOrNull(this._at);
-    }
-
-    set At(value) {
-        this._at = value;
+        return calculatorObj;
     }
 
     get Calculator() {
@@ -78,7 +59,9 @@ class Schedule extends Entity {
     }
 
     set Calculator(value) {
-        this._calculator = value;
+        if (value) {
+            this._calculator = value;
+        }
     }
 
     get WeeklySchedule() {
@@ -94,6 +77,14 @@ class Schedule extends Entity {
                 this._weeklyScheduleBitmap[WeekDayIndexMap[value]] = 1;
             }
         }
+    }
+
+    get Params() {
+        return this.getOrNull(this._params);
+    }
+
+    set Params(value) {
+        this._params = value;
     }
 }
 

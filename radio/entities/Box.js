@@ -37,6 +37,17 @@ class BaseBox extends Entity {
     set IsFloating(value) {
         this._isFloating = value;
     }
+
+    // We keep the schedule object even after planning
+    // for use by feeds specially personal feed
+    // (where we need to recalculate the distribution time based on users' location)
+    get Schedule() {
+        return this.getOrNull(this._schedule);
+    }
+
+    set Schedule(value) {
+        this._schedule = new Schedule(value);
+    }
 }
 
 class BoxTemplate extends BaseBox {
@@ -64,8 +75,7 @@ class BoxTemplate extends BaseBox {
                 for (let programTemplate of this.ProgramTemplates) {
                     let programPlan = programTemplate.plan(targetDate, boxPlan);
                     if (programPlan) {
-                        boxPlan.ProgramPlans =
-                                boxPlan.ProgramPlans.concat(programPlan);
+                        boxPlan.ProgramPlans = boxPlan.ProgramPlans.concat(programPlan);
                     }
                 }
 
@@ -74,9 +84,8 @@ class BoxTemplate extends BaseBox {
                     return null;
                 }
 
-                boxPlan.StartTime = this.Schedule
-                    .calculateStartTime(targetDate, this.BoxId);
-
+                boxPlan.StartTime =
+                            this.Schedule.calculateStartTime(targetDate, null);
                 return boxPlan;
             }
         }
@@ -90,25 +99,17 @@ class BoxTemplate extends BaseBox {
     set ProgramTemplates(values) {
         if (typeof values !== 'undefined' && values) {
             if (this.IsFloating && values.length > 1) {
-                throw Error('Box is marked as floating but' +
-                 'it contains more than one program.');
+                throw Error(
+                    'Box is marked as floating but' + 'it contains more than one program.'
+                );
             }
 
             this._programTemplates = [];
             for (let value of values) {
-                let programTemplate =
-                    ProgramTemplate.createTemplate(value, this);
+                let programTemplate = ProgramTemplate.createTemplate(value, this);
                 this._programTemplates.push(programTemplate);
             }
         }
-    }
-
-    get Schedule() {
-        return this.getOrNull(this._schedule);
-    }
-
-    set Schedule(value) {
-        this._schedule = new Schedule(value);
     }
 }
 
@@ -120,8 +121,7 @@ class BoxPlan extends BaseBox {
     }
 
     compile(parent) {
-        let box = AppContext.getInstance()
-                            .ObjectBuilder.buildOfType(Box, this, parent);
+        let box = AppContext.getInstance().ObjectBuilder.buildOfType(Box, this, parent);
         let programs = [];
 
         if (!this.ProgramPlans || this.ProgramPlans.length == 0) {
@@ -141,8 +141,7 @@ class BoxPlan extends BaseBox {
         box.Programs = programs;
         // In case there is a shift up due to a preshow
         box.StartTime = moment(box.Programs[0].Metadata.StartTime);
-        box.EndTime = moment(box.Programs[box.Programs.length - 1]
-                                                        .Metadata.EndTime);
+        box.EndTime = moment(box.Programs[box.Programs.length - 1].Metadata.EndTime);
         return box;
     }
 
@@ -176,8 +175,7 @@ class Box extends BaseBox {
     }
 
     validate() {
-        if (this.IsFloating &&
-                this.Programs && this.Programs.length > 1) {
+        if (this.IsFloating && this.Programs && this.Programs.length > 1) {
             throw Error('Floating box can only contain one program');
         }
     }
@@ -196,17 +194,18 @@ class Box extends BaseBox {
         this.EndTime = moment(this.Programs[this.Programs.length - 1].Metadata.EndTime);
     }
 
-
     schedule(targetDate, boxIdx) {
-        let oldLineupFilePath = AppContext.getInstance('LineupGenerator').LineupManager
-                                            .getScheduledLineupFilePath(targetDate);
+        let oldLineupFilePath = AppContext.getInstance(
+            'LineupGenerator'
+        ).LineupManager.getScheduledLineupFilePath(targetDate);
 
         if (fs.existsSync(oldLineupFilePath)) {
             let oldLineup = JSON.parse(fs.readFileSync(oldLineupFilePath));
             for (let oldBox of oldLineup.Boxes) {
                 if (oldBox.BoxId == this.BoxId) {
-                    this.unscheduleBox(AppContext.getInstance()
-                                                .ObjectBuilder.buildOfType(Box, oldBox));
+                    this.unscheduleBox(
+                        AppContext.getInstance().ObjectBuilder.buildOfType(Box, oldBox)
+                    );
                 }
             }
         }
@@ -225,8 +224,7 @@ class Box extends BaseBox {
     }
 
     // Implemneted in subclasses
-    doScheduleBox(targetDate) {
-    }
+    doScheduleBox(targetDate) {}
 
     // Implemented in subclasses
     unscheduleBox(oldBox) {
@@ -245,59 +243,67 @@ class Box extends BaseBox {
     }
 
     // Implemneted in subclasses
-    doUnscheduleBox(oldBox) {
-    }
+    doUnscheduleBox(oldBox) {}
 
     injectProgram(interruptingProgram) {
-        let newBox = AppContext.getInstance()
-                            .ObjectBuilder.buildOfType(Box, this, this._parentLineup);
+        let newBox = AppContext.getInstance().ObjectBuilder.buildOfType(
+            Box,
+            this,
+            this._parentLineup
+        );
         // find the program that should be interrupted
         // This is the closest program that starts
         // sooner than interrupting.
         // In other words, interrupt crosses its boundaries.
         for (let i = 0; i < this.Programs.length; i++) {
-            if (moment(this.Programs[i].Metadata.StartTime)
-                .isBefore(interruptingProgram.Metadata.StartTime) &&
-                ((i + 1) == this.Programs.length ||
-                moment(this.Programs[i + 1].Metadata.StartTime)
-                .isAfter(interruptingProgram.Metadata.StartTime))) {
-                    let shiftAmount =
-                                moment(interruptingProgram.Metadata.EndTime)
-                                .diff(interruptingProgram.Metadata.StartTime,
-                                'seconds');
-                    // We will have three programs resulting:
-                    // Original before the interrupt
-                    // The interrupting
-                    // The result of program
-                    let splittedProgs =
-                        this.Programs[i]
-                            .split(interruptingProgram.Metadata.StartTime,
-                                    interruptingProgram.Metadata.EndTime,
-                                    shiftAmount);
-                    newBox.Programs[i] = splittedProgs[0];
-                    newBox.Programs.splice(i + 1, 0,
-                        [interruptingProgram, splittedProgs[1]]);
+            if (
+                moment(this.Programs[i].Metadata.StartTime).isBefore(
+                    interruptingProgram.Metadata.StartTime
+                ) &&
+                (i + 1 == this.Programs.length ||
+                    moment(this.Programs[i + 1].Metadata.StartTime).isAfter(
+                        interruptingProgram.Metadata.StartTime
+                    ))
+            ) {
+                let shiftAmount = moment(interruptingProgram.Metadata.EndTime).diff(
+                    interruptingProgram.Metadata.StartTime,
+                    'seconds'
+                );
+                // We will have three programs resulting:
+                // Original before the interrupt
+                // The interrupting
+                // The result of program
+                let splittedProgs = this.Programs[i].split(
+                    interruptingProgram.Metadata.StartTime,
+                    interruptingProgram.Metadata.EndTime,
+                    shiftAmount
+                );
+                newBox.Programs[i] = splittedProgs[0];
+                newBox.Programs.splice(i + 1, 0, [interruptingProgram, splittedProgs[1]]);
 
-                    // shift all the programs down as well
-                    // starting from the next program
-                    newBox.shiftProgramsDown(i + 3, shiftAmount);
+                // shift all the programs down as well
+                // starting from the next program
+                newBox.shiftProgramsDown(i + 3, shiftAmount);
 
                 return newBox;
             }
         }
 
-        throw Error('Logic error: We should have been able to find a program' +
-                    ' to interrupt, but we could\'t. This is a bug');
+        throw Error(
+            'Logic error: We should have been able to find a program' +
+                ' to interrupt, but we could\'t. This is a bug'
+        );
     }
 
     shiftProgramsDown(startingProgramIdx, shiftAmount) {
         for (let i = startingProgramIdx; i < this.Programs.length; i++) {
-            this.Programs[i].Metadata.StartTime =
-                moment(this.Programs[i].Metadata.StartTime)
-                .add(shiftAmount, 'seconds');
-            this.Programs[i].EndTime =
-                moment(this.Programs[i].Metadata.EndTime)
-                .add(shiftAmount, 'seconds');
+            this.Programs[i].Metadata.StartTime = moment(
+                this.Programs[i].Metadata.StartTime
+            ).add(shiftAmount, 'seconds');
+            this.Programs[i].EndTime = moment(this.Programs[i].Metadata.EndTime).add(
+                shiftAmount,
+                'seconds'
+            );
         }
     }
 
@@ -324,8 +330,13 @@ class Box extends BaseBox {
                 if (value.constructor.name == 'Program') {
                     this._programs.push(value);
                 } else {
-                    this._programs.push(AppContext.getInstance()
-                                        .ObjectBuilder.buildOfType(Program, value, this));
+                    this._programs.push(
+                        AppContext.getInstance().ObjectBuilder.buildOfType(
+                            Program,
+                            value,
+                            this
+                        )
+                    );
                 }
             }
         }
@@ -365,7 +376,7 @@ class Box extends BaseBox {
 }
 
 module.exports = {
-    'BoxTemplate': BoxTemplate,
-    'BoxPlan': BoxPlan,
-    'Box': Box,
+    BoxTemplate: BoxTemplate,
+    BoxPlan: BoxPlan,
+    Box: Box,
 };

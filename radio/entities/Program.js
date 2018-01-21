@@ -40,12 +40,12 @@ class BaseProgram extends Entity {
     }
 
     get Publishing() {
-        return this.getOrElse(this._publishing, new Publishing());
+        return this.getOrElse(this._publishing, new Publishing(null, this));
     }
 
     set Publishing(value) {
         if (value) {
-            this._publishing = new Publishing(value);
+            this._publishing = new Publishing(value, this);
         }
     }
 }
@@ -90,7 +90,7 @@ class PremiereProgramTemplate extends ProgramTemplate {
 
     plan(targetDate, parent) {
         // Plan a new episode
-        if (!this.Schedule || !this.Schedule.isOnSchedule(targetDate)) {
+        if (this.Schedule && !this.Schedule.isOnSchedule(targetDate)) {
             AppContext.getInstance().Logger.debug(
                 'Program ' + this.ProgramId + ' not on schedule. Skipping...'
             );

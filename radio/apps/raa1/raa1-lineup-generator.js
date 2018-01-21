@@ -5,6 +5,8 @@ const ObjectBuilder = require('../../entities/ObjectBuilder');
 const LineupGenerator = require('../../LineupGenerator');
 
 const Raa1ActionManager = require('./lineupaction/Raa1ActionManager');
+const Raa1StartTimeCalculatorManager =
+                        require('./starttimecalculator/Raa1StartTimeCalculatorManager');
 
 const StandaloneMedia = require('../../standalone/StandaloneMedia');
 const StandaloneBox = require('../../standalone/StandaloneBox');
@@ -94,12 +96,14 @@ class Raa1LineupGenerator extends LineupGenerator {
         });
 
         this._actionManager = new Raa1ActionManager();
+        this._startTimeCalculatorManager =
+                                new Raa1StartTimeCalculatorManager(this._conf.Adhan);
         this._publishers = {
             PodcastPublisher: new Raa1PodcastPublisher(),
             ArchivePublisher: new Raa1ArchivePublisher(),
         };
 
-        this._clipUtils = new Raa1ClipUtils(this._conf);
+        this._clipUtils = new Raa1ClipUtils(this._conf.Credentials);
         try {
             this._pinfoDirectory = JSON.parse(
                 fs.readFileSync(this._pinfoDirectoryFilePath)

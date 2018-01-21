@@ -3,8 +3,10 @@ const Entity = require('./Entity');
 const AppContext = require('../AppContext');
 
 class Publishing extends Entity {
-    constructor(jsonOrOther) {
+    constructor(jsonOrOther, parent) {
         super(jsonOrOther);
+
+        this._parent = parent;
     }
 
     validate() {

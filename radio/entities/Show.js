@@ -93,7 +93,7 @@ class PreShowTemplate extends ShowTemplate {
 
     set FillerClipTemplate(value) {
         if (value) {
-            this._fillerClipTemplate = value;
+            this._fillerClipTemplate = new ClipTemplate(value, this);
         }
     }
 }
