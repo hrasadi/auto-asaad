@@ -107,6 +107,10 @@ class LineupGenerator extends AppContext {
         return this._publicFeed;
     }
 
+    get PersonalFeed() {
+        return this._personalFeed;
+    }
+
     get Publishers() {
         return this._publishers;
     }

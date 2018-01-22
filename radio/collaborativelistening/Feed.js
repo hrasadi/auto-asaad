@@ -34,7 +34,7 @@ class Feed extends DBProvider {
     }
 
     // implemented in subclasses
-    registerProgram(program, userId) {
+    registerProgram(program, targetDate) {
     }
 
     // implemented in subclasses

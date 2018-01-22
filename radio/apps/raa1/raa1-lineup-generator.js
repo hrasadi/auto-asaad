@@ -119,6 +119,9 @@ class Raa1LineupGenerator extends LineupGenerator {
         this._publicFeed = new Raa1PublicFeed(
             this._conf.CollaborativeListening.FeedDBFile
         );
+        this._publicFeed = new Raa1PersonalFeed(
+            this._conf.CollaborativeListening.FeedDBFile
+        );
         // this._personalFeed = new Raa1PersonalFeed('feed.db');
         await this._publicFeed.init();
     }

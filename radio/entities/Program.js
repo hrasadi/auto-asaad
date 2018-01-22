@@ -437,6 +437,10 @@ class Program extends BaseProgram {
             );
         } else if (this.Publishing.CollaborativeListeningFeed === 'Personal') {
             // Schedule for personal feed
+            AppContext.getInstance('LineupGenerator').PersonalFeed.registerProgram(
+                programToPublish,
+                targetDate
+            );
         }
     }
 
