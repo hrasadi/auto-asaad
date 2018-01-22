@@ -1,3 +1,4 @@
 [submodule "radio/apps/raa1/conf"]
 	path = radio/apps/raa1/conf
 	url = git@github.com:hrasadi/raa-conf.git
+	branch = master
