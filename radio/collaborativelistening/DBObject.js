@@ -20,18 +20,25 @@ class DBObject {
         let placeholders = sampleObj.getQueryPlaceholders();
 
         return {
-            statement: 'INSERT INTO ' + sampleObj._tableName + '(' +
-                            sampleObj.getInsertQueryPropertyNames().join(', ') +
-                             ') VALUES ' + list.map((obj) => placeholders).join(', '),
+            statement:
+                'INSERT INTO ' +
+                sampleObj._tableName +
+                '(' +
+                sampleObj.getInsertQueryPropertyNames().join(', ') +
+                ') VALUES ' +
+                list.map((obj) => placeholders).join(', '),
             values: list.map((obj) => obj.getValues()),
         };
     }
 
     static getSelectPreStatement(fromType, query) {
         return {
-            statement: 'SELECT * FROM ' + fromType.name +
-                        (query ? ' WHERE ' + query.statement : ''),
-            values: query.values,
+            statement:
+                'SELECT * FROM "' +
+                fromType.name +
+                '"' +
+                (query ? ' WHERE ' + query.statement : ''),
+            values: query ? query.values : [],
         };
     }
 
@@ -42,8 +49,10 @@ class DBObject {
         let propertyValues = this.getValues(properties);
 
         return {
-            statement: 'INSERT INTO ' + this._tableName + '(' + propertyNames.join(', ') +
-                                        ') VALUES ' + placeholders,
+            statement:
+                'INSERT INTO "' + this._tableName + '" (' + propertyNames.join(', ') +
+                ') VALUES ' +
+                placeholders,
             values: propertyValues,
         };
     }
@@ -80,8 +89,12 @@ class DBObject {
         let updatedValuesStrings = propertyNames.map((pn) => pn + ' = ?');
 
         return {
-            statement: 'UPDATE ' + this._tableName + ' SET ' +
-                                updatedValuesStrings.join(', ') + ' WHERE Id = ?',
+            statement:
+                'UPDATE "' +
+                this._tableName +
+                '" SET ' +
+                updatedValuesStrings.join(', ') +
+                ' WHERE Id = ?',
             values: propertyValues.concat(this.Id),
         };
     }
@@ -117,14 +130,13 @@ class DBObject {
     }
 
     listProperties(proto) {
-        return Object.entries(Object
-                                .getOwnPropertyDescriptors(proto))
-           .filter(([key, descriptor]) => typeof descriptor.get === 'function')
-           .map(([key]) => {
+        return Object.entries(Object.getOwnPropertyDescriptors(proto))
+            .filter(([key, descriptor]) => typeof descriptor.get === 'function')
+            .map(([key]) => {
                 let res = {};
                 res[key] = this[key];
                 return res;
-           });
+            });
     }
 }
 

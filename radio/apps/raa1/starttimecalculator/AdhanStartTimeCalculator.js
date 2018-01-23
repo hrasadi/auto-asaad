@@ -70,6 +70,9 @@ class AdhanStartTimeCalculator extends StartTimeCalculator {
             return null;
         }
 
+        if (res.statusCode > 300) {
+            throw Error('Error while reading adhan times for given request: ' + qs);
+        }
         let parsed = JSON.parse(res.getBody());
 
         let dateTimings = {};

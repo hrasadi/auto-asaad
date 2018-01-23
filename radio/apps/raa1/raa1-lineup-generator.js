@@ -121,11 +121,11 @@ class Raa1LineupGenerator extends LineupGenerator {
         this._publicFeed = new Raa1PublicFeed(
             this._conf.CollaborativeListening.FeedDBFile
         );
-        this._publicFeed = new Raa1PersonalFeed(
+        this._personalFeed = new Raa1PersonalFeed(
             this._conf.CollaborativeListening.FeedDBFile
         );
-        // this._personalFeed = new Raa1PersonalFeed('feed.db');
         await this._publicFeed.init();
+        await this._personalFeed.init();
     }
 }
 
@@ -160,3 +160,4 @@ if (program.args.length < 2) {
 }
 
 new Raa1LineupGenerator(program).run();
+process.on('unhandledRejection', (e) => console.log(e));

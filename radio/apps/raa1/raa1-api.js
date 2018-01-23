@@ -170,3 +170,4 @@ if (program.args.length < 1) {
 }
 
 new Raa1API(program).init();
+process.on('unhandledRejection', (e) => console.log(e));

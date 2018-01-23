@@ -404,7 +404,8 @@ class Program extends BaseProgram {
         ).ClipUtils.getPublicClip(this.Show.Clips);
         let programToPublish = AppContext.getInstance().ObjectBuilder.buildOfType(
             Program,
-            this
+            this,
+            this._parentBox
         );
         programToPublish.Show.Clips = [mergedClip];
         programToPublish.Metadata.Duration = programToPublish.Show.Duration;

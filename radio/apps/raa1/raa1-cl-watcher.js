@@ -91,5 +91,4 @@ if (program.args.length < 1) {
 }
 
 new Raa1CLWatcher(program).init();
-
-
+process.on('unhandledRejection', (e) => console.log(e));

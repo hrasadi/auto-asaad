@@ -29,8 +29,8 @@ class PersonalFeed extends Feed {
         if (this._historyProdiver) {
             await this._historyProdiver._db.runAsync(
                 'CREATE TABLE IF NOT EXISTS PERSONALFEEDENTRY ' +
-                '(Id TEXT PRIMARY_KEY, ' +
-                'Program TEXT, UserId INTEGER, unique(Id))'
+                    '(Id TEXT PRIMARY_KEY, ' +
+                    'Program TEXT, UserId INTEGER, unique(Id))'
             );
         }
 
@@ -40,8 +40,11 @@ class PersonalFeed extends Feed {
 
     async registerProgram(program, targetDate) {
         let self = this;
-        this.entryListForEach(User, null, (user) => {
-            let releaseMoment = program.Schedule.calculateStartTime(targetDate, user);
+        await this.entryListForEach(User, null, (user) => {
+            let releaseMoment = program._parentBox.Schedule.calculateStartTime(
+                targetDate,
+                user
+            );
             self.registerProgramForUser(program, releaseMoment, user.Id);
         });
     }
@@ -60,9 +63,9 @@ class PersonalFeed extends Feed {
         }
 
         feedEntry.ExpirationTimestamp = DateUtils.getEpochSeconds(
-            moment.unix(feedEntry.ReleaseTimestamp).add(
-                program.Metadata.Duration,
-                'seconds')
+            moment
+                .unix(feedEntry.ReleaseTimestamp)
+                .add(program.Metadata.Duration, 'seconds')
         );
         feedEntry.Program = program;
 
@@ -130,7 +133,7 @@ class PersonalFeedEntry extends FeedEntry {
 }
 
 module.exports = {
-    'PersonalFeed': PersonalFeed,
-    'PersonalFeedWatcher': PersonalFeedWatcher,
-    'PersonalFeedEntry': PersonalFeedEntry,
+    PersonalFeed: PersonalFeed,
+    PersonalFeedWatcher: PersonalFeedWatcher,
+    PersonalFeedEntry: PersonalFeedEntry,
 };
