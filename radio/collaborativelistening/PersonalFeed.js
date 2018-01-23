@@ -9,7 +9,7 @@ const FeedEntry = F.FeedEntry;
 const U = require('../collaborativelistening/UserManager');
 const User = U.User;
 
-const moment = require('moment-tz');
+const moment = require('moment-timezone');
 const uuid = require('uuid/v1');
 
 class PersonalFeed extends Feed {
