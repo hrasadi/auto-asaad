@@ -168,7 +168,7 @@ class Raa1LineupGenerator extends LineupGenerator {
             execSync(
                 'echo \'cd ' +
                     __dirname +
-                    '; ' +
+                    '; NODE_ENV=production ' +
                     process.argv.join(' ') +
                     '\' | at -t ' +
                     tomorrowMomentInOurZone.format('YYYYMMDDHHmm.ss') +
