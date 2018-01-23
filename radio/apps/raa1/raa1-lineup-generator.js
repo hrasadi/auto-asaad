@@ -22,6 +22,8 @@ const Raa1ArchivePublisher = require('./publishers/Raa1ArchivePublisher');
 
 const RUF = require('./collaborativelistening/Raa1PublicFeed');
 const Raa1PublicFeed = RUF.Raa1PublicFeed;
+const RSF = require('./collaborativelistening/Raa1PersonalFeed');
+const Raa1PersonalFeed = RSF.Raa1PersonalFeed;
 
 const fs = require('fs');
 const program = require('commander');
