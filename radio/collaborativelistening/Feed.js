@@ -121,7 +121,7 @@ class FeedWatcher {
         }
 
         if (fs.existsSync(this._epochLockFilePath)) {
-            return parseFloat(fs.readFileSync(this._epochLockFilePath));
+            return parseFloat(fs.readFileSync(this._epochLockFilePath), 'utf-8');
         } else {
             this._lastProcessedEpoch = DateUtils.getEpochSeconds(moment());
             return this._lastProcessedEpoch;

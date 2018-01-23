@@ -2,6 +2,8 @@ const AppContext = require('./AppContext');
 
 const LineupManager = require('./LineupManager');
 
+const fs = require('fs');
+
 class LineupGenerator extends AppContext {
     constructor() {
         super();
@@ -47,7 +49,9 @@ class LineupGenerator extends AppContext {
         try {
             await this.init();
 
-            if (this.GeneratorOptions.ActiveStages.Plan) {
+            // If admin locks a lineup plan, we skip planning it
+            if (this.GeneratorOptions.ActiveStages.Plan &&
+                !fs.existsSync(this.LineupManager.getLineupPlanFilePath + '.lock')) {
                 this.LineupManager.planLineupRange(this._targetDate,
                                                 this.GeneratorOptions.PlanAheadDays);
             } else {

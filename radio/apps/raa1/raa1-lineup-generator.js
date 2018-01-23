@@ -5,8 +5,7 @@ const ObjectBuilder = require('../../entities/ObjectBuilder');
 const LineupGenerator = require('../../LineupGenerator');
 
 const Raa1ActionManager = require('./lineupaction/Raa1ActionManager');
-const Raa1StartTimeCalculatorManager =
-                        require('./starttimecalculator/Raa1StartTimeCalculatorManager');
+const Raa1StartTimeCalculatorManager = require('./starttimecalculator/Raa1StartTimeCalculatorManager');
 
 const StandaloneMedia = require('../../standalone/StandaloneMedia');
 const StandaloneBox = require('../../standalone/StandaloneBox');
@@ -31,6 +30,8 @@ const Raa1PersonalFeed = RSF.Raa1PersonalFeed;
 const fs = require('fs');
 const program = require('commander');
 const path = require('path');
+const execSync = require('child_process').execSync;
+const moment = require('moment');
 
 class Raa1LineupGenerator extends LineupGenerator {
     constructor(proram) {
@@ -87,6 +88,11 @@ class Raa1LineupGenerator extends LineupGenerator {
     }
 
     async init() {
+        // Pull conf git repo!
+        execSync(
+            'git -C ' + path.resolve(path.dirname(this._confFilePath)) + ' pull --no-edit'
+        );
+
         try {
             this._conf = JSON.parse(fs.readFileSync(this._confFilePath));
         } catch (e) {
@@ -104,8 +110,9 @@ class Raa1LineupGenerator extends LineupGenerator {
         });
 
         this._actionManager = new Raa1ActionManager();
-        this._startTimeCalculatorManager =
-                                new Raa1StartTimeCalculatorManager(this._conf.Adhan);
+        this._startTimeCalculatorManager = new Raa1StartTimeCalculatorManager(
+            this._conf.Adhan
+        );
         this._publishers = {
             PodcastPublisher: new Raa1PodcastPublisher(),
             ArchivePublisher: new Raa1ArchivePublisher(),
@@ -127,9 +134,7 @@ class Raa1LineupGenerator extends LineupGenerator {
         // This is becuase we do not need the push notification endpoints when
         // generating lineup but still need to create tables if needed, etc.
         // Therefore we need the barebone to be created
-        this._userManager = new UserManager(
-            this._conf.CollaborativeListening.FeedDBFile
-        );
+        this._userManager = new UserManager(this._conf.CollaborativeListening.FeedDBFile);
         this._userManager.init();
         // Feeds
         this._publicFeed = new Raa1PublicFeed(
@@ -140,6 +145,40 @@ class Raa1LineupGenerator extends LineupGenerator {
         );
         await this._publicFeed.init();
         await this._personalFeed.init();
+
+        /* REPRODUCE: Schedle generation for tomorrow */
+        /* We use the exact same command that executed us for future executions too */
+
+        // Next days zoned time
+        let tomorrowMomentInZone = DateUtils.getNowInTimeZone()
+            .add(1, 'day')
+            .hours(0)
+            .minutes(0)
+            .seconds(0);
+        let tomorrowMomentInOurZone = moment.unix(
+            DateUtils.getEpochSeconds(tomorrowMomentInZone)
+        );
+
+        let lockFilePath = this._cwd + '/run/lineup-generator-next-job.lock';
+        if (
+            !fs.existsSync(lockFilePath) ||
+            fs.readFileSync(lockFilePath, 'utf-8') !==
+                DateUtils.getDateString(tomorrowMomentInZone)
+        ) {
+            execSync(
+                'echo \'cd ' +
+                    __dirname +
+                    '; ' +
+                    process.argv.join(' ') +
+                    '\' | at -t ' +
+                    tomorrowMomentInOurZone.format('YYYYMMDDHHmm.ss') +
+                    ' 2>&1'
+            );
+            fs.writeFileSync(lockFilePath, DateUtils.getDateString(tomorrowMomentInZone));
+        }
+
+        // Print out stack trace for failures in Promises
+        process.on('unhandledRejection', (e) => console.log(e));
     }
 }
 
@@ -175,4 +214,3 @@ if (program.args.length < 2) {
 }
 
 new Raa1LineupGenerator(program).run();
-process.on('unhandledRejection', (e) => console.log(e));

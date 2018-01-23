@@ -14,6 +14,10 @@ class DateUtils {
         return DateUtils.getDateString(moment());
     }
 
+    static getNowInTimeZone() {
+        return moment.tz('Pacific/Kiritimati');
+    }
+
     static getEpochSeconds(m) {
         // .unix() returns timestamp is Epoch seconds
         return moment(m).seconds(0).unix();
