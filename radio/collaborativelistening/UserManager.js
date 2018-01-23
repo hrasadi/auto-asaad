@@ -10,15 +10,13 @@ class UserManager extends DBProvider {
         this.init1();
     }
 
-    init1() {
-        let self = this;
-        this.init0(() => {
-            self._db.run(
-                'CREATE TABLE IF NOT EXISTS USER (Id TEXT PRIMARY_KEY, ' +
+    async init1() {
+        await this.init0();
+        this._db.runAsync(
+            'CREATE TABLE IF NOT EXISTS "USER" (Id TEXT PRIMARY_KEY, ' +
                 'DeviceType INTEGER, IP TEXT, TimeZone TEXT, Latitude REAL, ' +
                 'Longitude REAL, Country TEXT, State TEXT, City TEXT, unique(Id))'
-            );
-        });
+        );
 
         this._type = User;
         this._tableName = 'User';
