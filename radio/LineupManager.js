@@ -26,14 +26,16 @@ class LineupManager {
 
         for (let i = 0; i < numDaysToPlan; i++) {
             let targetDate = moment(startDate)
-                                    .add(i, 'days').format('YYYY-MM-DD');
+                .add(i, 'days')
+                .format('YYYY-MM-DD');
 
-            this._lineupPlansCache[targetDate] =
-                    this._lineupTemplate.plan(targetDate);
+            this._lineupPlansCache[targetDate] = this._lineupTemplate.plan(targetDate);
 
             if (!AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
-                fs.writeFileSync(this.getLineupPlanFilePath(targetDate),
-                        JSON.stringify(this._lineupPlansCache[targetDate], null, 2));
+                fs.writeFileSync(
+                    this.getLineupPlanFilePath(targetDate),
+                    JSON.stringify(this._lineupPlansCache[targetDate], null, 2)
+                );
             }
         }
     }
@@ -43,8 +45,10 @@ class LineupManager {
         this._lineupsCache[targetDate] = lineup;
 
         if (!AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
-            fs.writeFileSync(this.getLineupFilePath(targetDate),
-                JSON.stringify(lineup, null, 2));
+            fs.writeFileSync(
+                this.getLineupFilePath(targetDate),
+                JSON.stringify(lineup, null, 2)
+            );
         }
     }
 
@@ -64,8 +68,7 @@ class LineupManager {
 
             let lineupJSON = JSON.stringify(lineup, null, 2);
             if (!AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
-                fs.writeFileSync(
-                        this.getScheduledLineupFilePath(targetDate), lineupJSON);
+                fs.writeFileSync(this.getScheduledLineupFilePath(targetDate), lineupJSON);
             } else {
                 AppContext.getInstance().Logger.debug(lineupJSON);
             }
@@ -75,23 +78,38 @@ class LineupManager {
     }
 
     getLineupFileName(targetDate) {
-        return AppContext.getInstance('LineupGenerator').LineupFileNamePrefix +
-                                                                    '-' + targetDate;
+        return (
+            AppContext.getInstance('LineupGenerator').LineupFileNamePrefix +
+            '-' +
+            targetDate
+        );
     }
 
     getLineupPlanFilePath(targetDate) {
-        return AppContext.getInstance().CWD + '/run/lineup/' +
-                                this.getLineupFileName(targetDate) + '.planned.json';
+        return (
+            AppContext.getInstance().CWD +
+            '/run/lineup/' +
+            this.getLineupFileName(targetDate) +
+            '.planned.json'
+        );
     }
 
     getLineupFilePath(targetDate) {
-        return AppContext.getInstance().CWD + '/run/lineup/' +
-                                this.getLineupFileName(targetDate) + '.json';
+        return (
+            AppContext.getInstance().CWD +
+            '/run/lineup/' +
+            this.getLineupFileName(targetDate) +
+            '.json'
+        );
     }
 
     getScheduledLineupFilePath(targetDate) {
-        return AppContext.getInstance().CWD + '/run/lineup/' +
-                                this.getLineupFileName(targetDate) + '.json.scheduled';
+        return (
+            AppContext.getInstance().CWD +
+            '/run/lineup/' +
+            this.getLineupFileName(targetDate) +
+            '.json.scheduled'
+        );
     }
 
     getLineupPlan(targetDate) {
@@ -103,13 +121,17 @@ class LineupManager {
         // Load from file if not in memory
         let lineupPlanFilePath = this.getLineupPlanFilePath(targetDate);
         if (fs.existsSync(lineupPlanFilePath)) {
-            return new LineupPlan(
-                    JSON.parse(fs.readFileSync(lineupPlanFilePath)));
+            return new LineupPlan(JSON.parse(fs.readFileSync(lineupPlanFilePath)));
         }
 
         // If not found (date belongs to feature of latest planned lineup)
-        throw Error('LineupPlan for ' + targetDate +' does not exist.' +
-         ' Perhaps this date is in future');
+        AppContext.getInstance().Logger.warn(
+            'LineupPlan for ' +
+                targetDate +
+                ' does not exist.'
+        );
+
+        return null;
     }
 
     getLineup(targetDate) {
