@@ -20,6 +20,8 @@ const Raa1ClipUtils = require('./Raa1ClipUtils');
 const Raa1PodcastPublisher = require('./publishers/Raa1PodcastPublisher');
 const Raa1ArchivePublisher = require('./publishers/Raa1ArchivePublisher');
 
+const Raa1UserManager = require('./collaborativelistening/Raa1UserManager');
+
 const RUF = require('./collaborativelistening/Raa1PublicFeed');
 const Raa1PublicFeed = RUF.Raa1PublicFeed;
 const RSF = require('./collaborativelistening/Raa1PersonalFeed');
@@ -117,6 +119,9 @@ class Raa1LineupGenerator extends LineupGenerator {
             process.exit(1);
         }
 
+        this._userManager = new Raa1UserManager(
+            this._conf.CollaborativeListening.FeedDBFile
+        );
         // Feeds
         this._publicFeed = new Raa1PublicFeed(
             this._conf.CollaborativeListening.FeedDBFile

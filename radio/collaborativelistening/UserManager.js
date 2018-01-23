@@ -14,7 +14,7 @@ class UserManager extends DBProvider {
         let self = this;
         this.init0(() => {
             self._db.run(
-                'CREATE TABLE IF NOT EXISTS "USER" (Id TEXT PRIMARY_KEY, ' +
+                'CREATE TABLE IF NOT EXISTS USER (Id TEXT PRIMARY_KEY, ' +
                 'DeviceType INTEGER, IP TEXT, TimeZone TEXT, Latitude REAL, ' +
                 'Longitude REAL, Country TEXT, State TEXT, City TEXT, unique(Id))'
             );
