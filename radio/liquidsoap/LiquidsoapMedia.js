@@ -10,8 +10,7 @@ class LiquidsoapMedia extends Media {
     compile() {
         let compiledMedia = new LiquidsoapMedia(this, this._parentMediaGroup);
 
-        let cmd = 'afinfo ' + this.Path +
-                    ' | awk \'/estimated duration/ { print $3 }\'';
+        let cmd = 'mp3info -p "%S" ' + this.Path;
         compiledMedia.Duration = parseFloat(execSync(cmd, {
                     encoding: 'utf-8',
                 }));
