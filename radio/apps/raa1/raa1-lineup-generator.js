@@ -63,6 +63,9 @@ class Raa1LineupGenerator extends LineupGenerator {
         if (!program.tts) {
             this._generatorOptions.NoTTS = true;
         }
+        if (!program.vodUpload) {
+            this._generatorOptions.NoVODUpload = true;
+        }
 
         if (program.targetDate) {
             this._targetDate = program.targetDate;
@@ -149,6 +152,7 @@ program
     )
     .option('-c --no-planning', 'Use the current plan and start from compiling stage')
     .option('-s --no-tts', 'Do not call Text-to-Speech services.')
+    .option('-o --no-vod-upload', 'Do not upload Voice On Demand files to S3.')
     .option(
         '-j --no-at-job',
         'Do not creat system jobs for boxes and interrupting ' +

@@ -35,7 +35,8 @@ class Raa1ClipUtils extends ClipUtils {
         };
         wrappedClip.wrap();
 
-        if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
+        if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode ||
+            AppContext.getInstance('LineupGenerator').GeneratorOptions.NoVODUpload) {
             AppContext.getInstance().Logger.debug('S3 upload key is: ' +
                                                     wrappedClip.RelativePath);
         } else {

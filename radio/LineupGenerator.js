@@ -31,6 +31,7 @@ class LineupGenerator extends AppContext {
             },
             'TestMode': false,
             'NoTTS': false,
+            'NoVODUpload': false,
             'NoAtJob': false,
             'PlanAheadDays': 5,
         };
