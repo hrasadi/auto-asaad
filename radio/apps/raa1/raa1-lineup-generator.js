@@ -20,7 +20,8 @@ const Raa1ClipUtils = require('./Raa1ClipUtils');
 const Raa1PodcastPublisher = require('./publishers/Raa1PodcastPublisher');
 const Raa1ArchivePublisher = require('./publishers/Raa1ArchivePublisher');
 
-const Raa1UserManager = require('./collaborativelistening/Raa1UserManager');
+const U = require('../../collaborativelistening/UserManager');
+const UserManager = U.UserManager;
 
 const RUF = require('./collaborativelistening/Raa1PublicFeed');
 const Raa1PublicFeed = RUF.Raa1PublicFeed;
@@ -119,9 +120,14 @@ class Raa1LineupGenerator extends LineupGenerator {
             process.exit(1);
         }
 
-        this._userManager = new Raa1UserManager(
+        // NOTE: there is a reason why we instantiate UserManager and not Raa1UserManager
+        // This is becuase we do not need the push notification endpoints when
+        // generating lineup but still need to create tables if needed, etc.
+        // Therefore we need the barebone to be created
+        this._userManager = new UserManager(
             this._conf.CollaborativeListening.FeedDBFile
         );
+        this._userManager.init();
         // Feeds
         this._publicFeed = new Raa1PublicFeed(
             this._conf.CollaborativeListening.FeedDBFile
