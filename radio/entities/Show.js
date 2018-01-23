@@ -77,7 +77,7 @@ class PreShowTemplate extends ShowTemplate {
         // FillerClip
         let fillerClipPlan = null;
         if (this.FillerClipTemplate) {
-            fillerClipPlan = this.FillerClipTemplate.plan(targetDate, 0);
+            fillerClipPlan = this.FillerClipTemplate.plan(targetDate, 'Filler');
         }
 
         let preShowPlan = new PreShowPlan(this);

@@ -114,6 +114,7 @@ class ClipTemplate extends BaseClip {
         }
     }
 }
+
 class ClipPlan extends BaseClip {
     constructor(jsonOrOther) {
         super(jsonOrOther);
