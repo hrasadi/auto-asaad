@@ -54,6 +54,7 @@ class Raa1CLWatcher extends AppContext {
             await this._userManager.init(this._conf.Credentials);
 
             process.on('SIGINT', () => this.shutdown());
+            process.on('unhandledRejection', (e) => console.log(e));
         } catch (error) {
             this._logger.error('Uncaught Error: ' + error.stack);
             process.exit(0);
@@ -91,4 +92,3 @@ if (program.args.length < 1) {
 }
 
 new Raa1CLWatcher(program).init();
-process.on('unhandledRejection', (e) => console.log(e));

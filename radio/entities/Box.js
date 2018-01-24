@@ -138,7 +138,7 @@ class BoxPlan extends BaseBox {
             let program = programPlan.compile(nextProgramStartTime, box);
 
             if (program) {
-                nextProgramStartTime = program.EndTime;
+                nextProgramStartTime = program.Metadata.EndTime;
                 programs.push(program);
             }
         }

@@ -58,6 +58,7 @@ class Raa1API extends AppContext {
             this.registerAPI();
 
             process.on('SIGINT', () => this.shutdown());
+            process.on('unhandledRejection', (e) => console.log(e));
         } catch (error) {
             this._logger.error('Uncaught Error: ' + error.stack);
             process.exit(0);
@@ -170,4 +171,3 @@ if (program.args.length < 1) {
 }
 
 new Raa1API(program).init();
-process.on('unhandledRejection', (e) => console.log(e));

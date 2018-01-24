@@ -165,16 +165,21 @@ class Raa1LineupGenerator extends LineupGenerator {
             fs.readFileSync(lockFilePath, 'utf-8') !==
                 DateUtils.getDateString(tomorrowMomentInZone)
         ) {
-            execSync(
-                'echo \'cd ' +
-                    __dirname +
-                    '; NODE_ENV=production ' +
-                    process.argv.join(' ') +
-                    '\' | at -t ' +
-                    tomorrowMomentInOurZone.format('YYYYMMDDHHmm.ss') +
-                    ' 2>&1'
-            );
-            fs.writeFileSync(lockFilePath, DateUtils.getDateString(tomorrowMomentInZone));
+            if (this._productionMode) {
+                execSync(
+                    'echo \'cd ' +
+                        __dirname +
+                        '; NODE_ENV=production ' +
+                        process.argv.join(' ') +
+                        '\' | at -t ' +
+                        tomorrowMomentInOurZone.format('YYYYMMDDHHmm.ss') +
+                        ' 2>&1'
+                );
+                fs.writeFileSync(
+                    lockFilePath,
+                    DateUtils.getDateString(tomorrowMomentInZone)
+                );
+            } // Otherwise do nothing
         }
 
         // Print out stack trace for failures in Promises
