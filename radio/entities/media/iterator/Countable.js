@@ -29,12 +29,12 @@ class Countable {
     }
 
     diff(other) {
-        if (typeof(other) !== this.constructor.name) {
-            throw Error(`Given counters are not from the same type: ${typeof(other)}, ` +
+        if (other.constructor.name !== this.constructor.name) {
+            throw Error(`Given countable are not from the same type: ${typeof(other)}, ` +
                         `and ${this.constructor.name}`);
         }
 
-        this.diff0(other);
+        return this.diff0(other);
     }
 
     equals(other) {
@@ -51,7 +51,7 @@ class Countable {
     // Smallest number available, used for default tag value
     static get MinCountable() {
         // Implemented in subclasses
-        return -1;
+        return new Countable(-1);
     }
 }
 
@@ -76,7 +76,7 @@ class DateCountable extends Countable {
     }
 
     diff0(other) {
-        return this._value.diff(other, this._unit);
+        return this._value.diff(other._value, this._unit);
     }
 
     get Value() {
@@ -84,7 +84,7 @@ class DateCountable extends Countable {
     }
 
     static get MinCountable() {
-        return '1970-01-01';
+        return new DateCountable('1970-01-01');
     }
 }
 

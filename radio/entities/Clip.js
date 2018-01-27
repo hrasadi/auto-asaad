@@ -2,7 +2,7 @@ const Entity = require('./Entity');
 
 const AppContext = require('../AppContext');
 
-const I = require('./media/Iterator');
+const I = require('./media/iterator/Iterator');
 const Iterator = I.Iterator;
 
 const Media = require('./media/Media');
@@ -76,6 +76,7 @@ class ClipTemplate extends BaseClip {
         }
 
         let clipPlan = new ClipPlan(this);
+        console.log(mediaIdx)
         clipPlan.Media = this.MediaGroup.Media[mediaIdx].plan();
 
         return clipPlan;
