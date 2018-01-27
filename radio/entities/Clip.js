@@ -2,8 +2,8 @@ const Entity = require('./Entity');
 
 const AppContext = require('../AppContext');
 
-const C = require('./media/Counter');
-const Counter = C.Counter;
+const I = require('./media/Iterator');
+const Iterator = I.Iterator;
 
 const Media = require('./media/Media');
 
@@ -40,7 +40,7 @@ class ClipTemplate extends BaseClip {
     }
 
     plan(targetDate, clipIndex) {
-        let counterId = this._parentShowTemplate._parentProgramTemplate
+        let iteratorId = this._parentShowTemplate._parentProgramTemplate
                             ._parentBoxTemplate.BoxId + '-' +
                             this._parentShowTemplate
                             ._parentProgramTemplate.ProgramId + '-' +
@@ -58,8 +58,8 @@ class ClipTemplate extends BaseClip {
                                     this.MediaGroupName + ' could not be found.');
         }
         // immutable if in future
-        let counter = Counter.createCounter(this.IteratorPolicy,
-            counterId, this.MediaGroup.Media.length,
+        let counter = Iterator.createDateCounter(this.IteratorPolicy,
+            iteratorId, this.MediaGroup.Media.length,
             futureOffset ? true : false);
 
         // When planning future, an extra offset should be applied
