@@ -14,20 +14,20 @@ class Raa1PodcastPublisher extends PodcastPublisher {
         let feedName = program.Publishing.PodcastFeed;
         if (!this._rollingListsDict[feedName]) {
             this._rollingListsDict[feedName] =
-                    new RollingList(feedName, targetDate,
+                    new RollingList(feedName,
                                     AppContext.getInstance().CWD + '/run/podcast/',
                                     AppContext.getInstance('LineupGenerator')
                                                                     .MaxPodcastEntries);
         }
 
-        this._rollingListsDict[feedName].addItem(program);
+        this._rollingListsDict[feedName].addItem(program, targetDate);
     }
 
-    commit() {
+    commit(targetDate) {
         for (let feedName in this._rollingListsDict) {
             if (this._rollingListsDict.hasOwnProperty(feedName)) {
                 this._rollingListsDict[feedName].flush();
-                this.generateRSS(feedName);
+                this.generateRSS(feedName, targetDate);
             }
         }
     }

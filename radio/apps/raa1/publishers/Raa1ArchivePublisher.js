@@ -28,15 +28,15 @@ class Raa1ArchivePublisher extends ArchivePublisher {
 
         if (!this._rollingListsDict[program.ProgramId]) {
             this._rollingListsDict[program.ProgramId] =
-                    new RollingList(program.ProgramId, targetDate,
+                    new RollingList(program.ProgramId,
                                         AppContext.getInstance().CWD + '/run/archive/',
                                         'unlimited');
         }
 
-        this._rollingListsDict[program.ProgramId].addItem(program);
+        this._rollingListsDict[program.ProgramId].addItem(program, targetDate);
     }
 
-    commit() {
+    commit(targetDate) {
         fs.writeFileSync(this._archiveParentFilePath,
             JSON.stringify(this._programDictionary, null, 2));
 
@@ -44,7 +44,7 @@ class Raa1ArchivePublisher extends ArchivePublisher {
             if (this._rollingListsDict.hasOwnProperty(program)) {
                 this._rollingListsDict[program].flush();
                 // We also publish our archives in the form of RSS
-                this.generateRSS(program, 'SingleProgram');
+                this.generateRSS(program, targetDate, 'SingleProgram');
             }
         }
     }

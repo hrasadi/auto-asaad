@@ -1,80 +1,111 @@
 const fs = require('fs');
 
+const MAX_HISTORY_RETAIN_DAYS = 14;
+
 /**
  * This class manages JSON array file, with a maximum number of entries
  */
 class RollingList {
-    constructor(feedName, targetDate, filePrefix, maxItems = 20) {
+    constructor(feedName, filePrefix, maxItems = 20) {
         this._feedName = feedName;
-        this._targetDate = targetDate;
         this._filePrefix = filePrefix;
         this._listFilePath = this._filePrefix + '/' + this._feedName + '.json';
-        if (maxItems == 'unlmitied' || maxItems <= 0) {
-            this.maxItems = 0;
+        if (maxItems == 'unlimited' || maxItems <= 0) {
+            this._maxItems = 0;
         } else {
             this._maxItems = maxItems;
         }
 
-        this._newItems = [];
+        this._uncommitedMap = {};
     }
 
-    addItem(item) {
+    addItem(item, targetDate) {
         if (item) {
-            this._dirty = true;
-            this._newItems.push(item);
-
-            if (this._newItems.length > this._maxItems) {
-                // remove one item from the beginning (oldest entry)
-                this._newItems.splice(0, 1);
+            if (!this._uncommitedMap[targetDate]) {
+                this._uncommitedMap[targetDate] = [];
             }
+
+            this._uncommitedMap[targetDate].push(item);
         }
     }
 
-    loadBak() {
-        if (!this._bakList) {
-            this._bakList = {
-                'Tag': this._targetDate,
-                'List': [],
-            };
-
-            if (fs.existsSync(this._listFilePath + '.bak')) {
-                this._bakList = JSON.parse(fs.readFileSync(
-                                        this._listFilePath + '.bak'));
-                if (this._bakList.Tag != this._targetDate) {
-                    // Date has changed, update the bak file
-                    if (fs.existsSync(this._listFilePath)) {
-                        let currentList = JSON.parse(
-                                        fs.readFileSync(this._listFilePath));
-                        this._bakList.Tag = this._targetDate;
-                        this._bakList.List = currentList;
-                        fs.writeFileSync(this._listFilePath + '.bak',
-                                        JSON.stringify(this._bakList, null, 2));
-                    }
-                }
+    loadHistroy() {
+        if (!this._fullHistory) {
+            if (fs.existsSync(this._listFilePath)) {
+                this._fullHistory = JSON.parse(
+                    fs.readFileSync(this._listFilePath, 'utf-8')
+                );
             } else {
-                // create empty one
-                fs.writeFileSync(this._listFilePath + '.bak',
-                                        JSON.stringify(this._bakList, null, 2));
+                this._fullHistory = {};
             }
         }
     }
 
     flush() {
-        this.loadBak();
-        this._fullList = this._bakList.List.concat(this._newItems);
-        fs.writeFileSync(this._listFilePath,
-                                JSON.stringify(this._fullList, null, 2));
+        if (Object.keys(this._uncommitedMap).length > 0) {
+            this.loadHistroy();
+
+            for (let date in this._uncommitedMap) {
+                if (this._uncommitedMap[date]) {
+                    // Update the values for date with the new ones
+                    this._fullHistory[date] = this._uncommitedMap[date];
+                }
+            }
+
+            // Now sort, filter and save. Good news is that acsending string sort
+            // works for us just fine
+            let sortedDates = Object.keys(this._fullHistory).sort();
+
+            // if not unlimited
+            if (this._maxItems !== 0) {
+                let feedCapacity = this._maxItems;
+                let filteredHistory = {};
+                // start from newest to oldest
+                for (let date of sortedDates.reverse()) {
+                    if (feedCapacity - this._fullHistory[date].length > 0) {
+                        filteredHistory[date] = this._fullHistory[date];
+                        feedCapacity -= this._fullHistory[date].length;
+                    } else {
+                        // enough, no more room to fit another day
+                        break;
+                    }
+                }
+                this._fullHistory = filteredHistory;
+            }
+
+            // Save
+            fs.writeFileSync(
+                this._listFilePath,
+                JSON.stringify(this._fullHistory, null, 2)
+            );
+        }
     }
 
-    get Items() {
-        this.loadBak();
+    // This is where we reassemble the items from different dates, note that
+    // this function is only called once a day to update feeds, so I am not
+    // worried about it doing some heavy-lifting work
+    getItems(forDate) {
+        // commit any uncommited changes
+        this.flush();
 
-        if (this._dirty) {
-            this._dirty = false;
-            this._fullList = this._bakList.List.concat(this._newItems);
+        // We are sure that this._fullHistory is sorted based on date (older first)
+        // Therefore we iterate and append values together up to the date
+        let result = [];
+
+        for (let date in this._fullHistory) {
+            if (this._fullHistory.hasOwnProperty(date)) {
+                result = result.concat(this._fullHistory[date]);
+                if (date === forDate) {
+                    // As soon as we hit the date, we should terminate
+                    break;
+                }
+            }
         }
+        return result;
+    }
 
-        return this._fullList ? this._fullList : null;
+    getListFromHistory(targetDate) {
+        this._fullHistory[targetDate] ? this._fullHistory[targetDate] : [];
     }
 }
 

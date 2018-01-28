@@ -1,8 +1,10 @@
 const AppContext = require('./AppContext');
 
 const LineupManager = require('./LineupManager');
+const DateUtils = require('./DateUtils');
 
 const fs = require('fs');
+const moment = require('moment');
 
 class LineupGenerator extends AppContext {
     constructor() {
@@ -33,6 +35,7 @@ class LineupGenerator extends AppContext {
             },
             'TestMode': false,
             'NoTTS': false,
+            'VODPulishDelay': 1,
             'NoVODUpload': false,
             'NoAtJob': false,
             'PlanAheadDays': 5,
@@ -58,23 +61,40 @@ class LineupGenerator extends AppContext {
                 this.Logger.debug('Skipped stage "Plan" due to options settings');
             }
 
-            if (this.GeneratorOptions.ActiveStages.Compile) {
-                this.LineupManager.compileLineup(this._targetDate);
-            } else {
-                this.Logger.debug('Skipped stage "Compile" due to options settings');
+            // The number of days to compile/publish/... (including the target date)
+            // Why? Because if we are regenerating the lineup for a date in the past,
+            // all the lineups generated up until now (today) should be fixed as well.
+            // Exception is when user is explicitly says otherwise
+            let daysToCompile = 1;
+            if (!this.GeneratorOptions.TestMode) {
+                daysToCompile = moment(DateUtils.getTodayString())
+                                .diff(moment(this._targetDate), 'days') + 1;
+                // And we cannot surpass the plans we created
+                daysToCompile = Math.min(daysToCompile,
+                                        this.GeneratorOptions.PlanAheadDays);
             }
 
-            if (this.GeneratorOptions.ActiveStages.Publish) {
-                this.LineupManager.publishLineup(this._targetDate);
-            } else {
-                this.Logger.debug('Skipped stage "Publish" due to options settings');
-            }
+            Array(daysToCompile).fill().map((i) => {
+                let tdate = moment(this._targetDate).add(i, 'days').format('YYYY-MM-DD');
 
-            if (this.GeneratorOptions.ActiveStages.Schedule) {
-                this.LineupManager.scheduleLineup(this._targetDate);
-            } else {
-                this.Logger.debug('Skipped stage "Schedule" due to options settings');
-            }
+                if (this.GeneratorOptions.ActiveStages.Compile) {
+                    this.LineupManager.compileLineup(tdate);
+                } else {
+                    this.Logger.debug('Skipped stage "Compile" due to options settings');
+                }
+
+                if (this.GeneratorOptions.ActiveStages.Publish) {
+                    this.LineupManager.publishLineup(tdate);
+                } else {
+                    this.Logger.debug('Skipped stage "Publish" due to options settings');
+                }
+
+                if (this.GeneratorOptions.ActiveStages.Schedule) {
+                    this.LineupManager.scheduleLineup(tdate);
+                } else {
+                    this.Logger.debug('Skipped stage "Schedule" due to options settings');
+                }
+            });
         } catch (error) {
             AppContext.getInstance().Logger.error(error.stack);
         }

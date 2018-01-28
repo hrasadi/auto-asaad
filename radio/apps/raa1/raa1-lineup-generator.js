@@ -68,6 +68,10 @@ class Raa1LineupGenerator extends LineupGenerator {
             this._generatorOptions.NoVODUpload = true;
         }
 
+        if (program.vodPublishDelay) {
+            this._generatorOptions.VODPublishDelay = program.vodPublishDelay;
+        }
+
         if (program.targetDate) {
             this._targetDate = program.targetDate;
         } else {
@@ -196,6 +200,7 @@ program
     )
     .option('-c --no-planning', 'Use the current plan and start from compiling stage')
     .option('-s --no-tts', 'Do not call Text-to-Speech services.')
+    .option('-l --vod-publish-delay [integer]', 'The delay between airing and VOD pulishing')
     .option('-o --no-vod-upload', 'Do not upload Voice On Demand files to S3.')
     .option(
         '-j --no-at-job',

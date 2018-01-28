@@ -180,7 +180,7 @@ class Lineup extends Entity {
             if (AppContext.getInstance('LineupGenerator')
                                         .Publishers.hasOwnProperty(publisherName)) {
                 AppContext.getInstance('LineupGenerator')
-                                        .Publishers[publisherName].commit();
+                                        .Publishers[publisherName].commit(targetDate);
             }
         }
     }
@@ -250,7 +250,8 @@ class Lineup extends Entity {
         }
     }
 
-    shiftBoxDown(targetBox, shiftAmount) {
+    shiftBoxDown(targetBoxIdx, shiftAmount) {
+        let targetBox = this.Boxes[targetBoxIdx];
         if (targetBox) {
             targetBox.EndTime = moment(targetBox.EndTime)
                                     .add(shiftAmount, 'seconds');

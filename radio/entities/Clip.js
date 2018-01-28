@@ -76,7 +76,6 @@ class ClipTemplate extends BaseClip {
         }
 
         let clipPlan = new ClipPlan(this);
-        console.log(mediaIdx)
         clipPlan.Media = this.MediaGroup.Media[mediaIdx].plan();
 
         return clipPlan;

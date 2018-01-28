@@ -418,16 +418,30 @@ class Program extends BaseProgram {
                     JSON.stringify(this.Publishing)
             );
         } else {
+            // We publish VOD with a delay (normally 1 day)
+            let actualPublishDate = moment(targetDate)
+                .add(
+                    AppContext.getInstance('LineupGenerator').GeneratorOptions
+                        .VODPublishDelay
+                )
+                .format('YYYY-MM-DD');
+
             if (this.Publishing.Podcast) {
                 AppContext.getInstance(
                     'LineupGenerator'
-                ).Publishers.PodcastPublisher.publish(programToPublish, targetDate);
+                ).Publishers.PodcastPublisher.publish(
+                    programToPublish,
+                    actualPublishDate
+                );
             }
-            // Publish in Archive
+            // Publish into Archive
             if (this.Publishing.Archive) {
                 AppContext.getInstance(
                     'LineupGenerator'
-                ).Publishers.ArchivePublisher.publish(programToPublish, targetDate);
+                ).Publishers.ArchivePublisher.publish(
+                    programToPublish,
+                    actualPublishDate
+                );
             }
         }
 
