@@ -76,6 +76,11 @@ class ClipTemplate extends BaseClip {
         }
 
         let clipPlan = new ClipPlan(this);
+
+        if (!this.MediaGroup.Media[mediaIdx]) {
+            throw Error(`Media cannot be found for group ` +
+                        `${this.MediaGroup.Name} and index ${mediaIdx}`);
+        }
         clipPlan.Media = this.MediaGroup.Media[mediaIdx].plan();
 
         return clipPlan;
