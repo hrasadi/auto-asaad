@@ -33,13 +33,14 @@ class Raa1ClipUtils extends ClipUtils {
             'Bucket': 'vod.raa.media',
             'Key': wrappedClip.RelativePath,
         };
-        wrappedClip.wrap();
 
         if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode ||
             AppContext.getInstance('LineupGenerator').GeneratorOptions.NoVODUpload) {
             AppContext.getInstance().Logger.debug('S3 upload key is: ' +
                                                     wrappedClip.RelativePath);
         } else {
+            wrappedClip.wrap();
+
             ((w) => {
                 fs.readFile(w.AbsolutePath, (err, data) => {
                     if (err) {
