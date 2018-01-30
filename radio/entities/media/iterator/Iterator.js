@@ -101,7 +101,7 @@ class Iterator {
         if (diff > this._history.length) {
             throw Error(
                 `Not enough history to rollback, required ${diff}` +
-                    +`but history length was ${this._history.length}`
+                ` but history length was ${this._history.length}.`
             );
         }
 

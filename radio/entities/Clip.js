@@ -69,22 +69,30 @@ class ClipTemplate extends BaseClip {
         // from it
         let extraFutureOffset = (futureOffset > 0) ? futureOffset - 1 : 0;
 
-        let mediaIdx = counter.next(targetDate,
-                            this.Offset + extraFutureOffset);
+        try {
+            let mediaIdx = counter.next(targetDate,
+                    this.Offset + extraFutureOffset);
 
-        if (mediaIdx == null) {
-            return null;
+            if (mediaIdx == null) {
+                return null;
+            }
+
+            let clipPlan = new ClipPlan(this);
+
+            if (!this.MediaGroup.Media[mediaIdx]) {
+                throw Error(`Media cannot be found for group ` +
+                            `${this.MediaGroup.Name} and index ${mediaIdx}`);
+            }
+            clipPlan.Media = this.MediaGroup.Media[mediaIdx].plan();
+
+            return clipPlan;
+        } catch (e) {
+            let wrappedError =
+                    Error(`Error while planning group: ${this.MediaGroup.Name}.` +
+                            `Inner exception is: ${e}`);
+            wrappedError.stack = e.stack;
+            throw wrappedError;
         }
-
-        let clipPlan = new ClipPlan(this);
-
-        if (!this.MediaGroup.Media[mediaIdx]) {
-            throw Error(`Media cannot be found for group ` +
-                        `${this.MediaGroup.Name} and index ${mediaIdx}`);
-        }
-        clipPlan.Media = this.MediaGroup.Media[mediaIdx].plan();
-
-        return clipPlan;
     }
 
     get MediaGroupName() {
