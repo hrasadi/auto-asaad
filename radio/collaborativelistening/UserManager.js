@@ -32,11 +32,15 @@ class UserManager extends DBProvider {
 }
 
 class User extends DBObject {
-    constructor(jsonOrOther, deviceType) {
+    constructor(jsonOrOther, deviceType, ip) {
         super(jsonOrOther);
 
         if (deviceType) {
             this._deviceType = DeviceTypeEnum.fromString(deviceType);
+        }
+
+        if (ip) {
+            this._ip = ip;
         }
     }
 

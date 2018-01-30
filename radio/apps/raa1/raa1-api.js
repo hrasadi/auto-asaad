@@ -78,7 +78,8 @@ class Raa1API extends AppContext {
     registerAPI() {
         let self = this;
         this._webApp.post('/registerDevice/:deviceType/', (req, res) => {
-            let user = new User(request.body, req.params.deviceType);
+            let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+            let user = new User(request.body, req.params.deviceType, ip);
             self.UserManager.registerUser(user);
             res.send('Success');
         });

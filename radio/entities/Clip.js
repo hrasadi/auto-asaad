@@ -88,9 +88,9 @@ class ClipTemplate extends BaseClip {
             return clipPlan;
         } catch (e) {
             let wrappedError =
-                    Error(`Error while planning group: ${this.MediaGroup.Name}.` +
-                            `Inner exception is: ${e}`);
-            wrappedError.stack = e.stack;
+                    Error(`Error while planning clip if media group: ` +
+                            `${this.MediaGroup.Name}.` +
+                            ` Inner exception is: \n ${e}`);
             throw wrappedError;
         }
     }
