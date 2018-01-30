@@ -42,7 +42,7 @@ class Iterator {
 
             this._iteratorPos = parseInt(data.iteratorPos);
             this._tag = new this._CountableType(data.tag);
-            this._history = data.histroy ? data.histroy : '';
+            this._history = data.history ? data.history : '';
         }
     }
 
@@ -108,7 +108,8 @@ class Iterator {
         // Count number of '1's in the history substring
         let rollbackOffset = (this._history.substring(0, diff).match(/1/g) || []).length;
 
-        this._history = this._history.substring(0, diff);
+        // From the location of rolling back to the end of string
+        this._history = this._history.substring(diff + 1);
         this._iteratorPos = this.adjustByOffset(
             this._iteratorPos,
             rollbackOffset * (-1)
