@@ -11,6 +11,10 @@ class DBObject {
         return this._id;
     }
 
+    set Id(value) {
+        this._id = value;
+    }
+
     static getListInsertPreStatement(list) {
         if (!list || list.length == 0) {
             return null;

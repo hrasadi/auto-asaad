@@ -4,9 +4,6 @@ const AppContext = require('../../AppContext');
 const UF = require('./collaborativelistening/Raa1PublicFeed');
 const Raa1PublicFeed = UF.Raa1PublicFeed;
 
-const SF = require('./collaborativelistening/Raa1PersonalFeed');
-const Raa1PersonalFeed = SF.Raa1PersonalFeed;
-
 const Raa1UserManager = require('./collaborativelistening/Raa1UserManager');
 const U = require('../../collaborativelistening/UserManager');
 const User = U.User;
@@ -77,6 +74,8 @@ class Raa1API extends AppContext {
 
     registerAPI() {
         let self = this;
+        this._webApp.use(bodyParser.json());
+
         this._webApp.post('/registerDevice/:deviceType/', (req, res) => {
             let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
             let user = new User(req.body, req.params.deviceType, ip);
@@ -137,7 +136,6 @@ class Raa1API extends AppContext {
             return res.status(400).send('The querystring is missing or not valid');
         });
 
-        this._webApp.use(bodyParser.json());
         this._webApp.use((err, req, res, next) => {
             AppContext.getInstance().Logger.error(err.stack);
             res

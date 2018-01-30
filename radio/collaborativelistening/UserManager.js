@@ -115,7 +115,7 @@ const DeviceTypeEnum = Object.freeze({
 
     fromString(string) {
         for (let key of Object.keys(this)) {
-            if (key.toLowerCase() === string) {
+            if (key.toLowerCase() === string.toLowerCase()) {
                 return this[key];
             }
         }
