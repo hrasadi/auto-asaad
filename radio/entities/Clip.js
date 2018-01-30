@@ -1,6 +1,7 @@
 const Entity = require('./Entity');
 
 const AppContext = require('../AppContext');
+const DateUtils = require('../DateUtils');
 
 const I = require('./media/iterator/Iterator');
 const Iterator = I.Iterator;
@@ -48,10 +49,10 @@ class ClipTemplate extends BaseClip {
                             clipIndex;
 
         // If the point is in future, the counter should be immutable
+        // note that we might be replanning a date in the past
+        // (so this value could become negative)
         let futureOffset =
-            moment(targetDate)
-                .diff(moment(AppContext.getInstance('LineupGenerator')
-                                        .LineupManager.BaseDate), 'days');
+            moment(targetDate).diff(moment(DateUtils.getTodayString()), 'days');
 
         if (!this.MediaGroup || !this.MediaGroup.Media) {
             AppContext.getInstance().Logger.error('MediaGroup ' +
@@ -60,13 +61,13 @@ class ClipTemplate extends BaseClip {
         // immutable if in future
         let counter = Iterator.createDateCounter(this.IteratorPolicy,
             iteratorId, this.MediaGroup.Media.length,
-            futureOffset ? true : false);
+            (futureOffset > 0) ? true : false);
 
         // When planning future, an extra offset should be applied
         // However, since the counter already persisted next value
         // when plannning the current date, we should decrease one
         // from it
-        let extraFutureOffset = futureOffset ? futureOffset - 1 : 0;
+        let extraFutureOffset = (futureOffset > 0) ? futureOffset - 1 : 0;
 
         let mediaIdx = counter.next(targetDate,
                             this.Offset + extraFutureOffset);
