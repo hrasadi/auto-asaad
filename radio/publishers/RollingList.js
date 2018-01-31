@@ -1,7 +1,5 @@
 const fs = require('fs');
 
-const MAX_HISTORY_RETAIN_DAYS = 14;
-
 /**
  * This class manages JSON array file, with a maximum number of entries
  */
@@ -102,10 +100,6 @@ class RollingList {
             }
         }
         return result;
-    }
-
-    getListFromHistory(targetDate) {
-        this._fullHistory[targetDate] ? this._fullHistory[targetDate] : [];
     }
 }
 
