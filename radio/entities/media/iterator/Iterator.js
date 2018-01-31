@@ -109,7 +109,7 @@ class Iterator {
         let rollbackOffset = (this._history.substring(0, diff).match(/1/g) || []).length;
 
         // From the location of rolling back to the end of string
-        this._history = this._history.substring(diff + 1);
+        this._history = this._history.substring(diff);
         this._iteratorPos = this.adjustByOffset(
             this._iteratorPos,
             rollbackOffset * (-1)
