@@ -23,7 +23,8 @@ class PersonalFeed extends Feed {
         await this._db.runAsync(
             'CREATE TABLE IF NOT EXISTS PERSONALFEEDENTRY ' +
                 '(Id TEXT PRIMARY_KEY, ' +
-                'Program TEXT, UserId INTEGER, unique(Id))'
+                'Program TEXT, UserId INTEGER, ReleaseTimestamp REAL,' +
+                'ExpirationTimestamp REAL, unique(Id))'
         );
 
         if (this._historyProdiver) {
@@ -38,9 +39,9 @@ class PersonalFeed extends Feed {
         this._tableName = 'PersonalFeedEntry';
     }
 
-    async registerProgram(program, targetDate) {
+    registerProgram(program, targetDate) {
         let self = this;
-        await this.entryListForEach(User, null, (user) => {
+        this.entryListForEach(User, null, (err, user) => {
             let releaseMoment = program._parentBox.Schedule.calculateStartTime(
                 targetDate,
                 user

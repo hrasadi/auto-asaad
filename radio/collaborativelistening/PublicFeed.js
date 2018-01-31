@@ -49,7 +49,7 @@ class PublicFeed extends Feed {
         this._tableName = 'PublicFeedEntry';
     }
 
-    async registerProgram(program, releaseMoment) {
+    registerProgram(program, releaseMoment) {
         let feedEntry = new PublicFeedEntry();
         if (releaseMoment) {
             feedEntry.ReleaseTimestamp = DateUtils.getEpochSeconds(releaseMoment);
@@ -73,7 +73,7 @@ class PublicFeed extends Feed {
                     JSON.stringify(feedEntry, null, 2)
             );
         } else {
-            await this.persist(feedEntry);
+            this.persist(feedEntry);
         }
     }
 
