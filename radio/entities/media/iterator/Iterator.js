@@ -114,6 +114,7 @@ class Iterator {
             this._iteratorPos,
             rollbackOffset * (-1)
         );
+        this._tag = requesterTag; // Rollback the tag value as well
 
         if (!this.isInBounds()) {
             throw Error('Requested iterator position found not in bound ' +
