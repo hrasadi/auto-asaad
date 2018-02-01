@@ -50,6 +50,7 @@ class PublicFeed extends Feed {
     }
 
     registerProgram(program, releaseMoment) {
+        // TODO: Remove old entries (if regenerating the lineup)
         let feedEntry = new PublicFeedEntry();
         if (releaseMoment) {
             feedEntry.ReleaseTimestamp = DateUtils.getEpochSeconds(releaseMoment);

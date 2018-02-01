@@ -46,6 +46,7 @@ class AdhanStartTimeCalculator extends StartTimeCalculator {
             timezonestring: user.TimeZone,
             method: this._adhanConf.CalculationMethod,
         });
+        qs = DateUtils.getEpochSeconds(targetDate) + '?' + qs;
 
         if (this._timingsCache[md5(qs)]) {
             return this._timingsCache[md5(qs)];
@@ -55,8 +56,6 @@ class AdhanStartTimeCalculator extends StartTimeCalculator {
             'GET',
             'http://api.aladhan.com' +
                 '/timingsByCity/' +
-                DateUtils.getEpochSeconds(targetDate) +
-                '?' +
                 qs
         );
 

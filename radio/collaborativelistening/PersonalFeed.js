@@ -40,6 +40,7 @@ class PersonalFeed extends Feed {
     }
 
     registerProgram(program, targetDate) {
+        // TODO: Remove old entries (if regenerating the lineup)
         let self = this;
         this.entryListForEach(User, null, (err, user) => {
             let releaseMoment = program._parentBox.Schedule.calculateStartTime(
