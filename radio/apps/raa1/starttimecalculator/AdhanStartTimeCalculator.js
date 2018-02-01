@@ -43,7 +43,6 @@ class AdhanStartTimeCalculator extends StartTimeCalculator {
             country: user.Country,
             state: user.State,
             city: user.City,
-            timezonestring: user.TimeZone,
             method: this._adhanConf.CalculationMethod,
         });
         qs = DateUtils.getEpochSeconds(targetDate) + '?' + qs;
@@ -80,7 +79,7 @@ class AdhanStartTimeCalculator extends StartTimeCalculator {
                 let timingLocalMoment = moment.tz(
                     targetDate + ' ' + parsed.data.timings[adhanName],
                     'YYYY-MM-DD HH:mm',
-                    user.TimeZone
+                    parsed.data.meta.timezone
                 );
 
                 dateTimings[adhanName] = timingLocalMoment;
