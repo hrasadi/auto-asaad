@@ -51,8 +51,8 @@ class DBProvider {
         return this._db.runAsync(query.statement, query.values);
     }
 
-    unpersistById(id) {
-        let query = DBObject.getDeletePreStatement(this.constructor, {
+    unpersistById(fromType, id) {
+        let query = DBObject.getDeletePreStatement(fromType, {
             statement: 'Id = ?',
             values: id,
         });

@@ -81,7 +81,7 @@ class PublicFeed extends Feed {
     }
 
     async deregisterFeedEntry(feedEntry) {
-        await this.unpersistById(feedEntry.Id);
+        await this.unpersistById(this._type, feedEntry.Id);
     }
 
     upvoteProgram(programId, userId) {
