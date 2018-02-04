@@ -38,6 +38,18 @@ class DBObject {
         };
     }
 
+    getDeletePreStatement(fromType, query) {
+        return {
+            statement:
+                'DELETE FROM "' +
+                fromType.name +
+                '"' +
+                (query ? ' WHERE ' + query.statement : ''),
+            values: query ? query.values : [],
+        };
+    }
+
+
     getDeletePreStatement() {
         return {
             statement:

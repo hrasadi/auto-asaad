@@ -51,6 +51,14 @@ class DBProvider {
         return this._db.runAsync(query.statement, query.values);
     }
 
+    unpersistById(id) {
+        let query = DBObject.getDeletePreStatement(this.constructor, {
+            statement: 'Id = ?',
+            values: id,
+        });
+        return this._db.runAsync(query.statement, query.values);
+    }
+
     entryListForEach(fromType, whereClause, onRow) {
         let query = DBObject.getSelectPreStatement(fromType, whereClause);
         return this._db.eachAsync(query.statement, query.values, onRow);

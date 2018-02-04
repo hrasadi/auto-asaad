@@ -68,7 +68,7 @@ class PublicFeed extends Feed {
 
         // Delete any entries with same Id exists from before (old onces)
         // We will continue on complete callback from deregister (note async func)
-        this.deregisterFeedEntry(new PublicFeedEntry(feedEntry));
+        this.deregisterFeedEntry(feedEntry);
 
         if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
             AppContext.getInstance().Logger.debug(
@@ -81,7 +81,7 @@ class PublicFeed extends Feed {
     }
 
     async deregisterFeedEntry(feedEntry) {
-        await this.unpersist(feedEntry);
+        await this.unpersistById(feedEntry.Id);
     }
 
     upvoteProgram(programId, userId) {
