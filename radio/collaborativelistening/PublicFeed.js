@@ -119,8 +119,8 @@ class PublicFeedEntry extends FeedEntry {
     // Override parent (calculate id)
     set Program(value) {
         if (value) {
+            this._id = Buffer.from(value.CanonicalIdPath).toString('base64');
             this._program = JSON.stringify(value);
-            this._id = Buffer.from(this._program.CanonicalIdPath).toString('base64');
         }
     }
 
