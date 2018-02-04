@@ -68,6 +68,7 @@ class PublicFeed extends Feed {
         feedEntry.Upvotes = 0;
 
         // Delete any entries with same Id exists from before (old onces)
+        // We will continue on complete callback from deregister (note async func)
         this.deregisterEntry(feedEntry);
 
         if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
@@ -80,8 +81,8 @@ class PublicFeed extends Feed {
         }
     }
 
-    deregisterEntry(feedEntry) {
-        this.unpersist({
+    async deregisterEntry(feedEntry) {
+        await this.unpersist({
             statement: 'Id = ?',
             values: feedEntry.Id,
         });
