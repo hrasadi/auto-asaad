@@ -7,14 +7,6 @@ class DBObject {
         this._tableName = this.constructor.name;
     }
 
-    get Id() {
-        return this._id;
-    }
-
-    set Id(value) {
-        this._id = value;
-    }
-
     static getListInsertPreStatement(list) {
         if (!list || list.length == 0) {
             return null;
@@ -152,6 +144,14 @@ class DBObject {
                 res[key] = this[key];
                 return res;
             });
+    }
+
+    get Id() {
+        return this._id;
+    }
+
+    set Id(value) {
+        this._id = value;
     }
 }
 
