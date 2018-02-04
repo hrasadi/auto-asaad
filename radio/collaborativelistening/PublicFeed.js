@@ -117,8 +117,14 @@ class PublicFeedWatcher extends FeedWatcher {
 class PublicFeedEntry extends FeedEntry {
     constructor() {
         super();
+    }
 
-        this._id = Buffer.from(this._program.CanonicalIdPath).toString('base64');
+    // Override parent (calculate id)
+    set Program(value) {
+        if (value) {
+            this._program = value;
+            this._id = Buffer.from(this._program.CanonicalIdPath).toString('base64');
+        }
     }
 
     get Upvotes() {
