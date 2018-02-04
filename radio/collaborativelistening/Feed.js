@@ -23,8 +23,7 @@ class Feed extends DBProvider {
     }
 
     // implemented in subclasses
-    init(resolve) {
-    }
+    init(resolve) {}
 
     async init1(resolve) {
         await this.init0(resolve);
@@ -34,34 +33,38 @@ class Feed extends DBProvider {
     }
 
     // implemented in subclasses
-    registerProgram(program, targetDate) {
-    }
+    registerProgram(program, targetDate) {}
 
     // implemented in subclasses
-    deregisterFeedEntry(feedEntry) {
-    }
+    deregisterFeedEntry(feedEntry) {}
 
     // implemented in subclasses
-    async renderFeed(userId) {
-    }
+    async renderFeed(userId) {}
 
     foreachProgramStartingWithinMinute(nowEpoch, onFeedEntry) {
-        return this.entryListForEach(this._type, {
-            statement: 'ReleaseTimestamp <= ? AND ReleaseTimestamp >= ?',
-            values: [nowEpoch, nowEpoch - 60],
-        }, onFeedEntry);
+        return this.entryListForEach(
+            this._type,
+            {
+                statement: 'ReleaseTimestamp <= ? AND ReleaseTimestamp >= ?',
+                values: [nowEpoch, nowEpoch - 60],
+            },
+            onFeedEntry
+        );
     }
 
     foreachProgramEndingUntilNow(nowEpoch, onFeedEntry) {
-        return this.entryListForEach(this._type, {
-            statement: 'ExpirationTimestamp <= ?',
-            values: nowEpoch,
-        }, onFeedEntry);
+        return this.entryListForEach(
+            this._type,
+            {
+                statement: 'ExpirationTimestamp <= ?',
+                values: nowEpoch,
+            },
+            onFeedEntry
+        );
     }
 
     // implemented in subclasses
-    notifyProgramStart(feedEntry) {
-    }
+    notifyProgramStart(feedEntry) {}
 
     // overriden in subclasses
     getWatcher() {
@@ -73,8 +76,11 @@ class FeedWatcher {
     constructor(feed) {
         this._feed = feed;
 
-        this._epochLockFilePath = AppContext.getInstance().CWD + '/run/db/' +
-                                            this._feed.constructor.name + '-epoch.lock';
+        this._epochLockFilePath =
+            AppContext.getInstance().CWD +
+            '/run/db/' +
+            this._feed.constructor.name +
+            '-epoch.lock';
     }
 
     init() {
@@ -84,33 +90,44 @@ class FeedWatcher {
         this.tick(self);
     }
 
-    tick(self) {
+    async tick(self) {
         let currentTimeEpoch = DateUtils.getEpochSeconds(moment());
         // check last persisted time (should be one minute before)
-        if (self.LastProcessedEpoch +
-            (FEED_CHECKING_FREQUENCY / 1000) != currentTimeEpoch) {
-            AppContext.getInstance()
-                    .Logger.warn('Watcher ' +
-                            self._feed.constructor.name + ' has time inconsistencies. ' +
-                            'Jumping from ' + self.LastProcessedEpoch + ' to ' +
-                            currentTimeEpoch);
+        if (
+            self.LastProcessedEpoch + FEED_CHECKING_FREQUENCY / 1000 !=
+            currentTimeEpoch
+        ) {
+            AppContext.getInstance().Logger.warn(
+                'Watcher ' +
+                    self._feed.constructor.name +
+                    ' has time inconsistencies. ' +
+                    'Jumping from ' +
+                    self.LastProcessedEpoch +
+                    ' to ' +
+                    currentTimeEpoch
+            );
         }
         // One minute in (success path).
         // Check for programs released now. Notify listeners
-        self._feed.foreachProgramStartingWithinMinute(currentTimeEpoch,
-                                                            (err, feedEntry) => {
-            if (err) {
-                throw err;
+        self._feed.foreachProgramStartingWithinMinute(
+            currentTimeEpoch,
+            (err, feedEntry) => {
+                if (err) {
+                    throw err;
+                }
+                self._feed.notifyProgramStart(feedEntry);
             }
-            self._feed.notifyProgramStart(feedEntry);
-        });
+        );
         // Check for expired programs
-        self._feed.foreachProgramEndingUntilNow(currentTimeEpoch, (err, feedEntry) => {
-            if (err) {
-                throw err;
+        self._feed.foreachProgramEndingUntilNow(
+            currentTimeEpoch,
+            (err, feedEntry) => {
+                if (err) {
+                    throw err;
+                }
+                self._feed.deregisterFeedEntry(feedEntry);
             }
-            self._feed.deregisterFeedEntry(feedEntry);
-        });
+        );
         // Persist new epoch
         self.LastProcessedEpoch = currentTimeEpoch;
     }
@@ -167,7 +184,7 @@ class FeedEntry extends DBObject {
 }
 
 module.exports = {
-    'Feed': Feed,
-    'FeedWatcher': FeedWatcher,
-    'FeedEntry': FeedEntry,
+    Feed: Feed,
+    FeedWatcher: FeedWatcher,
+    FeedEntry: FeedEntry,
 };

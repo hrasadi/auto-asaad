@@ -7,7 +7,6 @@ const FeedWatcher = F.FeedWatcher;
 const FeedEntry = F.FeedEntry;
 
 const moment = require('moment');
-const uuid = require('uuid/v1');
 
 class PublicFeed extends Feed {
     constructor(dbFileName, historyDbFileName) {
@@ -69,7 +68,7 @@ class PublicFeed extends Feed {
 
         // Delete any entries with same Id exists from before (old onces)
         // We will continue on complete callback from deregister (note async func)
-        this.deregisterEntry(feedEntry);
+        this.deregisterFeedEntry(feedEntry);
 
         if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
             AppContext.getInstance().Logger.debug(
@@ -81,7 +80,7 @@ class PublicFeed extends Feed {
         }
     }
 
-    async deregisterEntry(feedEntry) {
+    async deregisterFeedEntry(feedEntry) {
         await this.unpersist(feedEntry);
     }
 
