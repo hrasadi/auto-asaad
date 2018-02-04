@@ -145,7 +145,6 @@ class FeedEntry extends DBObject {
 
     set Program(value) {
         if (value) {
-            this._id = Buffer.from(value.CanonicalIdPath).toString('base64');
             this._program = value;
         }
     }

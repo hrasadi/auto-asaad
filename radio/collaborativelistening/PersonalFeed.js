@@ -112,7 +112,7 @@ class PersonalFeedEntry extends FeedEntry {
     constructor() {
         super();
 
-        this._id = uuid();
+        this._id = uuid(); // TODO:
     }
 
     /**

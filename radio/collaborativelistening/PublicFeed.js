@@ -116,6 +116,8 @@ class PublicFeedWatcher extends FeedWatcher {
 class PublicFeedEntry extends FeedEntry {
     constructor() {
         super();
+
+        this._id = Buffer.from(this._program.CanonicalIdPath).toString('base64');
     }
 
     get Upvotes() {
