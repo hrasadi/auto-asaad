@@ -145,7 +145,7 @@ class FeedEntry extends DBObject {
 
     set Program(value) {
         if (value) {
-            this._program = value;
+            this._program = JSON.stringify(value);
         }
     }
 
