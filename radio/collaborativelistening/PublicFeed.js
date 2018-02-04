@@ -68,7 +68,7 @@ class PublicFeed extends Feed {
 
         // Delete any entries with same Id exists from before (old onces)
         // We will continue on complete callback from deregister (note async func)
-        this.deregisterFeedEntry(feedEntry);
+        this.deregisterFeedEntry(new PublicFeedEntry(feedEntry));
 
         if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
             AppContext.getInstance().Logger.debug(
