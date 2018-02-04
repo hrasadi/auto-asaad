@@ -38,7 +38,7 @@ class DBObject {
         };
     }
 
-    getDeletePreStatement(fromType, query) {
+    static getDeletePreStatement(fromType, query) {
         return {
             statement:
                 'DELETE FROM "' +
