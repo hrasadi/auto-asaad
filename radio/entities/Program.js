@@ -65,6 +65,13 @@ class ProgramTemplate extends BaseProgram {
         this._parentBoxTemplate = parent;
     }
 
+    get CanonicalIdPath() {
+        if (!this._canonicalIdPath) {
+            this._canonicalIdPath = this._parentBoxTemplate.CanonicalIdPath +
+                                    '/' + this.ProgramId;
+        }
+    }
+
     get ProgramType() {
         return this._programType;
     }
@@ -512,6 +519,18 @@ class Program extends BaseProgram {
 
     onEvent(eventName) {
         this.onEvent0(eventName);
+    }
+
+    get CanonicalIdPath() {
+        if (!this._canonicalIdPath) {
+            this._canonicalIdPath = this._parentBox.CanonicalIdPath +
+                                                '/' + this.ProgramId;
+        }
+        return this._canonicalIdPath;
+    }
+
+    set CanonicalIdPath(value) {
+        this._canonicalIdPath = value;
     }
 
     get PreShow() {

@@ -7,8 +7,8 @@ const moment = require('moment');
 const execSync = require('child_process').execSync;
 
 class StandaloneBox extends Box {
-    constructor(jsonOrOther) {
-        super(jsonOrOther);
+    constructor(jsonOrOther, parent) {
+        super(jsonOrOther, parent);
     }
 
     doScheduleBox(targetDate, boxIdx) {

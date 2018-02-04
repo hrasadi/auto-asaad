@@ -46,6 +46,17 @@ class DBObject {
         };
     }
 
+    getDeletePreStatement() {
+        return {
+            statement:
+                'DELETE FROM "' +
+                this._tableName +
+                '"' +
+                ' WHERE Id = ?',
+            values: [this._id],
+        };
+    }
+
     getInsertPreStatement() {
         let properties = this.getProperties();
         let propertyNames = this.getInsertQueryPropertyNames(properties);

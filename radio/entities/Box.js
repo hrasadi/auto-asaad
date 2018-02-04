@@ -178,6 +178,18 @@ class Box extends BaseBox {
         this._parentLineup = parent;
     }
 
+    get CanonicalIdPath() {
+        if (!this._canonicalIdPath) {
+            this._canonicalIdPath = this._parentLineup.CanonicalIdPath +
+                                                '/' + this.BoxId;
+        }
+        return this._canonicalIdPath;
+    }
+
+    set CanonicalIdPath(value) {
+        this._canonicalIdPath = value;
+    }
+
     validate() {
         if (this.IsFloating && this.Programs && this.Programs.length > 1) {
             throw Error('Floating box can only contain one program');

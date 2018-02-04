@@ -31,7 +31,8 @@ class PersonalFeed extends Feed {
             await this._historyProdiver._db.runAsync(
                 'CREATE TABLE IF NOT EXISTS PERSONALFEEDENTRY ' +
                     '(Id TEXT PRIMARY_KEY, ' +
-                    'Program TEXT, UserId INTEGER, unique(Id))'
+                    'Program TEXT, UserId INTEGER, ReleaseTimestamp REAL,' +
+                    'ExpirationTimestamp REAL, unique(Id))'
             );
         }
 
@@ -112,14 +113,6 @@ class PersonalFeedEntry extends FeedEntry {
         super();
 
         this._id = uuid();
-    }
-
-    get Program() {
-        return this._program;
-    }
-
-    set Program(value) {
-        this._program = value;
     }
 
     /**

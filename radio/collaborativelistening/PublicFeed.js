@@ -50,7 +50,6 @@ class PublicFeed extends Feed {
     }
 
     registerProgram(program, releaseMoment) {
-        // TODO: Remove old entries (if regenerating the lineup)
         let feedEntry = new PublicFeedEntry();
         if (releaseMoment) {
             feedEntry.ReleaseTimestamp = DateUtils.getEpochSeconds(releaseMoment);
@@ -68,6 +67,9 @@ class PublicFeed extends Feed {
         feedEntry.Program = program;
         feedEntry.Upvotes = 0;
 
+        // Delete any entries with same Id exists from before (old onces)
+        this.deregisterEntry(feedEntry);
+
         if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
             AppContext.getInstance().Logger.debug(
                 'Register program to public feed with entry: ' +
@@ -79,10 +81,10 @@ class PublicFeed extends Feed {
     }
 
     deregisterEntry(feedEntry) {
-        // TODO:
-        AppContext.getInstance().Logger.debug(
-            'Program ' + feedEntry.Id + ' marked for deregistration.'
-        );
+        this.unpersist({
+            statement: 'Id = ?',
+            values: feedEntry.Id,
+        });
     }
 
     upvoteProgram(programId, userId) {
@@ -114,16 +116,6 @@ class PublicFeedWatcher extends FeedWatcher {
 class PublicFeedEntry extends FeedEntry {
     constructor() {
         super();
-
-        this._id = uuid();
-    }
-
-    get Program() {
-        return this._program;
-    }
-
-    set Program(value) {
-        this._program = value;
     }
 
     get Upvotes() {

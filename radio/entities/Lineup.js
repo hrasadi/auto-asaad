@@ -19,6 +19,7 @@ class LineupTemplate extends Entity {
         AppContext.getInstance().Logger.info('Planning lineup for ' + targetDate);
 
         let lineupPlan = new LineupPlan();
+        lineupPlan.LineupId = targetDate;
 
         if (this.BoxTemplates) {
             lineupPlan.BoxPlans = [];
@@ -75,6 +76,7 @@ class LineupPlan extends Entity {
 
     compile() {
         let lineup = new Lineup();
+        lineup.LineupId = this.LineupId;
 
         let boxes = [];
         for (let boxPlan of this.BoxPlans) {
@@ -109,6 +111,18 @@ class LineupPlan extends Entity {
             }
         }
         return null;
+    }
+
+    get LineupId() {
+        return this._lineupId;
+    }
+
+    set LineupId(value) {
+        this._lineupId = value;
+    }
+
+    get CanonicalIdPath() {
+        return this._lineupId;
     }
 
     get BoxPlans() {
@@ -278,6 +292,18 @@ class Lineup extends Entity {
             box.onEvent(eventName);
         }
         this.onEvent0(eventName);
+    }
+
+    get LineupId() {
+        return this._lineupId;
+    }
+
+    set LineupId(value) {
+        this._lineupId = value;
+    }
+
+    get CanonicalIdPath() {
+        return this._lineupId;
     }
 
     get Boxes() {
