@@ -66,6 +66,13 @@ class PublicFeed extends Feed {
         feedEntry.Program = program;
         feedEntry.Upvotes = 0;
 
+        // If the feed is already expired, why publish?
+        // This case might happen when we are replanning
+        // dates from the past.
+        if (feedEntry.ExpirationTimestamp > moment.unix()) {
+            return;
+        }
+
         // Delete any entries with same Id exists from before (old onces)
         // We will continue on complete callback from deregister (note async func)
         this.deregisterFeedEntry(feedEntry);
