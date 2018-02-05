@@ -13,7 +13,7 @@ class LiquidsoapBox extends Box {
 
     doScheduleBox(targetDate, boxIdx) {
         let targetLineup = AppContext.getInstance('LineupGenerator').
-                                        LineupManager.getScheduledLineupFilePath(targetDate);
+                                    LineupManager.getScheduledLineupFilePath(targetDate);
 
         let boxStartTimeString = moment(this.StartTime).subtract(1, 'minute')
                                                         .format('YYYYMMDDHHmm.ss');

@@ -121,10 +121,6 @@ class LineupPlan extends Entity {
         this._lineupId = value;
     }
 
-    get CanonicalIdPath() {
-        return this._lineupId;
-    }
-
     get BoxPlans() {
         return this.getOrNull(this._boxPlans);
     }

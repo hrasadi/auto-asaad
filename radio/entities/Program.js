@@ -65,13 +65,6 @@ class ProgramTemplate extends BaseProgram {
         this._parentBoxTemplate = parent;
     }
 
-    get CanonicalIdPath() {
-        if (!this._canonicalIdPath) {
-            this._canonicalIdPath = this._parentBoxTemplate.CanonicalIdPath +
-                                    '/' + this.ProgramId;
-        }
-    }
-
     get ProgramType() {
         return this._programType;
     }
