@@ -218,7 +218,7 @@ class CyclicIterator extends Iterator {
 
     adjustByOffset(base, offset) {
         if (offset) {
-            return (base + offset) % this._maxValue;
+            return this.mod(base + offset, this._maxValue);
         } else {
             return base;
         }
@@ -233,6 +233,11 @@ class CyclicIterator extends Iterator {
         if (this._maxValue && this._maxValue > 0) {
             return true;
         }
+    }
+
+    // Positive mode
+    mod(n, m) {
+        return ((n % m) + m) % m;
     }
 }
 
