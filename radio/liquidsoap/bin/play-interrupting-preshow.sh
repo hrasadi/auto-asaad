@@ -7,18 +7,18 @@ sleep $wait_time
 
 # change the current program
 # There is a slight code duplication here with the playback-show.sh file. We may fix it later
-echo "${2}" > "${1}.program.iter"
+echo "${3}" > "${1}/run/interrupting-preshow-playback.liquidsoap.lock"
 
 # stop any half-played items from before!
-{ echo "pre_show_q.skip"; sleep 1; } | telnet localhost 1234 
+{ echo "interrupting_preshow_q.skip"; sleep 1; } | telnet localhost 1234 
 
 # The the lineup file should be introduced as paramter
-clips=`node list-preshow-items ${1} ${2}` 
+clips=`node list-preshow-items ${1} ${2} ${3}`
 for line in $clips; do
   # pass it to telnet
-  { echo "pre_show_q.push $line"; sleep 1; } | telnet localhost 1234
+  { echo "interrupting_preshow_q.push $line"; sleep 1; } | telnet localhost 1234
 done 
 
 # Now start playback
-{ echo "var.set start_pre_show = true"; sleep 1; } | telnet localhost 1234 
+{ echo "var.set interrupting_pre_show_enabled = true"; sleep 1; } | telnet localhost 1234 
 

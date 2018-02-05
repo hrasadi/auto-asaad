@@ -12,15 +12,16 @@ class LiquidsoapBox extends Box {
     }
 
     doScheduleBox(targetDate, boxIdx) {
-        let lineupFilePath = AppContext.getInstance('LineupGenerator').LineupManager
-                                .getScheduledLineupFilePath(targetDate);
+        let targetLineup = AppContext.getInstance('LineupGenerator').
+                                        LineupManager.getScheduledLineupFilePath(targetDate);
 
-        let boxStartTimeString = moment(this.StartTime)
-                                        .format('YYYYMMDDHHmm.ss');
+        let boxStartTimeString = moment(this.StartTime).subtract(1, 'minute')
+                                                        .format('YYYYMMDDHHmm.ss');
         let boxSchedulerCmd = 'echo \'cd ' + __dirname +
                                     '/bin; node playback-box.js ' +
-                                    lineupFilePath +
-                                    ' ' + boxIdx + '\' | at -t ' +
+                                    AppContext.getInstance().CWD + ' ' +
+                                    targetLineup + ' ' +
+                                    this.CanonicalIdPath + '\' | at -t ' +
                                     boxStartTimeString + ' 2>&1';
 
         if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode ||

@@ -12,18 +12,19 @@ class LiquidsoapProgram extends Program {
     }
 
     doScheduleProgram(targetDate, boxIdx, programIdx) {
-        let lineupFilePath = AppContext.getInstance('LineupGenerator')
-                                .LineupManager.getScheduledLineupFilePath(targetDate);
+        let targetLineup = AppContext.getInstance('LineupGenerator').
+                                        LineupManager.getScheduledLineupFilePath(targetDate);
 
         this.LivePlaybackSchedulerMeta =
                                 new LivePlaybackSchedulerMeta();
 
-        let showStartTimeString = moment(this.ShowStartTime)
-                                        .format('YYYYMMDDHHmm.ss');
+        let showStartTimeString = moment(this.ShowStartTime).subtract(1, 'minute')
+                                                            .format('YYYYMMDDHHmm.ss');
         let showSchedulerCmd = 'echo \'cd ' + __dirname +
                                 '/bin; node playback-program-show.js ' +
-                                lineupFilePath + ' ' + boxIdx + ' ' +
-                                programIdx + ' \' | at -t ' +
+                                AppContext.getInstance().CWD + ' ' +
+                                targetLineup + ' ' +
+                                this.CanonicalIdPath + ' \' | at -t ' +
                                 showStartTimeString + ' 2>&1';
 
         if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode ||
@@ -41,14 +42,16 @@ class LiquidsoapProgram extends Program {
 
         if (this.PreShow) {
             let preShowStartTimeString = moment(this.PreShowStartTime)
-                                            .format('YYYYMMDDHHmm.ss');
+                                                .subtract(1, 'minute')
+                                                .format('YYYYMMDDHHmm.ss');
             let preShowSchedulerCmd =
                                 'echo \'cd ' + __dirname +
                                 '/bin; node playback-program-preshow.js ' +
-                                lineupFilePath +
+                                AppContext.getInstance().CWD + ' ' +
+                                targetLineup + ' ' +
+                                this.CanonicalIdPath + ' ' +
                                 this.PreShow.FillerClip ?
                                 this.PreShow.FillerClip.Media.Path : '' +
-                                ' ' + boxIdx + ' ' + programIdx +
                                 ' \' | at -t ' +
                                 preShowStartTimeString + ' 2>&1';
 

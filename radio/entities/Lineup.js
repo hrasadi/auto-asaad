@@ -306,6 +306,10 @@ class Lineup extends Entity {
         return this._lineupId;
     }
 
+    set CanonicalIdPath(value) {
+        this._canonicalIdPath = value;
+    }
+
     get Boxes() {
         return this.getOrElse(this._boxes, []);
     }
