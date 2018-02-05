@@ -85,7 +85,7 @@ class FeedWatcher {
 
     init() {
         let self = this;
-        setInterval(() => this.tick(self), FEED_CHECKING_FREQUENCY);
+        setInterval(() => self.tick(self), FEED_CHECKING_FREQUENCY);
         // Start with a firing
         this.tick(self);
     }
