@@ -48,7 +48,7 @@ class PublicFeed extends Feed {
         this._tableName = 'PublicFeedEntry';
     }
 
-    registerProgram(program, releaseMoment) {
+    async registerProgram(program, releaseMoment) {
         let feedEntry = new PublicFeedEntry();
         if (releaseMoment) {
             feedEntry.ReleaseTimestamp = DateUtils.getEpochSeconds(releaseMoment);
@@ -75,7 +75,7 @@ class PublicFeed extends Feed {
 
         // Delete any entries with same Id exists from before (old onces)
         // We will continue on complete callback from deregister (note async func)
-        this.deregisterFeedEntry(feedEntry);
+        await this.deregisterFeedEntry(feedEntry);
 
         if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
             AppContext.getInstance().Logger.debug(
@@ -87,8 +87,8 @@ class PublicFeed extends Feed {
         }
     }
 
-    async deregisterFeedEntry(feedEntry) {
-        await this.unpersistById(this._type, feedEntry.Id);
+    deregisterFeedEntry(feedEntry) {
+        return this.unpersistById(this._type, feedEntry.Id);
     }
 
     upvoteProgram(programId, userId) {
