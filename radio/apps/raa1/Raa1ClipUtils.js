@@ -95,7 +95,7 @@ class WrappedClip {
                         this._relativePath[0] == '/' ? this._relativePath.substring(1) :
                                                         this._relativePath;
                     this._name = this._relativePath.substring(
-                                                    this._relativePath.lastIndexOf('/'));
+                                                    this._relativePath.lastIndexOf('/') + 1);
 
                     this._publicClip = new Clip(clip);
                 }
