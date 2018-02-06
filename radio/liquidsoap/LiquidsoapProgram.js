@@ -20,49 +20,6 @@ class LiquidsoapProgram extends Program {
 
         this.LivePlaybackSchedulerMeta = new LivePlaybackSchedulerMeta();
 
-        let showStartTime = moment(this.Metadata.ShowStartTime).subtract(1, 'minute');
-
-        if (showStartTime.isBefore(moment())) {
-            AppContext.getInstance().Logger.info(
-                `Show ${this.CanonicalIdPath} start` +
-                    `time is passed. Skipping scheudling.`
-            );
-            return;
-        }
-
-        let showStartTimeString = showStartTime.format('YYYYMMDDHHmm.ss');
-
-        let showSchedulerCmd =
-            'echo \'cd ' +
-            __dirname +
-            '/bin; node playback-program-show.js ' +
-            AppContext.getInstance().CWD +
-            ' ' +
-            targetLineupFilePath +
-            ' ' +
-            this.CanonicalIdPath +
-            ' \' | at -t ' +
-            showStartTimeString +
-            ' 2>&1';
-
-        if (
-            AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode ||
-            AppContext.getInstance('LineupGenerator').GeneratorOptions.NoAtJob
-        ) {
-            AppContext.getInstance().Logger.debug(
-                'Program show scheduler command is: ' + showSchedulerCmd
-            );
-        } else {
-            let ret = execSync(showSchedulerCmd, {
-                encoding: 'utf-8',
-            });
-
-            this.LivePlaybackSchedulerMeta.ShowAt = this.ShowStartTime;
-
-            // The second token (e.g. "job xxx at Thu Jun 29 20:24:58 2017")
-            this.LivePlaybackSchedulerMeta.ShowId = ret.split('\n')[1].split(' ')[1];
-        }
-
         if (this.PreShow) {
             let preShowStartTime = moment(this.Metadata.PreShowStartTime).subtract(
                 1,
@@ -82,7 +39,7 @@ class LiquidsoapProgram extends Program {
             let preShowSchedulerCmd =
                 'echo \'cd ' +
                 __dirname +
-                '/bin; node playback-program-preshow.js ' +
+                '/bin; ./play-interrupting-preshow.sh ' +
                 AppContext.getInstance().CWD +
                 ' ' +
                 targetLineupFilePath +
@@ -113,6 +70,49 @@ class LiquidsoapProgram extends Program {
                     .split('\n')[1]
                     .split(' ')[1];
             }
+        }
+
+        let showStartTime = moment(this.Metadata.ShowStartTime).subtract(1, 'minute');
+
+        if (showStartTime.isBefore(moment())) {
+            AppContext.getInstance().Logger.info(
+                `Show ${this.CanonicalIdPath} start` +
+                    `time is passed. Skipping scheudling.`
+            );
+            return;
+        }
+
+        let showStartTimeString = showStartTime.format('YYYYMMDDHHmm.ss');
+
+        let showSchedulerCmd =
+            'echo \'cd ' +
+            __dirname +
+            '/bin; ./play-interrupting-show.sh ' +
+            AppContext.getInstance().CWD +
+            ' ' +
+            targetLineupFilePath +
+            ' ' +
+            this.CanonicalIdPath +
+            ' \' | at -t ' +
+            showStartTimeString +
+            ' 2>&1';
+
+        if (
+            AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode ||
+            AppContext.getInstance('LineupGenerator').GeneratorOptions.NoAtJob
+        ) {
+            AppContext.getInstance().Logger.debug(
+                'Program show scheduler command is: ' + showSchedulerCmd
+            );
+        } else {
+            let ret = execSync(showSchedulerCmd, {
+                encoding: 'utf-8',
+            });
+
+            this.LivePlaybackSchedulerMeta.ShowAt = this.ShowStartTime;
+
+            // The second token (e.g. "job xxx at Thu Jun 29 20:24:58 2017")
+            this.LivePlaybackSchedulerMeta.ShowId = ret.split('\n')[1].split(' ')[1];
         }
     }
 
