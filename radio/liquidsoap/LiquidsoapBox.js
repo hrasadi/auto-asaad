@@ -29,14 +29,16 @@ class LiquidsoapBox extends Box {
             AppContext.getInstance().Logger.debug('Box scheduler command is: ' +
                                                         boxSchedulerCmd);
         } else {
-            let ret = execSync(boxSchedulerCmd);
+            let ret = execSync(boxSchedulerCmd, {
+                encoding: 'utf-8',
+            });
 
             this.LivePlaybackSchedulerMeta =
                                 new LivePlaybackSchedulerMeta();
             this.LivePlaybackSchedulerMeta.ShowAt = this.StartTime;
 
             // The second token (e.g. "job xxx at Thu Jun 29 20:24:58 2017")
-            this.LivePlaybackSchedulerMeta.ShowId = ret.split(' ')[1];
+            this.LivePlaybackSchedulerMeta.ShowId = ret.split('\n')[1].split(' ')[1];
         }
     }
 
