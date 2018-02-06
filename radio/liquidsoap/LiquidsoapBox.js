@@ -11,39 +11,50 @@ class LiquidsoapBox extends Box {
         super(jsonOrOther, parent);
     }
 
-    doScheduleBox(targetDate, boxIdx) {
-        let targetLineup = AppContext.getInstance('LineupGenerator').
-                                    LineupManager.getScheduledLineupFilePath(targetDate);
+    doScheduleBox() {
+        let targetLineupFilePath = AppContext.getInstance(
+            'LineupGenerator'
+        ).LineupManager.getScheduledLineupFilePath(this._parentLineup.LineupId);
 
         // we Active wait in the last minute to guarantee precision by seconds.
         let boxStartTime = moment(this.StartTime).subtract(1, 'minute');
 
         if (boxStartTime.isBefore(moment())) {
-            AppContext.getInstance().Logger.info(`Box ${this.CanonicalIdPath} start` +
-                                                `time is passed. Skipping scheudling.`);
-           return;
+            AppContext.getInstance().Logger.info(
+                `Box ${this.CanonicalIdPath} start` +
+                    `time is passed. Skipping scheudling.`
+            );
+            return;
         }
 
         let boxStartTimeString = boxStartTime.format('YYYYMMDDHHmm.ss');
 
-        let boxSchedulerCmd = 'echo \'cd ' + __dirname +
-                                    '/bin; node playback-box.js ' +
-                                    AppContext.getInstance().CWD + ' ' +
-                                    targetLineup + ' ' +
-                                    this.CanonicalIdPath + '\' | at -t ' +
-                                    boxStartTimeString + ' 2>&1';
+        let boxSchedulerCmd =
+            'echo \'cd ' +
+            __dirname +
+            '/bin; node playback-box.js ' +
+            AppContext.getInstance().CWD +
+            ' ' +
+            targetLineupFilePath +
+            ' ' +
+            this.CanonicalIdPath +
+            '\' | at -t ' +
+            boxStartTimeString +
+            ' 2>&1';
 
-        if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode ||
-            AppContext.getInstance('LineupGenerator').GeneratorOptions.NoAtJob) {
-            AppContext.getInstance().Logger.debug('Box scheduler command is: ' +
-                                                        boxSchedulerCmd);
+        if (
+            AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode ||
+            AppContext.getInstance('LineupGenerator').GeneratorOptions.NoAtJob
+        ) {
+            AppContext.getInstance().Logger.debug(
+                'Box scheduler command is: ' + boxSchedulerCmd
+            );
         } else {
             let ret = execSync(boxSchedulerCmd, {
                 encoding: 'utf-8',
             });
 
-            this.LivePlaybackSchedulerMeta =
-                                new LivePlaybackSchedulerMeta();
+            this.LivePlaybackSchedulerMeta = new LivePlaybackSchedulerMeta();
             this.LivePlaybackSchedulerMeta.ShowAt = this.StartTime;
 
             // The second token (e.g. "job xxx at Thu Jun 29 20:24:58 2017")
@@ -52,23 +63,25 @@ class LiquidsoapBox extends Box {
     }
 
     doUnscheduleBox(oldBox) {
-        if (!this.LivePlaybackSchedulerMeta ||
-            !this.LivePlaybackSchedulerMeta.ShowId) {
+        if (!this.LivePlaybackSchedulerMeta || !this.LivePlaybackSchedulerMeta.ShowId) {
             return;
         }
 
-        let boxUnschedulingCmd = 'atrm ' +
-                                        this.LivePlaybackSchedulerMeta.ShowId;
-        if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode ||
-            AppContext.getInstance('LineupGenerator').GeneratorOptions.NoAtJob) {
-            AppContext.getInstance().Logger.debug('Box unscheduler command is: ' +
-                                                        boxUnschedulingCmd);
+        let boxUnschedulingCmd = 'atrm ' + this.LivePlaybackSchedulerMeta.ShowId;
+        if (
+            AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode ||
+            AppContext.getInstance('LineupGenerator').GeneratorOptions.NoAtJob
+        ) {
+            AppContext.getInstance().Logger.debug(
+                'Box unscheduler command is: ' + boxUnschedulingCmd
+            );
         } else {
             try {
                 execSync(boxUnschedulingCmd);
             } catch (e) {
                 AppContext.getInstance().Logger.debug(
-                                'Box unschedule resturns non-empty: ' + e);
+                    'Box unschedule resturns non-empty: ' + e
+                );
             }
         }
     }

@@ -158,7 +158,9 @@ class Iterator {
     }
 
     hasNext(offset = 0) {
-        if (this.isInBounds(offset + 1)) {
+        // we need this to call linear isInBound, so override
+        // polymorphism
+        if (Iterator.prototype.isInBounds.call(this, offset + 1)) {
             return true;
         }
         return false;
@@ -226,6 +228,11 @@ class CyclicIterator extends Iterator {
 
     linearIteratorHasNext() {
         return Iterator.prototype.hasNext.call(this);
+    }
+
+    isInBounds(offset) {
+        // CyclicIterator is always in bound!
+        return true;
     }
 
     // always true unless the maxValue is not set correctly

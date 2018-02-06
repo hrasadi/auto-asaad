@@ -467,18 +467,18 @@ class Program extends BaseProgram {
         );
     }
 
-    schedule(targetDate, boxIdx, programIdx) {
+    schedule() {
         if (this.Priority != 'High') {
             throw Error(
                 'Logic error: scheduling on programs is only valid' +
                     'when program is interrrupting'
             );
         }
-        this.doScheduleProgram(targetDate, boxIdx, programIdx);
+        this.doScheduleProgram();
     }
 
     // Implemented in subclasses
-    doScheduleProgram(targetDate, boxIdx, programIdx) {}
+    doScheduleProgram() {}
 
     unschedule() {
         if (this.LivePlaybackSchedulerMeta) {

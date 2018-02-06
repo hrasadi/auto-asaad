@@ -11,10 +11,12 @@ class LiquidsoapProgram extends Program {
         super(jsonOrOther, parent);
     }
 
-    doScheduleProgram(targetDate) {
-        let targetLineup = AppContext.getInstance(
+    doScheduleProgram() {
+        let targetLineupFilePath = AppContext.getInstance(
             'LineupGenerator'
-        ).LineupManager.getScheduledLineupFilePath(targetDate);
+        ).LineupManager.getScheduledLineupFilePath(
+            this._parentBox._parentLineup.LineupId
+        );
 
         this.LivePlaybackSchedulerMeta = new LivePlaybackSchedulerMeta();
 
@@ -36,7 +38,7 @@ class LiquidsoapProgram extends Program {
             '/bin; node playback-program-show.js ' +
             AppContext.getInstance().CWD +
             ' ' +
-            targetLineup +
+            targetLineupFilePath +
             ' ' +
             this.CanonicalIdPath +
             ' \' | at -t ' +
@@ -83,12 +85,14 @@ class LiquidsoapProgram extends Program {
                 '/bin; node playback-program-preshow.js ' +
                 AppContext.getInstance().CWD +
                 ' ' +
-                targetLineup +
+                targetLineupFilePath +
                 ' ' +
                 this.CanonicalIdPath +
                 ' ' +
                 (this.PreShow.FillerClip ? this.PreShow.FillerClip.Media.Path : '') +
-                 ' \' | at -t ' + preShowStartTimeString + ' 2>&1';
+                ' \' | at -t ' +
+                preShowStartTimeString +
+                ' 2>&1';
 
             if (
                 AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode ||

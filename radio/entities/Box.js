@@ -213,7 +213,7 @@ class Box extends BaseBox {
     schedule(targetDate) {
         let oldLineupFilePath = AppContext.getInstance(
             'LineupGenerator'
-        ).LineupManager.getScheduledLineupFilePath(targetDate);
+        ).LineupManager.getScheduledLineupFilePath(this._parentLineup.LineupId);
 
         if (fs.existsSync(oldLineupFilePath)) {
             let oldLineup = JSON.parse(fs.readFileSync(oldLineupFilePath));
@@ -227,20 +227,20 @@ class Box extends BaseBox {
         }
 
         if (!this.IsFloating) {
-            this.doScheduleBox(targetDate);
+            this.doScheduleBox();
         }
         // Also schedule any program with high priority
         // Note that if the box is floating, we expect it
         // only to have high priority programs
         for (let program of this.Programs) {
             if (program.Priority == 'High') {
-                program.schedule(targetDate);
+                program.schedule();
             }
         }
     }
 
     // Implemented in subclasses
-    doScheduleBox(targetDate) {}
+    doScheduleBox() {}
 
     // Implemented in subclasses
     unscheduleBox(oldBox) {
