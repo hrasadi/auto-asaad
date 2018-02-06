@@ -11,15 +11,23 @@ class LiquidsoapProgram extends Program {
         super(jsonOrOther, parent);
     }
 
-    doScheduleProgram(targetDate, boxIdx, programIdx) {
+    doScheduleProgram(targetDate) {
         let targetLineup = AppContext.getInstance('LineupGenerator').
-                                        LineupManager.getScheduledLineupFilePath(targetDate);
+                                    LineupManager.getScheduledLineupFilePath(targetDate);
 
         this.LivePlaybackSchedulerMeta =
                                 new LivePlaybackSchedulerMeta();
 
-        let showStartTimeString = moment(this.ShowStartTime).subtract(1, 'minute')
-                                                            .format('YYYYMMDDHHmm.ss');
+        let showStartTime = moment(this.ShowStartTime).subtract(1, 'minute');
+
+        if (showStartTime.isBefore(moment())) {
+            AppContext.getInstance().Logger.info(`Show ${this.CanonicalIdPath} start` +
+                                                `time is passed. Skipping scheudling.`);
+            return;
+        }
+
+        let showStartTimeString = showStartTime.format('YYYYMMDDHHmm.ss');
+
         let showSchedulerCmd = 'echo \'cd ' + __dirname +
                                 '/bin; node playback-program-show.js ' +
                                 AppContext.getInstance().CWD + ' ' +
@@ -44,9 +52,17 @@ class LiquidsoapProgram extends Program {
         }
 
         if (this.PreShow) {
-            let preShowStartTimeString = moment(this.PreShowStartTime)
-                                                .subtract(1, 'minute')
-                                                .format('YYYYMMDDHHmm.ss');
+            let preShowStartTime = moment(this.PreShowStartTime).subtract(1, 'minute');
+
+            if (preShowStartTime.isBefore(moment())) {
+                AppContext.getInstance().Logger
+                                        .info(`PreShow ${this.CanonicalIdPath}` +
+                                        `start time is passed. Skipping scheudling.`);
+                return;
+            }
+
+            let preShowStartTimeString = preShowStartTime.format('YYYYMMDDHHmm.ss');
+
             let preShowSchedulerCmd =
                                 'echo \'cd ' + __dirname +
                                 '/bin; node playback-program-preshow.js ' +

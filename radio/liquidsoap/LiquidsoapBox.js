@@ -15,8 +15,16 @@ class LiquidsoapBox extends Box {
         let targetLineup = AppContext.getInstance('LineupGenerator').
                                     LineupManager.getScheduledLineupFilePath(targetDate);
 
-        let boxStartTimeString = moment(this.StartTime).subtract(1, 'minute')
-                                                        .format('YYYYMMDDHHmm.ss');
+        // we Active wait in the last minute to guarantee precision by seconds.
+        let boxStartTime = moment(this.StartTime).subtract(1, 'minute');
+
+        if (boxStartTime.isBefore(moment())) {
+            AppContext.getInstance().Logger.info(`Box ${this.CanonicalIdPath} start` +
+                                                `time is passed. Skipping scheudling.`);
+        }
+
+        let boxStartTimeString = boxStartTime.format('YYYYMMDDHHmm.ss');
+
         let boxSchedulerCmd = 'echo \'cd ' + __dirname +
                                     '/bin; node playback-box.js ' +
                                     AppContext.getInstance().CWD + ' ' +

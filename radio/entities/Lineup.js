@@ -206,8 +206,8 @@ class Lineup extends Entity {
         this.validate();
 
         // Schedule boxes
-        for (let i = 0; i < this.Boxes.length; i++) {
-            this.Boxes[i].schedule(targetDate, i);
+        for (let box of this.Boxes) {
+            box.schedule(targetDate);
         }
     }
 
