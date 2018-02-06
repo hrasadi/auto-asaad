@@ -57,6 +57,8 @@ class Raa1ClipUtils extends ClipUtils {
                                 'Error uploading file to S3. Error is: ' + err
                             );
                         } else {
+                            AppContext.getInstance().Logger.info(
+                                                    `Upload successful! ${data}`);
                             // Remove the temp file
                             if (w.IsWrapped) {
                                 fs.unlinkSync(w.AbsolutePath);
