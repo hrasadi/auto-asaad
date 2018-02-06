@@ -13,8 +13,9 @@ class Raa1ClipUtils extends ClipUtils {
         super();
         // Initiate AWS connection
         if (credentialsConf.AWS) {
-            AWS.config.loadFromPath(AppContext.getInstance().CWD +
-                                    '/' + credentialsConf.AWS);
+            AWS.config.loadFromPath(
+                AppContext.getInstance().CWD + '/' + credentialsConf.AWS
+            );
         }
         this.s3 = new AWS.S3();
     }
@@ -30,14 +31,17 @@ class Raa1ClipUtils extends ClipUtils {
 
         // Upload the file on S3
         let uploadParams = {
-            'Bucket': 'vod.raa.media',
-            'Key': wrappedClip.RelativePath,
+            Bucket: 'vod.raa.media',
+            Key: wrappedClip.RelativePath,
         };
 
-        if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode ||
-            AppContext.getInstance('LineupGenerator').GeneratorOptions.NoVODUpload) {
-            AppContext.getInstance().Logger.debug('S3 upload key is: ' +
-                                                    wrappedClip.RelativePath);
+        if (
+            AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode ||
+            AppContext.getInstance('LineupGenerator').GeneratorOptions.NoVODUpload
+        ) {
+            AppContext.getInstance().Logger.debug(
+                'S3 upload key is: ' + wrappedClip.RelativePath
+            );
         } else {
             wrappedClip.wrap();
 
@@ -50,7 +54,8 @@ class Raa1ClipUtils extends ClipUtils {
                     this.s3.putObject(uploadParams, (err, data) => {
                         if (err) {
                             AppContext.getInstance().Logger.error(
-                                    'Error uploading file to S3. Error is: ' + err);
+                                'Error uploading file to S3. Error is: ' + err
+                            );
                         } else {
                             // Remove the temp file
                             if (w.IsWrapped) {
@@ -89,13 +94,17 @@ class WrappedClip {
                 this._duration += clip.Media.Duration;
                 if (clip.IsMainClip) {
                     this._relativePath = clip.Media.Path.replace(
-                                    AppContext.getInstance('LineupGenerator')
-                                    .LineupManager.MediaDirectory.BaseDir, '');
+                        AppContext.getInstance('LineupGenerator').LineupManager
+                            .MediaDirectory.BaseDir,
+                        ''
+                    );
                     this._relativePath =
-                        this._relativePath[0] == '/' ? this._relativePath.substring(1) :
-                                                        this._relativePath;
+                        this._relativePath[0] == '/'
+                            ? this._relativePath.substring(1)
+                            : this._relativePath;
                     this._name = this._relativePath.substring(
-                                                    this._relativePath.lastIndexOf('/') + 1);
+                        this._relativePath.lastIndexOf('/') + 1
+                    );
 
                     this._publicClip = new Clip(clip);
                 }
@@ -104,19 +113,22 @@ class WrappedClip {
         } else {
             this._absolutePath = this._clips[0].Media.Path;
             this._relativePath = this._clips[0].Media.Path.replace(
-                                    AppContext.getInstance('LineupGenerator')
-                                    .LineupManager.MediaDirectory.BaseDir, '');
+                AppContext.getInstance('LineupGenerator').LineupManager.MediaDirectory
+                    .BaseDir,
+                ''
+            );
             this._name = this._relativePath.substring(
-                                    this._relativePath.lastIndexOf('/'));
+                this._relativePath.lastIndexOf('/')
+            );
             this._duration = this._clips[0].Media.Duration;
 
             this._publicClip = new Clip(this._clips[0]);
         }
 
         let vodUrl = new URL(this._relativePath, 'http://vod.raa.media/');
-        vodUrl = 'https://api.raa.media/linkgenerator/podcast.mp3?src=' +
-                                                Buffer.from(vodUrl.toString())
-                                                .toString('base64');
+        vodUrl =
+            'https://api.raa.media/linkgenerator/podcast.mp3?src=' +
+            Buffer.from(vodUrl.toString()).toString('base64');
         // Return the clip
         this._publicClip.Media.Path = vodUrl;
         this._publicClip.Media.Duration = this._duration;
@@ -124,20 +136,29 @@ class WrappedClip {
 
     wrap() {
         if (this.IsWrapped) {
-            let wrapCmd = 'echo y | ffmpeg -i "concat:' + this._allMediaPath +
-                            '" -ac 2 ' + this._absolutePath + ' 2>&1 >/dev/null';
+            let wrapCmd =
+                'echo y | ffmpeg -i "concat:' +
+                this._allMediaPath +
+                '" -ac 2 ' +
+                this._absolutePath +
+                ' 2>&1 >/dev/null';
 
             try {
-                if (AppContext.getInstance('LineupGenerator')
-                                        .GeneratorOptions.TestMode) {
+                if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
                     AppContext.getInstance().Logger.debug(
-                                            'Clip wrapping cmd is: ' + wrapCmd);
+                        'Clip wrapping cmd is: ' + wrapCmd
+                    );
                 } else {
+                    AppContext.getInstance().Logger.info(
+                        `Resource intensive process is starting: ${wrapCmd}`
+                    );
                     execSync(wrapCmd);
+                    AppContext.getInstance().Logger.info('External process finished.');
                 }
             } catch (error) {
-                throw Error('Merging clips was unsuccessful. Error was: ' +
-                            error.message);
+                throw Error(
+                    'Merging clips was unsuccessful. Error was: ' + error.message
+                );
             }
         }
     }
