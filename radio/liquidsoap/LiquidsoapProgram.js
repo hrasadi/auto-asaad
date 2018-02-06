@@ -18,7 +18,7 @@ class LiquidsoapProgram extends Program {
         this.LivePlaybackSchedulerMeta =
                                 new LivePlaybackSchedulerMeta();
 
-        let showStartTime = moment(this.ShowStartTime).subtract(1, 'minute');
+        let showStartTime = moment(this.Metadata.ShowStartTime).subtract(1, 'minute');
 
         if (showStartTime.isBefore(moment())) {
             AppContext.getInstance().Logger.info(`Show ${this.CanonicalIdPath} start` +
@@ -52,7 +52,7 @@ class LiquidsoapProgram extends Program {
         }
 
         if (this.PreShow) {
-            let preShowStartTime = moment(this.PreShowStartTime).subtract(1, 'minute');
+            let preShowStartTime = moment(this.Metadata.PreShowStartTime).subtract(1, 'minute');
 
             if (preShowStartTime.isBefore(moment())) {
                 AppContext.getInstance().Logger
