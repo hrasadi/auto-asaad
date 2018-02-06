@@ -13,7 +13,7 @@ echo "${3}" > "${1}/run/interrupting-preshow-playback.liquidsoap.lock"
 { echo "interrupting_preshow_q.skip"; sleep 1; } | telnet localhost 1221 
 
 # The the lineup file should be introduced as paramter
-clips=`node list-preshow-items.js "${1}" "${2}" "${3}"`
+clips=`node list-interrupting-preshow-media.js "${1}" "${2}" "${3}"`
 for line in $clips; do
   # pass it to telnet
   { echo "interrupting_preshow_q.push $line"; sleep 1; } | telnet localhost 1221

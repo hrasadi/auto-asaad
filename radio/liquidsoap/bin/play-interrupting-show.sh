@@ -10,7 +10,7 @@ sleep $wait_time
 echo "${3}" > "${1}/interrupting-show-playback.liquidsoap.lock"
 
 # The the lineup file should be introduced as paramter
-clips=`node list-interrupting-show-items.js "${1}" "${2}" "${3}"` 
+clips=`node list-interrupting-show-media.js "${1}" "${2}" "${3}"` 
 echo $clips
 for line in $clips; do
   # pass it to telnet
