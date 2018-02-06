@@ -14,5 +14,5 @@ clips=`node list-box-media.js ${1} ${2} ${3}`
 echo $clips
 for line in $clips; do
   # pass it to telnet
-  { echo "show_q.push $line"; sleep 1; } | telnet localhost 1234
+  { echo "show_q.push $line"; sleep 1; } | telnet localhost 1221
 done 

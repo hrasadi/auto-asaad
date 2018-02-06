@@ -56,13 +56,14 @@ case "$1" in
       if test $liq != '*.liq' ; then
         has_channels=1
         echo -n "$liq "
-	liq_name=$(echo $liq | cut -f 1 -d '.')
-	LS_SCRIPT_DIR="${liq_name}_LS_SCRIPT_DIR"
-	RUNNING_DIR="${liq_name}_RUNNING_DIR"
-	MEDIA_DIR="${liq_name}_MEDIA_DIR"
-	ICECAST_PASSWORD="${liq_name}_ICECAST_PASSWORD"
-	start-stop-daemon --start --quiet --pidfile $rundir/${liq%.liq}.pid \
-          --chuid $user:$group --exec $liquidsoap -- -d $confdir/$liq -- ${!LS_SCRIPT_DIR} ${!RUNNING_DIR} ${!MEDIA_DIR} ${!ICECAST_PASSWORD} 
+        liq_name=$(echo $liq | cut -f 1 -d '.')
+
+        LS_SCRIPT_DIR="${liq_name}_LS_SCRIPT_DIR"
+        RUNNING_DIR="${liq_name}_RUNNING_DIR"
+        MEDIA_DIR="${liq_name}_MEDIA_DIR"
+        ICECAST_PASSWORD="${liq_name}_ICECAST_PASSWORD"
+        start-stop-daemon --start --quiet --pidfile $rundir/${liq%.liq}.pid \
+                --chuid $user:$group --exec $liquidsoap -- -d $confdir/$liq -- ${!LS_SCRIPT_DIR} ${!RUNNING_DIR} ${!MEDIA_DIR} ${!ICECAST_PASSWORD} 
       fi
     done
     if test -n "$has_channels"; then

@@ -1,43 +1,47 @@
-var fs = require('fs');
-var moment = require('moment');
-var execSync = require('child_process').execSync;
+const getPartialCanonicalIdPath = require('./id-utils').getPartialCanonicalIdPath;
+
+const fs = require('fs');
+
+// const cwd = process.argv[2];
+// path to the lineup file
+const lineupFilePath = process.argv[3];
+const programCanonicalIdPath = process.argv[4];
+
+let findbox = (lineup, boxCanonicalIdPath) => {
+    let box = lineup.Boxes.find((box) => {
+        box.CanonicalIdPath == boxCanonicalIdPath;
+    });
+
+    if (!box) {
+        throw Error(`Box ${boxCanonicalIdPath} not found!`);
+    }
+    return box;
+};
+
+let findProgram = (lineup, programCanonicalIdPath) => {
+    let box = findbox(lineup, getPartialCanonicalIdPath(programCanonicalIdPath, 'Box'));
+    let program = box.find((program) => {
+        program.CanonicalIdPath == programCanonicalIdPath;
+    });
+
+    if (!program) {
+        throw Error(`Program ${programCanonicalIdPath} not found!`);
+    }
+    return program;
+};
+
 
 // path to the lineup file
-var running_dir = process.argv[2];
-var lineupFilePath = fs.readFileSync(running_dir + "/lineups/current", 'utf8');
-
 if (fs.existsSync(lineupFilePath)) {
-	lineup = JSON.parse(fs.readFileSync(lineupFilePath, 'utf8'));
+    let lineup = JSON.parse(fs.readFileSync(lineupFilePath, 'utf8'));
 
-	if (fs.existsSync(lineupFilePath + ".program.iter")) {
+    // find the program
+    let program = findProgram(lineup, programCanonicalIdPath);
 
-		var currentProgramIdx = parseInt(fs.readFileSync(lineupFilePath + ".program.iter", 'utf8'));
-
-		// Program does not have a preshow
-		if (lineup.Programs[currentProgramIdx] && lineup.Programs[currentProgramIdx].PreShow) {
-			if (lineup.Programs[currentProgramIdx].PreShow.FillerClip) {
-			    console.log(lineup.Programs[currentProgramIdx].PreShow.FillerClip.Path);
-			}
-			
-			// Preprogram exists but no filler is set.
-			// Print nothing 
-
-		} else { // This program does not have a preshow, so wait a bit to see what happens in the next program
-			setTimeout(function() {
-				process.exit(0);
-			}, 5000);
-		}
-	} else { // This case only should happen in the case that radio is not does yet with compiling the lineup, so bear it up!
-		setTimeout(function() {
-			process.exit(0);
-		}, 2000);
-	}
-
+    if (program.PreShow.FillerClip) {
+        console.log(program.Preshow.FillerClip.Media.Path);
+    }
+    // else print nothing, no filler available
 } else { // LineupFilePath not accessible, maybe radio is not up yet
-	
-	setTimeout(function() {
-		process.exit(0);
-	}, 1000);
+    throw Error(`Fatal error! Cannot find lineup ${lineupFilePath}`);
 }
-
-

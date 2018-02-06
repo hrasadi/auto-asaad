@@ -26,8 +26,6 @@ if (fs.existsSync(lineupFilePath)) {
             console.log(clip.Media.Path);
         }
     }
-} else { // LineupFilePath not accessible, maybe radio is not up yet
-    setTimeout(function() {
-        process.exit(0);
-    }, 1000);
+} else {
+    throw Error(`Fatal error! Cannot find lineup ${lineupFilePath}`);
 }

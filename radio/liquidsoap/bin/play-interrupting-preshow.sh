@@ -10,15 +10,15 @@ sleep $wait_time
 echo "${3}" > "${1}/run/interrupting-preshow-playback.liquidsoap.lock"
 
 # stop any half-played items from before!
-{ echo "interrupting_preshow_q.skip"; sleep 1; } | telnet localhost 1234 
+{ echo "interrupting_preshow_q.skip"; sleep 1; } | telnet localhost 1221 
 
 # The the lineup file should be introduced as paramter
 clips=`node list-preshow-items ${1} ${2} ${3}`
 for line in $clips; do
   # pass it to telnet
-  { echo "interrupting_preshow_q.push $line"; sleep 1; } | telnet localhost 1234
+  { echo "interrupting_preshow_q.push $line"; sleep 1; } | telnet localhost 1221
 done 
 
 # Now start playback
-{ echo "var.set interrupting_pre_show_enabled = true"; sleep 1; } | telnet localhost 1234 
+{ echo "var.set interrupting_pre_show_enabled = true"; sleep 1; } | telnet localhost 1221 
 

@@ -19,6 +19,7 @@ mkdir -p "$CWD/run/logs"
 mkdir -p "$CWD/run/podcast"
 mkdir -p "$CWD/run/rss"
 mkdir -p "$CWD/run/tmp"
+mkdir -p "$CWD/run/tts-cache"
 
 DBPATH="$CWD/run/db/`jq  -r '.CollaborativeListening.FeedDBFile' $1`"
 HISTORY_DBPATH="$CWD/run/db/`jq  -r '.CollaborativeListening.FeedHistoryDBFile' $1`"

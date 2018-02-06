@@ -33,16 +33,12 @@ let findProgram = (lineup, programCanonicalIdPath) => {
 if (fs.existsSync(lineupFilePath)) {
     let lineup = JSON.parse(fs.readFileSync(lineupFilePath, 'utf8'));
 
-    // find the box
-    let box = findProgram(lineup, programCanonicalIdPath);
+    // find the program
+    let program = findProgram(lineup, programCanonicalIdPath);
 
-    for (let program of box.Programs) {
-        for (let clip of program.PreShow.Clips) {
-            console.log(clip.Media.Path);
-        }
+    for (let clip of program.PreShow.Clips) {
+        console.log(clip.Media.Path);
     }
-} else { // LineupFilePath not accessible, maybe radio is not up yet
-    setTimeout(function() {
-        process.exit(0);
-    }, 1000);
+} else {
+    throw Error(`Fatal error! Cannot find lineup ${lineupFilePath}`);
 }

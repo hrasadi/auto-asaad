@@ -14,8 +14,8 @@ clips=`node list-interrupting-show-items ${1} ${2} ${3}`
 echo $clips
 for line in $clips; do
   # pass it to telnet
-  { echo "interrupting_show_q.push $line"; sleep 1; } | telnet localhost 1234
+  { echo "interrupting_show_q.push $line"; sleep 1; } | telnet localhost 1221
 done 
 
 # Don't come back to the the filler when done with the show
-{ echo "var.set interrupting_pre_show_enabled = false"; sleep 1; } | telnet localhost 1234 
+{ echo "var.set interrupting_pre_show_enabled = false"; sleep 1; } | telnet localhost 1221 
