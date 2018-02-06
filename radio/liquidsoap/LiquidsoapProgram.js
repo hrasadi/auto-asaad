@@ -43,11 +43,11 @@ class LiquidsoapProgram extends Program {
                 AppContext.getInstance().CWD +
                 ' ' +
                 targetLineupFilePath +
-                ' ' +
+                ' "' +
                 this.CanonicalIdPath +
                 ' ' +
                 (this.PreShow.FillerClip ? this.PreShow.FillerClip.Media.Path : '') +
-                ' \' | at -t ' +
+                '"\' | at -t ' +
                 preShowStartTimeString +
                 ' 2>&1';
 
@@ -91,9 +91,9 @@ class LiquidsoapProgram extends Program {
             AppContext.getInstance().CWD +
             ' ' +
             targetLineupFilePath +
-            ' ' +
+            ' "' +
             this.CanonicalIdPath +
-            ' \' | at -t ' +
+            '"\' | at -t ' +
             showStartTimeString +
             ' 2>&1';
 
