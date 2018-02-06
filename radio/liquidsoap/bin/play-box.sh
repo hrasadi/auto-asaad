@@ -10,7 +10,7 @@ sleep $wait_time
 echo "${3}" > "${1}/box-playback.liquidsoap.lock"
 
 # The the lineup file should be introduced as paramter
-clips=`node list-box-media.js ${1} ${2} ${3}` 
+clips=`node list-box-media.js "${1}" "${2}" "${3}"` 
 echo $clips
 for line in $clips; do
   # pass it to telnet
