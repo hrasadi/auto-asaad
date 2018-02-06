@@ -21,6 +21,7 @@ class LiquidsoapBox extends Box {
         if (boxStartTime.isBefore(moment())) {
             AppContext.getInstance().Logger.info(`Box ${this.CanonicalIdPath} start` +
                                                 `time is passed. Skipping scheudling.`);
+           return;
         }
 
         let boxStartTimeString = boxStartTime.format('YYYYMMDDHHmm.ss');
@@ -63,11 +64,11 @@ class LiquidsoapBox extends Box {
             AppContext.getInstance().Logger.debug('Box unscheduler command is: ' +
                                                         boxUnschedulingCmd);
         } else {
-            let ret = execSync(boxUnschedulingCmd);
-
-            if (ret) {
+            try {
+                execSync(boxUnschedulingCmd);
+            } catch (e) {
                 AppContext.getInstance().Logger.debug(
-                                'Box unschedule resturns non-empty: ' + ret);
+                                'Box unschedule resturns non-empty: ' + e);
             }
         }
     }

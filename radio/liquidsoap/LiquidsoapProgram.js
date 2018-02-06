@@ -119,19 +119,19 @@ class LiquidsoapProgram extends Program {
                                                         showUnschedulingCmd);
         } else {
             if (preShowUnschedulingCmd) {
-                let ret = execSync(preShowUnschedulingCmd);
-
-                if (ret) {
+                try {
+                    execSync(preShowUnschedulingCmd);
+                } catch (e) {
                     AppContext.getInstance().Logger.debug(
-                            'Preshow unschedule resturns non-empty: ' + ret);
+                                    'PreShow unschedule resturns non-empty: ' + e);
                 }
             }
 
-            let ret = execSync(showUnschedulingCmd);
-
-            if (ret) {
+            try {
+                execSync(showUnschedulingCmd);
+            } catch (e) {
                 AppContext.getInstance().Logger.debug(
-                                'Show unschedule resturns non-empty: ' + ret);
+                                'Show unschedule resturns non-empty: ' + e);
             }
         }
     }
