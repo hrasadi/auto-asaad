@@ -20,5 +20,5 @@ for line in $clips; do
 done 
 
 # Now start playback
-{ echo "var.set interrupting_pre_show_enabled = true"; sleep 1; } | telnet localhost 1221 
+{ echo "var.set interrupting_preshow_enabled = true"; sleep 1; } | telnet localhost 1221 
 

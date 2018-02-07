@@ -18,4 +18,4 @@ for line in $clips; do
 done 
 
 # Don't come back to the the filler when done with the show
-{ echo "var.set interrupting_pre_show_enabled = false"; sleep 1; } | telnet localhost 1221 
+{ echo "var.set interrupting_preshow_enabled = false"; sleep 1; } | telnet localhost 1221 
