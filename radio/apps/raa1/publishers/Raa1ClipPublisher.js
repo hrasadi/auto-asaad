@@ -57,15 +57,25 @@ class Raa1ClipPublisher extends ClipPublisher {
         ) {
             wrappedClip.wrap();
             try {
-                let clipData = await fs.readFileAsync(wrappedClip.AbsolutePath);
-
-                if (!await this._asyncS3.exists(wrappedClip.RelativePath)) {
-                    await this._asyncS3.putObject(wrappedClip.RelativePath, clipData);
-                    // Remove the temp file
-                    if (wrappedClip.IsWrapped) {
-                        fs.unlinkSync(wrappedClip.AbsolutePath);
-                    }
-                }
+                let self = this;
+                fs.readFileAsync(wrappedClip.AbsolutePath).then(
+                    // We want to block this part only, so we create surraounding closure
+                    ((wrappedClip) => {
+                        let uploadClosure = async function(clipData) {
+                            if (!await self._asyncS3.exists(wrappedClip.RelativePath)) {
+                                await self._asyncS3.putObject(
+                                    wrappedClip.RelativePath,
+                                    clipData
+                                );
+                                // Remove the temp file
+                                if (wrappedClip.IsWrapped) {
+                                    fs.unlinkSync(wrappedClip.AbsolutePath);
+                                }
+                            }
+                        };
+                        return uploadClosure;
+                    })(wrappedClip)
+                );
             } catch (e) {
                 throw Error('Error while uploading public clip. Inner exception is ' + e);
             }
@@ -99,11 +109,14 @@ class WrappedClip {
                 this._duration += clip.Media.Duration;
 
                 if (clip.IsMainClip) {
-                    this._relativePath = path.dirname(clip.Media.Path).replace(
-                        AppContext.getInstance('LineupGenerator').LineupManager
-                            .MediaDirectory.BaseDir,
-                        ''
-                    ).replace(/^\/+/g, ''); // also remove any '/' at the beginning
+                    this._relativePath = path
+                        .dirname(clip.Media.Path)
+                        .replace(
+                            AppContext.getInstance('LineupGenerator').LineupManager
+                                .MediaDirectory.BaseDir,
+                            ''
+                        )
+                        .replace(/^\/+/g, ''); // also remove any '/' at the beginning
                     if (this._publicClipNamingStrategy == 'MainClip') {
                         this._name = this._relativePath.substring(
                             this._relativePath.lastIndexOf('/') + 1
@@ -119,8 +132,7 @@ class WrappedClip {
 
             this._relativePath = path.join(this._relativePath, this._name);
 
-            this._absolutePath =
-                AppContext.getInstance().CWD + '/run/tmp/' + this._name;
+            this._absolutePath = AppContext.getInstance().CWD + '/run/tmp/' + this._name;
         } else {
             this._absolutePath = this._clips[0].Media.Path;
             this._relativePath = this._clips[0].Media.Path.replace(
@@ -129,7 +141,8 @@ class WrappedClip {
                 ''
             ).replace(/^\/+/g, ''); // also remove any '/' at the beginning
             this._name = this._relativePath.substring(
-                this._relativePath.lastIndexOf('/') + 1);
+                this._relativePath.lastIndexOf('/') + 1
+            );
             this._duration = this._clips[0].Media.Duration;
 
             this._publicClip = new Clip(this._clips[0]);
