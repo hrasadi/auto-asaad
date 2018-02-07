@@ -43,7 +43,7 @@ class Raa1ClipPublisher extends ClipPublisher {
      *  be named. Options are 'MainClip', 'AllClips'
      * @return {Clip} the public clip object
      */
-    async getPublicClip(clips, publicClipNamingStrategy = 'MainClip') {
+    getPublicClip(clips, publicClipNamingStrategy = 'MainClip') {
         let wrappedClip = new WrappedClip(clips, publicClipNamingStrategy);
 
         AppContext.getInstance().Logger.debug(
@@ -60,16 +60,16 @@ class Raa1ClipPublisher extends ClipPublisher {
                 let self = this;
                 fs.readFileAsync(wrappedClip.AbsolutePath).then(
                     // We want to block this part only, so we create surraounding closure
-                    ((wrappedClip) => {
+                    ((w) => {
                         let uploadClosure = async function(clipData) {
-                            if (!await self._asyncS3.exists(wrappedClip.RelativePath)) {
+                            if (!await self._asyncS3.exists(w.RelativePath)) {
                                 await self._asyncS3.putObject(
-                                    wrappedClip.RelativePath,
+                                    w.RelativePath,
                                     clipData
                                 );
                                 // Remove the temp file
-                                if (wrappedClip.IsWrapped) {
-                                    fs.unlinkSync(wrappedClip.AbsolutePath);
+                                if (w.IsWrapped) {
+                                    fs.unlinkSync(w.AbsolutePath);
                                 }
                             }
                         };
