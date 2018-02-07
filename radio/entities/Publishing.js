@@ -12,6 +12,14 @@ class Publishing extends Entity {
     validate() {
     }
 
+    get PublicClipNamingStrategy() {
+        return this.getOrElse(this._publicClipNamingStrategy, 'MainClip');
+    }
+
+    set PublicClipNamingStrategy(value) {
+        this._publicClipNamingStrategy = value;
+    }
+
     get Archive() {
         return this.getOrElse(this._archive, false);
     }

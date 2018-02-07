@@ -140,8 +140,8 @@ class LineupGenerator extends AppContext {
         return this._publishers;
     }
 
-    get ClipUtils() {
-        return this._clipUtils;
+    get ClipPublisher() {
+        return this._clipPublisher;
     }
 
     get ProgramInfoDirectory() {

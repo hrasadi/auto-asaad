@@ -5,7 +5,8 @@ const ObjectBuilder = require('../../entities/ObjectBuilder');
 const LineupGenerator = require('../../LineupGenerator');
 
 const Raa1ActionManager = require('./lineupaction/Raa1ActionManager');
-const Raa1StartTimeCalculatorManager = require('./starttimecalculator/Raa1StartTimeCalculatorManager');
+const Raa1StartTimeCalculatorManager = require('./starttimecalculator/' +
+                                                'Raa1StartTimeCalculatorManager');
 
 const StandaloneMedia = require('../../standalone/StandaloneMedia');
 const StandaloneBox = require('../../standalone/StandaloneBox');
@@ -14,7 +15,7 @@ const LiquidsoapMedia = require('../../liquidsoap/LiquidsoapMedia');
 const LiquidsoapBox = require('../../liquidsoap/LiquidsoapBox');
 const LiquidsoapProgram = require('../../liquidsoap/LiquidsoapProgram');
 
-const Raa1ClipUtils = require('./Raa1ClipUtils');
+const Raa1ClipPublisher = require('./publishers/Raa1ClipPublisher');
 
 const Raa1PodcastPublisher = require('./publishers/Raa1PodcastPublisher');
 const Raa1ArchivePublisher = require('./publishers/Raa1ArchivePublisher');
@@ -122,7 +123,7 @@ class Raa1LineupGenerator extends LineupGenerator {
             ArchivePublisher: new Raa1ArchivePublisher(),
         };
 
-        this._clipUtils = new Raa1ClipUtils(this._conf.Credentials);
+        this._clipPublisher = new Raa1ClipPublisher(this._conf.Credentials);
         try {
             this._pinfoDirectory = JSON.parse(
                 fs.readFileSync(this._pinfoDirectoryFilePath)
@@ -200,7 +201,10 @@ program
     )
     .option('-c --no-planning', 'Use the current plan and start from compiling stage')
     .option('-s --no-tts', 'Do not call Text-to-Speech services.')
-    .option('-l --vod-publish-delay [integer]', 'The delay between airing and VOD pulishing')
+    .option(
+        '-l --vod-publish-delay [integer]',
+        'The delay between airing and VOD pulishing'
+    )
     .option('-o --no-vod-upload', 'Do not upload Voice On Demand files to S3.')
     .option(
         '-j --no-at-job',

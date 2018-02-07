@@ -401,7 +401,10 @@ class Program extends BaseProgram {
         // Publish in podcast
         let mergedClip = AppContext.getInstance(
             'LineupGenerator'
-        ).ClipUtils.getPublicClip(this.Show.Clips);
+        ).ClipPublisher.getPublicClip(
+            this.Show.Clips,
+            this.Publishing.PublicClipNamingStrategy
+        );
         let programToPublish = AppContext.getInstance().ObjectBuilder.buildOfType(
             Program,
             this,
@@ -516,8 +519,8 @@ class Program extends BaseProgram {
 
     get CanonicalIdPath() {
         if (!this._canonicalIdPath) {
-            this._canonicalIdPath = this._parentBox.CanonicalIdPath +
-                                                '/' + this.ProgramId;
+            this._canonicalIdPath =
+                this._parentBox.CanonicalIdPath + '/' + this.ProgramId;
         }
         return this._canonicalIdPath;
     }

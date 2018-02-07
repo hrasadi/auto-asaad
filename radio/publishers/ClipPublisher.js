@@ -1,9 +1,9 @@
 /**
  * Abstract class. Implemented by radio app
  */
-class ClipUtils {
+class ClipPublisher {
     getPublicClip(clips) {
     }
 }
 
-module.exports = ClipUtils;
+module.exports = ClipPublisher;
