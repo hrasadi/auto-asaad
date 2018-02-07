@@ -200,10 +200,9 @@ class Lineup extends Entity {
 
     /**
      * Platform-specific lineup scheduling logic
-     * @param {String} targetDate The date for which we are scheduling lineup
      */
-    schedule(targetDate) {
-        AppContext.getInstance().Logger.info('Scheduling lineup for ' + targetDate);
+    schedule() {
+        AppContext.getInstance().Logger.info('Scheduling lineup for ' + this._lineupId);
 
         this.onEvent('Event::ScheduleBegins');
 
@@ -212,7 +211,7 @@ class Lineup extends Entity {
 
         // Schedule boxes
         for (let box of this.Boxes) {
-            box.schedule(targetDate);
+            box.schedule();
         }
     }
 
