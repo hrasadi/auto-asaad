@@ -120,7 +120,7 @@ class WrappedClip {
                     if (this._publicClipNamingStrategy == 'MainClip') {
                         this._name = this._relativePath.substring(
                             this._relativePath.lastIndexOf('/') + 1
-                        );
+                        ) + '.mp3';
                     }
                     this._publicClip = new Clip(clip);
                 }
@@ -245,7 +245,7 @@ class AsyncS3 {
 
         params.Body = data;
         return new Promise((resolve, reject) => {
-            this.s3.putObject(params, (err, data) => {
+            this._s3.putObject(params, (err, data) => {
                 if (err) {
                     AppContext.getInstance().Logger.error(
                         'Error uploading file to S3. Error is: ' + err
