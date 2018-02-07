@@ -99,7 +99,7 @@ class WrappedClip {
                 this._duration += clip.Media.Duration;
 
                 if (clip.IsMainClip) {
-                    this._relativePath = clip.Media.Path.replace(
+                    this._relativePath = path.dirname(clip.Media.Path).replace(
                         AppContext.getInstance('LineupGenerator').LineupManager
                             .MediaDirectory.BaseDir,
                         ''
