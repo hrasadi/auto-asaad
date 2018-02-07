@@ -18,7 +18,7 @@ let addClip = (targetEntity, params) => {
     let targetProgram = null;
     if (targetEntity.constructor.name.includes('Box')) {
         // Find the program (first or last) add the clip to it
-        if (params.At.toLowerCase === 'start') {
+        if (params.At.toLowerCase === 'begin') {
             targetProgram = targetEntity.Programs[0];
         } else {
             targetProgram = targetEntity.Programs[targetEntity.Programs.length - 1];
