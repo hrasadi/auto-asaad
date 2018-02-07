@@ -60,7 +60,7 @@ class Raa1ClipPublisher extends ClipPublisher {
                 let clipData = await fs.readFileAsync(wrappedClip.AbsolutePath);
 
                 if (!await this._asyncS3.exists(wrappedClip.RelativePath)) {
-                    await this._asyncS3.pubObject(wrappedClip.RelativePath, clipData);
+                    await this._asyncS3.putObject(wrappedClip.RelativePath, clipData);
                     // Remove the temp file
                     if (wrappedClip.IsWrapped) {
                         fs.unlinkSync(wrappedClip.AbsolutePath);
@@ -208,7 +208,7 @@ class AsyncS3 {
     exists(key) {
         let params = {
             Bucket: this._bucket,
-            Key: this._key,
+            Key: key,
         };
 
         return new Promise((resolve, reject) => {
@@ -224,7 +224,7 @@ class AsyncS3 {
         });
     }
 
-    pubObject(key, data) {
+    putObject(key, data) {
         let params = {
             Bucket: this._bucket,
             Key: key,
