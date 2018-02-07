@@ -103,7 +103,7 @@ class WrappedClip {
                         AppContext.getInstance('LineupGenerator').LineupManager
                             .MediaDirectory.BaseDir,
                         ''
-                    );
+                    ).replace(/+\//g, ''); // also remove any '/' at the beginning
                     if (this._publicClipNamingStrategy == 'MainClip') {
                         this._name = this._relativePath.substring(
                             this._relativePath.lastIndexOf('/') + 1
