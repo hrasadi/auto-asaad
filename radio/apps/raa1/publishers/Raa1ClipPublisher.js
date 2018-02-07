@@ -7,8 +7,9 @@ const AWS = require('aws-sdk');
 const execSync = require('child_process').execSync;
 const fs = require('fs');
 const {URL} = require('url');
-const md5 = require('md5');
 const path = require('path');
+const md5 = require('md5');
+const uuid = require('uuid/v1');
 
 fs.readFileAsync = (filename) => {
     return new Promise((resolve, reject) => {
@@ -62,15 +63,13 @@ class Raa1ClipPublisher extends ClipPublisher {
                     // We want to block this part only, so we create surraounding closure
                     ((w) => {
                         let uploadClosure = async function(clipData) {
-                            if (!await self._asyncS3.exists(w.RelativePath)) {
-                                await self._asyncS3.putObject(
-                                    w.RelativePath,
-                                    clipData
-                                );
-                                // Remove the temp file
-                                if (w.IsWrapped) {
-                                    fs.unlinkSync(w.AbsolutePath);
-                                }
+                            await self._asyncS3.putObject(
+                                w.RelativePath,
+                                clipData
+                            );
+                            // Remove the temp file
+                            if (w.IsWrapped) {
+                                fs.unlinkSync(w.AbsolutePath);
                             }
                         };
                         return uploadClosure;
@@ -132,7 +131,8 @@ class WrappedClip {
 
             this._relativePath = path.join(this._relativePath, this._name);
 
-            this._absolutePath = AppContext.getInstance().CWD + '/run/tmp/' + this._name;
+            // tmp filename is a uuid to prevent name clashing
+            this._absolutePath = AppContext.getInstance().CWD + '/run/tmp/' + uuid();
         } else {
             this._absolutePath = this._clips[0].Media.Path;
             this._relativePath = this._clips[0].Media.Path.replace(
