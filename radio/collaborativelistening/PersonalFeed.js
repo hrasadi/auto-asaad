@@ -10,7 +10,6 @@ const U = require('../collaborativelistening/UserManager');
 const User = U.User;
 
 const moment = require('moment-timezone');
-const uuid = require('uuid/v1');
 
 class PersonalFeed extends Feed {
     constructor(dbFileName, historyDbFileName) {
@@ -41,7 +40,6 @@ class PersonalFeed extends Feed {
     }
 
     registerProgram(program, targetDate) {
-        // TODO: Remove old entries (if regenerating the lineup)
         let self = this;
         this.entryListForEach(User, null, (err, user) => {
             let releaseMoment = program._parentBox.Schedule.calculateStartTime(
@@ -72,26 +70,23 @@ class PersonalFeed extends Feed {
         );
         feedEntry.Program = program;
 
+        // Delete any entries with same Id exists from before (old onces)
+        // We will continue on complete callback from deregister (note async func)
+        await this.deregisterFeedEntry(feedEntry);
+
         if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
             AppContext.getInstance().Logger.debug(
                 'Register program to personal feed with entry: ' +
                     JSON.stringify(feedEntry, null, 2)
             );
         } else {
-            await this.persist(feedEntry);
+            this.persist(feedEntry);
         }
     }
 
-    deregisterEntry(feedEntry) {
-        // TODO:
-        AppContext.getInstance().Logger.debug(
-            'Program ' + feedEntry.Id + ' marked for deregistration.'
-        );
-    }
-
-    async renderFeed() {
+    renderFeed() {
         let now = DateUtils.getEpochSeconds(moment());
-        return await this.entryListForAll(PersonalFeedEntry, {
+        return this.entryListForAll(PersonalFeedEntry, {
             statement: 'ReleaseTimestamp < ?', // skip programs planned for future
             values: now,
         });
@@ -111,8 +106,27 @@ class PersonalFeedWatcher extends FeedWatcher {
 class PersonalFeedEntry extends FeedEntry {
     constructor() {
         super();
+    }
 
-        this._id = uuid(); // TODO:
+    refreshId() {
+        if (this._programCanonicalId && this._userId) {
+            this.Id = Buffer.from(this._programCanonicalId + '/' + this._userId).toString(
+                'base64'
+            );
+        }
+    }
+
+    get Program() {
+        return this._program;
+    }
+
+    set Program(value) {
+        if (value) {
+            this._programCanonicalId = value.CanonicalIdPath;
+            this.refreshId();
+
+            this._program = JSON.stringify(value);
+        }
     }
 
     /**
@@ -124,6 +138,7 @@ class PersonalFeedEntry extends FeedEntry {
 
     set UserId(value) {
         this._userId = value;
+        this.refreshId();
     }
 }
 

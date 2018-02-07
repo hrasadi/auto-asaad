@@ -87,10 +87,6 @@ class PublicFeed extends Feed {
         }
     }
 
-    deregisterFeedEntry(feedEntry) {
-        return this.unpersistById(this._type, feedEntry.Id);
-    }
-
     upvoteProgram(programId, userId) {
         // TODO:
         AppContext.getInstance().Logger.debug(
@@ -98,9 +94,9 @@ class PublicFeed extends Feed {
         );
     }
 
-    async renderFeed() {
+    renderFeed() {
         let now = DateUtils.getEpochSeconds(moment());
-        return await this.entryListForAll(PublicFeedEntry, {
+        return this.entryListForAll(PublicFeedEntry, {
             statement: 'ReleaseTimestamp < ?', // skip programs planned for future
             values: now,
         });

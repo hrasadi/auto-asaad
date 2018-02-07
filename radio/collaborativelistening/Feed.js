@@ -35,8 +35,9 @@ class Feed extends DBProvider {
     // implemented in subclasses
     registerProgram(program, targetDate) {}
 
-    // implemented in subclasses
-    deregisterFeedEntry(feedEntry) {}
+    deregisterFeedEntry(feedEntry) {
+        return this.unpersistById(this._type, feedEntry.Id);
+    }
 
     // implemented in subclasses
     async renderFeed(userId) {}
