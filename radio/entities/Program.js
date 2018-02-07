@@ -413,8 +413,8 @@ class Program extends BaseProgram {
             if (this.PreShow.FillerClip) {
                 let preshowPublicFillerClip = AppContext.getInstance(
                     'LineupGenerator'
-                ).ClipPublisher.getPublicClip([this.Preshow.FillerClip], 'MainClip');
-                programToPublish.Show.Clips = [preshowPublicFillerClip];
+                ).ClipPublisher.getPublicClip([this.PreShow.FillerClip], 'MainClip');
+                programToPublish.PreShow.FillerClip = preshowPublicFillerClip;
             }
         }
 
