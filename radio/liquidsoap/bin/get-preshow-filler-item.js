@@ -11,5 +11,5 @@ if (fs.existsSync(fillerClipLockFilePath)) {
 } else {
     // else print nothing, no filler available (no preshow in progress or finished before)
     // However, stall liquidsoap for a bit, as it is very regularly call us!
-    setTimeout(null, 5000);
+    setTimeout(() => {}, 5000);
 }
