@@ -63,10 +63,19 @@ class Raa1ClipPublisher extends ClipPublisher {
                     // We want to block this part only, so we create surraounding closure
                     ((w) => {
                         let uploadClosure = async function(clipData) {
-                            await self._asyncS3.putObject(w.RelativePath, clipData);
-                            // Remove the temp file
-                            if (w.IsWrapped) {
-                                fs.unlinkSync(w.AbsolutePath);
+                            // We upload programs if we are wrapping something
+                            // (they might be updated). However, if original clip is
+                            // being uploaded, we should only care to upload when
+                            // the file does not exsit on S3.
+                            if (
+                                w.IsWrapped ||
+                                !await self._asyncS3.exists(w.RelativePath)
+                            ) {
+                                await self._asyncS3.putObject(w.RelativePath, clipData);
+                                // Remove the temp file
+                                if (w.IsWrapped) {
+                                    fs.unlinkSync(w.AbsolutePath);
+                                }
                             }
                         };
                         return uploadClosure;
@@ -93,10 +102,20 @@ class WrappedClip {
 
         this._publicClip = null;
 
-        this.initPaths();
+        this.init();
     }
 
-    initPaths() {
+    init() {
+        this.buildPublicClip();
+
+        if (this.IsWrapped) {
+            this._publicClip.Description = this._clips
+                .map((clip) => clip.Media.Description)
+                .join(';');
+        }
+    }
+
+    buildPublicClip() {
         if (this.IsWrapped) {
             this._allMediaPath = '';
 

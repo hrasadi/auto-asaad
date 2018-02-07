@@ -398,20 +398,33 @@ class Program extends BaseProgram {
             return;
         }
 
-        // Publish in podcast
-        let mergedClip = AppContext.getInstance(
-            'LineupGenerator'
-        ).ClipPublisher.getPublicClip(
-            this.Show.Clips,
-            this.Publishing.PublicClipNamingStrategy
-        );
         let programToPublish = AppContext.getInstance().ObjectBuilder.buildOfType(
             Program,
             this,
             this._parentBox
         );
-        programToPublish.Show.Clips = [mergedClip];
-        programToPublish.Metadata.Duration = programToPublish.Show.Duration;
+
+        if (this.PreShow) {
+            let preshowPublicClip = AppContext.getInstance(
+                'LineupGenerator'
+            ).ClipPublisher.getPublicClip(this.PreShow.Clips, 'MainClip');
+            programToPublish.PreShow.Clips = [preshowPublicClip];
+
+            if (this.PreShow.FillerClip) {
+                let preshowPublicFillerClip = AppContext.getInstance(
+                    'LineupGenerator'
+                ).ClipPublisher.getPublicClip([this.Preshow.FillerClip], 'MainClip');
+                programToPublish.Show.Clips = [preshowPublicFillerClip];
+            }
+        }
+
+        let showPublicClip = AppContext.getInstance(
+            'LineupGenerator'
+        ).ClipPublisher.getPublicClip(
+            this.Show.Clips,
+            this.Publishing.PublicClipNamingStrategy
+        );
+        programToPublish.Show.Clips = [showPublicClip];
 
         if (AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
             AppContext.getInstance().Logger.debug(
