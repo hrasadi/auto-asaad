@@ -6,13 +6,14 @@ const lineupFilePath = process.argv[3];
 const boxCanonicalIdPath = process.argv[4];
 
 let findbox = (lineup, boxCanonicalIdPath) => {
-    for (let box of lineup.Boxes) {
-        if (box.CanonicalIdPath == boxCanonicalIdPath) {
-            return box;
-        }
-    }
+    let box = lineup.Boxes.find((box) => {
+        return box.CanonicalIdPath == boxCanonicalIdPath;
+    });
 
-    throw Error(`Box ${boxCanonicalIdPath} not found!`);
+    if (!box) {
+        throw Error(`Box ${boxCanonicalIdPath} not found!`);
+    }
+    return box;
 };
 
 if (fs.existsSync(lineupFilePath)) {

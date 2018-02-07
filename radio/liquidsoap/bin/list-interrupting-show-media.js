@@ -9,7 +9,7 @@ const programCanonicalIdPath = process.argv[4];
 
 let findbox = (lineup, boxCanonicalIdPath) => {
     let box = lineup.Boxes.find((box) => {
-        box.CanonicalIdPath == boxCanonicalIdPath;
+        return box.CanonicalIdPath == boxCanonicalIdPath;
     });
 
     if (!box) {
@@ -20,8 +20,8 @@ let findbox = (lineup, boxCanonicalIdPath) => {
 
 let findProgram = (lineup, programCanonicalIdPath) => {
     let box = findbox(lineup, getPartialCanonicalIdPath(programCanonicalIdPath, 'Box'));
-    let program = box.find((program) => {
-        program.CanonicalIdPath == programCanonicalIdPath;
+    let program = box.Programs.find((program) => {
+        return program.CanonicalIdPath == programCanonicalIdPath;
     });
 
     if (!program) {
