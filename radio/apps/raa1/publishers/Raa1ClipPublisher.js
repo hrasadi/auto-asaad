@@ -1,7 +1,7 @@
-const Clip = require('../../entities/Clip').Clip;
+const Clip = require('../../../entities/Clip').Clip;
 
-const AppContext = require('../../AppContext');
-const ClipPublisher = require('../../ClipPublisher');
+const AppContext = require('../../../AppContext');
+const ClipPublisher = require('../../../publishers/ClipPublisher');
 
 const AWS = require('aws-sdk');
 const execSync = require('child_process').execSync;
