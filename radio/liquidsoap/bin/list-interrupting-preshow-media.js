@@ -45,7 +45,8 @@ if (fs.existsSync(lineupFilePath)) {
         // by liquidsoap
         fs.writeFile(
             cwd + '/run/interrupting-preshow-filler.liquidsoap.lock',
-            program.PreShow.FillerClip.Media.Path
+            program.PreShow.FillerClip.Media.Path,
+            () => {}
         );
     }
 } else {

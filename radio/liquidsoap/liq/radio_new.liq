@@ -58,8 +58,8 @@ interrupting_show_playlist = request.equeue(id = "interrupting_show_q")
 show_playlist = request.equeue(id = "show_q")
 
 lineup = fallback(track_sensitive=false, [
-	interrupting_preshow_playlist,
 	interrupting_show_playlist,
+	interrupting_preshow_playlist,
 	show_playlist,
 	single(media_dir^"/no-program.mp3")
 ])

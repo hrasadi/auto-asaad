@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Precise start of the target minute
 sleep 2 # Avoid running on xx:59, if cron starts immediately.
