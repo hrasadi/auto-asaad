@@ -75,6 +75,8 @@ class LineupPlan extends Entity {
     }
 
     compile() {
+        AppContext.getInstance().Logger.info('Compiling lineup for ' + this._lineupId);
+
         let lineup = new Lineup();
         lineup.LineupId = this.LineupId;
 
@@ -178,11 +180,12 @@ class Lineup extends Entity {
     /**
      * The compiled program is ready to be published. We publish
      * our content before populating the live stream.
-     * @param {String} targetDate the date for which we publish
      */
-    publish(targetDate) {
+    publish() {
+        AppContext.getInstance().Logger.info('Publishing lineup for ' + this._lineupId);
+
         for (let box of this.Boxes) {
-            box.publish(targetDate);
+            box.publish();
         }
 
         // commit all publishers
@@ -190,7 +193,7 @@ class Lineup extends Entity {
             if (AppContext.getInstance('LineupGenerator')
                                         .Publishers.hasOwnProperty(publisherName)) {
                 AppContext.getInstance('LineupGenerator')
-                                        .Publishers[publisherName].commit(targetDate);
+                                        .Publishers[publisherName].commit(this._lineupId);
             }
         }
     }
@@ -200,6 +203,8 @@ class Lineup extends Entity {
      * @param {String} targetDate The date for which we are scheduling lineup
      */
     schedule(targetDate) {
+        AppContext.getInstance().Logger.info('Scheduling lineup for ' + targetDate);
+
         this.onEvent('Event::ScheduleBegins');
 
         this.fixFloatingBoxes();

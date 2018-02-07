@@ -84,8 +84,7 @@ class BoxTemplate extends BaseBox {
                     return null;
                 }
 
-                boxPlan.StartTime =
-                            this.Schedule.calculateStartTime(targetDate, null);
+                boxPlan.StartTime = this.Schedule.calculateStartTime(targetDate, null);
 
                 // This is where we evaluate custom action params
                 boxPlan.evaluateCustomActionParams();
@@ -124,8 +123,8 @@ class BoxPlan extends BaseBox {
         this._parentLineupPlan = parent;
     }
 
-    compile(parent) {
-        let box = AppContext.getInstance().ObjectBuilder.buildOfType(Box, this, parent);
+    compile(lineup) {
+        let box = AppContext.getInstance().ObjectBuilder.buildOfType(Box, this, lineup);
         let programs = [];
 
         if (!this.ProgramPlans || this.ProgramPlans.length == 0) {
@@ -180,8 +179,7 @@ class Box extends BaseBox {
 
     get CanonicalIdPath() {
         if (!this._canonicalIdPath) {
-            this._canonicalIdPath = this._parentLineup.CanonicalIdPath +
-                                                '/' + this.BoxId;
+            this._canonicalIdPath = this._parentLineup.CanonicalIdPath + '/' + this.BoxId;
         }
         return this._canonicalIdPath;
     }
@@ -196,9 +194,9 @@ class Box extends BaseBox {
         }
     }
 
-    publish(targetDate) {
+    publish() {
         for (let program of this.Programs) {
-            program.publish(targetDate);
+            program.publish();
         }
     }
 
@@ -210,7 +208,7 @@ class Box extends BaseBox {
         this.EndTime = moment(this.Programs[this.Programs.length - 1].Metadata.EndTime);
     }
 
-    schedule(targetDate) {
+    schedule() {
         let oldLineupFilePath = AppContext.getInstance(
             'LineupGenerator'
         ).LineupManager.getScheduledLineupFilePath(this._parentLineup.LineupId);

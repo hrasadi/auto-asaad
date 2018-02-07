@@ -388,7 +388,8 @@ class Program extends BaseProgram {
         this._parentBox = parent;
     }
 
-    publish(targetDate) {
+    publish() {
+        let targetDate = this._parentBox._parentLineup.LineupId;
         // Program is not being published
         if (
             !this.Publishing.Podcast &&

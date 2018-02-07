@@ -55,7 +55,7 @@ class LineupManager {
     publishLineup(targetDate) {
         let lineup = this.getLineup(targetDate);
         if (lineup) {
-            lineup.publish(targetDate);
+            lineup.publish();
         } else {
             throw Error('Lineup not found for date ' + targetDate);
         }
@@ -64,7 +64,7 @@ class LineupManager {
     scheduleLineup(targetDate) {
         let lineup = this.getLineup(targetDate);
         if (lineup) {
-            lineup.schedule(targetDate);
+            lineup.schedule();
 
             let lineupJSON = JSON.stringify(lineup, null, 2);
             if (!AppContext.getInstance('LineupGenerator').GeneratorOptions.TestMode) {
