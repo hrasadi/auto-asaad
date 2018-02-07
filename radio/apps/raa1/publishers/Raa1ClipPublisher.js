@@ -63,10 +63,7 @@ class Raa1ClipPublisher extends ClipPublisher {
                     // We want to block this part only, so we create surraounding closure
                     ((w) => {
                         let uploadClosure = async function(clipData) {
-                            await self._asyncS3.putObject(
-                                w.RelativePath,
-                                clipData
-                            );
+                            await self._asyncS3.putObject(w.RelativePath, clipData);
                             // Remove the temp file
                             if (w.IsWrapped) {
                                 fs.unlinkSync(w.AbsolutePath);
@@ -117,9 +114,10 @@ class WrappedClip {
                         )
                         .replace(/^\/+/g, ''); // also remove any '/' at the beginning
                     if (this._publicClipNamingStrategy == 'MainClip') {
-                        this._name = this._relativePath.substring(
-                            this._relativePath.lastIndexOf('/') + 1
-                        ) + '.mp3';
+                        this._name =
+                            this._relativePath.substring(
+                                this._relativePath.lastIndexOf('/') + 1
+                            ) + '.mp3';
                     }
                     this._publicClip = new Clip(clip);
                 }
@@ -132,7 +130,8 @@ class WrappedClip {
             this._relativePath = path.join(this._relativePath, this._name);
 
             // tmp filename is a uuid to prevent name clashing
-            this._absolutePath = AppContext.getInstance().CWD + '/run/tmp/' + uuid();
+            this._absolutePath =
+                AppContext.getInstance().CWD + '/run/tmp/' + uuid() + '.mp3';
         } else {
             this._absolutePath = this._clips[0].Media.Path;
             this._relativePath = this._clips[0].Media.Path.replace(
