@@ -90,15 +90,16 @@ class RollingList {
         // Therefore we iterate and append values together up to the date
         let result = [];
 
-        for (let date in this._fullHistory) {
-            if (this._fullHistory.hasOwnProperty(date)) {
-                result = result.concat(this._fullHistory[date]);
-                if (date === forDate) {
-                    // As soon as we hit the date, we should terminate
-                    break;
-                }
-            }
+        let includedDates = Object.keys(this._fullHistory).find((itemDate) => {
+            // Dates before or equal 'forDate'
+            // lexical ordering will be used
+            return (itemDate.localeCompare(forDate) <= 0);
+        });
+
+        for (let date of includedDates) {
+            result = result.concat(this._fullHistory[date]);
         }
+
         return result;
     }
 }
