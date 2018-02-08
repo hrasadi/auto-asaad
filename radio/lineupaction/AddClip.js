@@ -41,7 +41,7 @@ let addClip = (targetEntity, params) => {
         let clipToAdd = new Clip(null, targetProgram);
         clipToAdd.Media = media;
 
-        if (params.At.toLowerCase === 'beginning') {
+        if (params.At.toLowerCase() === 'beginning') {
             // Add clip to the beginning of the show
             targetProgram.Show.addClip(clipToAdd, 0);
         } else {
