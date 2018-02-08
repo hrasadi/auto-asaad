@@ -133,9 +133,9 @@ class WrappedClip {
                         )
                         .replace(/^\/+/g, ''); // also remove any '/' at the beginning
                     if (this._publicClipNamingStrategy == 'MainClip') {
-                        this._name =
-                            clip.Media.Path.substring(
-                                clip.Media.Path.lastIndexOf('/') + 1);
+                        this._name = clip.Media.Path.substring(
+                            clip.Media.Path.lastIndexOf('/') + 1
+                        );
                     }
                     this._publicClip = new Clip(clip);
                 }
@@ -261,6 +261,9 @@ class AsyncS3 {
         };
 
         params.Body = data;
+        AppContext.getInstance.Logger.debug(
+            `Attempting uploading to S3 with key: ${params.Key}`
+        );
         return new Promise((resolve, reject) => {
             this._s3.putObject(params, (err, data) => {
                 if (err) {
