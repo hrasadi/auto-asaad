@@ -95,6 +95,8 @@ class LineupGenerator extends AppContext {
                     this.Logger.debug('Skipped stage "Schedule" due to options settings');
                 }
             });
+
+            this.Logger.info('Lineup generation completed successfully!');
         } catch (error) {
             AppContext.getInstance().Logger.error(error.stack);
         }

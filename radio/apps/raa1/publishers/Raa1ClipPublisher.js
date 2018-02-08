@@ -135,7 +135,7 @@ class WrappedClip {
                     if (this._publicClipNamingStrategy == 'MainClip') {
                         this._name =
                             clip.Media.Path.substring(
-                                this._relativePath.lastIndexOf('/') + 1);
+                                clip.Media.Path.lastIndexOf('/') + 1);
                     }
                     this._publicClip = new Clip(clip);
                 }
