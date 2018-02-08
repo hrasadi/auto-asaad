@@ -23,13 +23,15 @@ class Feed extends DBProvider {
     }
 
     // implemented in subclasses
-    init(resolve) {}
+    init() {}
 
-    async init1(resolve) {
-        await this.init0(resolve);
-        if (this._historyProdiver) {
-            await this._historyProdiver.init0(resolve);
-        }
+    init1() {
+        let historyProviderInitPromise = this._historyProdiver
+            ? this._historyProdiver.init0()
+            : Promise.resolve();
+
+        // return a promise of the time when both dbs are inited successfully
+        return Promise.all([this.init0(), historyProviderInitPromise]);
     }
 
     // implemented in subclasses
@@ -120,15 +122,12 @@ class FeedWatcher {
             }
         );
         // Check for expired programs
-        self._feed.foreachProgramEndingUntilNow(
-            currentTimeEpoch,
-            (err, feedEntry) => {
-                if (err) {
-                    throw err;
-                }
-                self._feed.deregisterFeedEntry(feedEntry);
+        self._feed.foreachProgramEndingUntilNow(currentTimeEpoch, (err, feedEntry) => {
+            if (err) {
+                throw err;
             }
-        );
+            self._feed.deregisterFeedEntry(feedEntry);
+        });
         // Persist new epoch
         self.LastProcessedEpoch = currentTimeEpoch;
     }

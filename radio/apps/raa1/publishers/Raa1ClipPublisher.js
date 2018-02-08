@@ -261,7 +261,7 @@ class AsyncS3 {
         };
 
         params.Body = data;
-        AppContext.getInstance.Logger.debug(
+        AppContext.getInstance().Logger.debug(
             `Attempting uploading to S3 with key: ${params.Key}`
         );
         return new Promise((resolve, reject) => {

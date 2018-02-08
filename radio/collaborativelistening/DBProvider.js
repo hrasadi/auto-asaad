@@ -10,16 +10,18 @@ class DBProvider {
     }
 
     // implemented in subclasses
-    init() {
-    }
+    init() {}
 
     // implemented in subclasses
-    init1() {
-    }
+    init1() {}
 
-    async init0() {
-        this._db = await new AsyncDB(AppContext.getInstance().CWD +
-                                        '/run/db/' + this._dbFileName);
+    init0() {
+        let self = this;
+        return new AsyncDB(
+            AppContext.getInstance().CWD + '/run/db/' + this._dbFileName
+        ).then((db) => {
+            self._db = db;
+        });
     }
 
     // implemented in subclasses

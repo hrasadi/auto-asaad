@@ -17,6 +17,7 @@ class PersonalFeed extends Feed {
     }
 
     async init() {
+        // Wait until the all promises are resolved
         await this.init1();
 
         await this._db.runAsync(
