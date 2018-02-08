@@ -90,7 +90,7 @@ class RollingList {
         // Therefore we iterate and append values together up to the date
         let result = [];
 
-        let includedDates = Object.keys(this._fullHistory).find((itemDate) => {
+        let includedDates = Object.keys(this._fullHistory).filter((itemDate) => {
             // Dates before or equal 'forDate'
             // lexical ordering will be used
             return (itemDate.localeCompare(forDate) <= 0);

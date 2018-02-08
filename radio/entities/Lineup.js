@@ -30,8 +30,9 @@ class LineupTemplate extends Entity {
                 }
             }
         }
-        AppContext.getInstance().Logger.info('Planned ' + lineupPlan.BoxPlans.length
-                                                                            + ' boxes');
+        AppContext.getInstance().Logger.info(
+            'Planned ' + lineupPlan.BoxPlans.length + ' boxes'
+        );
         return lineupPlan;
     }
 
@@ -50,8 +51,10 @@ class LineupTemplate extends Entity {
     }
 
     get Version() {
-        return this.getOrElse(this.value, AppContext.getInstance('LineupGenerator')
-                                                                    .Defaults.Version);
+        return this.getOrElse(
+            this.value,
+            AppContext.getInstance('LineupGenerator').Defaults.Version
+        );
     }
 
     set Version(value) {
@@ -132,8 +135,10 @@ class LineupPlan extends Entity {
     }
 
     get Version() {
-        return this.getOrElse(this._version, AppContext.getInstance('LineupGenerator')
-                                                                    .Defaults.Version);
+        return this.getOrElse(
+            this._version,
+            AppContext.getInstance('LineupGenerator').Defaults.Version
+        );
     }
 
     set Version(value) {
@@ -163,15 +168,22 @@ class Lineup extends Entity {
             }
             // Except for the first box
             if (i > 0) {
-                if (moment(this.Boxes[i].StartTime)
-                        .isBefore(moment(this.Boxes[i - 1].EndTime)) &&
-                        !this.Boxes[i - 1].IsFloating) {
-                    throw Error('Boxes are overlapping: Box: ' +
-                            this.Boxes[i - 1].BoxId + ' ending at: ' +
+                if (
+                    moment(this.Boxes[i].StartTime).isBefore(
+                        moment(this.Boxes[i - 1].EndTime)
+                    ) &&
+                    !this.Boxes[i - 1].IsFloating
+                ) {
+                    throw Error(
+                        'Boxes are overlapping: Box: ' +
+                            this.Boxes[i - 1].BoxId +
+                            ' ending at: ' +
                             moment(this.Boxes[i - 1].EndTime).toString() +
-                            ', with Box: ' + this.Boxes[i].BoxId +
+                            ', with Box: ' +
+                            this.Boxes[i].BoxId +
                             ' starting at: ' +
-                            moment(this.Boxes[i].StartTime).toString());
+                            moment(this.Boxes[i].StartTime).toString()
+                    );
                 }
             }
         }
@@ -190,10 +202,22 @@ class Lineup extends Entity {
 
         // commit all publishers
         for (let publisherName in AppContext.getInstance('LineupGenerator').Publishers) {
-            if (AppContext.getInstance('LineupGenerator')
-                                        .Publishers.hasOwnProperty(publisherName)) {
-                AppContext.getInstance('LineupGenerator')
-                                        .Publishers[publisherName].commit(this._lineupId);
+            if (
+                AppContext.getInstance('LineupGenerator').Publishers.hasOwnProperty(
+                    publisherName
+                )
+            ) {
+                AppContext.getInstance('LineupGenerator').Publishers[
+                    publisherName
+                ].commit(
+                    moment(this._lineupId)
+                        .subtract( // take vod publish delay into consideration
+                            AppContext.getInstance('LineupGenerator').GeneratorOptions
+                                .VODPulishDelay,
+                            'day'
+                        )
+                        .format('YYYY-MM-DD')
+                );
             }
         }
     }
@@ -227,36 +251,49 @@ class Lineup extends Entity {
             if (this.Boxes[i].IsFloating) {
                 if (i < this.Boxes.length) {
                     // floating box collides with next box
-                    if (moment(this.Boxes[i + 1].StartTime)
-                            .isBefore(moment(this.Boxes[i].EndTime))) {
-                            // pushes the next box down
-                        if (moment(this.Boxes[i].StartTime)
-                                .isSameOrBefore(
-                                moment(this.Boxes[i + 1].StartTime))) {
-                            let shiftAmount =
+                    if (
+                        moment(this.Boxes[i + 1].StartTime).isBefore(
+                            moment(this.Boxes[i].EndTime)
+                        )
+                    ) {
+                        // pushes the next box down
+                        if (
+                            moment(this.Boxes[i].StartTime).isSameOrBefore(
                                 moment(this.Boxes[i + 1].StartTime)
-                                .diff(moment(this.Boxes[i].EndTime), 'seconds');
+                            )
+                        ) {
+                            let shiftAmount = moment(this.Boxes[i + 1].StartTime).diff(
+                                moment(this.Boxes[i].EndTime),
+                                'seconds'
+                            );
 
                             this.shiftBoxDown(i + 1, shiftAmount);
                         } else {
                             // the floating box should be
                             // wrapped by the program box
                             AppContext.getInstance().Logger.info(
-                                            'Box ' + this.Boxes[i + 1].BoxId +
-                                            ' will be splitted to wrap box ' +
-                                            this.Boxes[i].BoxId);
+                                'Box ' +
+                                    this.Boxes[i + 1].BoxId +
+                                    ' will be splitted to wrap box ' +
+                                    this.Boxes[i].BoxId
+                            );
                             this.wrapBox(i, i + 1);
                         }
                     }
                 }
                 if (i > 0) {
                     // floating box collides with previous box
-                    if (moment(this.Boxes[i].StartTime)
-                            .isBefore(moment(this.Boxes[i - 1].EndTime))) {
-                        AppContext.getInstance().Logger.info('Box ' +
-                                        this.Boxes[i - 1].BoxId +
-                                        ' will be splitted to wrap box ' +
-                                        this.Boxes[i].BoxId);
+                    if (
+                        moment(this.Boxes[i].StartTime).isBefore(
+                            moment(this.Boxes[i - 1].EndTime)
+                        )
+                    ) {
+                        AppContext.getInstance().Logger.info(
+                            'Box ' +
+                                this.Boxes[i - 1].BoxId +
+                                ' will be splitted to wrap box ' +
+                                this.Boxes[i].BoxId
+                        );
                         this.wrapBox(i, i - 1);
                     }
                 }
@@ -267,22 +304,21 @@ class Lineup extends Entity {
     shiftBoxDown(targetBoxIdx, shiftAmount) {
         let targetBox = this.Boxes[targetBoxIdx];
         if (targetBox) {
-            targetBox.EndTime = moment(targetBox.EndTime)
-                                    .add(shiftAmount, 'seconds');
+            targetBox.EndTime = moment(targetBox.EndTime).add(shiftAmount, 'seconds');
             // shift all the programs down as well
             targetBox.shiftProgramsDown(0, shiftAmount);
         }
     }
 
     wrapBox(floatingBoxIdx, wrappingBoxIdx) {
-        this.Boxes[wrappingBoxIdx].EndTime =
-                        moment(this.Boxes[wrappingBoxIdx].EndTime)
-                        .add(this.Boxes[floatingBoxIdx].Duration, 'seconds');
+        this.Boxes[wrappingBoxIdx].EndTime = moment(
+            this.Boxes[wrappingBoxIdx].EndTime
+        ).add(this.Boxes[floatingBoxIdx].Duration, 'seconds');
 
         // Now inject floating box to the wrapping box;
-        this.Boxes[wrappingBoxIdx] =
-            this.Boxes[wrappingBoxIdx].injectProgram(
-                    this.Boxes[floatingBoxIdx].Programs[0]);
+        this.Boxes[wrappingBoxIdx] = this.Boxes[wrappingBoxIdx].injectProgram(
+            this.Boxes[floatingBoxIdx].Programs[0]
+        );
         // And remove the floating box from the lineup;
         this.Boxes.splice(floatingBoxIdx, 1);
     }
@@ -321,18 +357,23 @@ class Lineup extends Entity {
                 if (value.constructor.name === 'Box') {
                     this._boxes.push(value);
                 } else {
-                    this._boxes.push(AppContext
-                                        .getInstance().ObjectBuilder
-                                        .buildOfType(Box, value, this));
+                    this._boxes.push(
+                        AppContext.getInstance().ObjectBuilder.buildOfType(
+                            Box,
+                            value,
+                            this
+                        )
+                    );
                 }
             }
         }
     }
 
     get Version() {
-        return this.getOrElse(this._version, AppContext
-                                                    .getInstance('LineupGenerator')
-                                                    .Defaults.Version);
+        return this.getOrElse(
+            this._version,
+            AppContext.getInstance('LineupGenerator').Defaults.Version
+        );
     }
 
     set Version(value) {
@@ -341,7 +382,7 @@ class Lineup extends Entity {
 }
 
 module.exports = {
-    'LineupTemplate': LineupTemplate,
-    'LineupPlan': LineupPlan,
-    'Lineup': Lineup,
+    LineupTemplate: LineupTemplate,
+    LineupPlan: LineupPlan,
+    Lineup: Lineup,
 };
